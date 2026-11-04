@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Hors ligne · Paper</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #ffffff;
+        color: #1f1f1f;
+        font-family: Inter, system-ui, sans-serif;
+        padding: 16px;
+      }
+      main { max-width: 22rem; text-align: center; }
+      img { width: 48px; height: 48px; border-radius: 12px; }
+      h1 { font-size: 20px; margin: 16px 0 4px; }
+      p { color: #6b6b6b; font-size: 14px; line-height: 1.5; margin: 0 0 20px; }
+      button {
+        font: inherit; font-size: 14px; color: #ffffff; background: #1f1f1f;
+        border: 0; border-radius: 6px; height: 40px; padding: 0 16px; cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" />
+      <h1>Paper est hors ligne</h1>
+      <p>Le serveur du foyer ne répond pas. Vérifiez la connexion (Wi-Fi ou Tailscale), puis réessayez.</p>
+      <button type="button" onclick="location.reload()">Réessayer</button>
+    </main>
+  </body>
+</html>

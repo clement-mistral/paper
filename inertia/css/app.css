@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Paper — design tokens (Tailwind v4, CSS-first).
+   Black & white, Notion-like. Colour only ever signals a domain.
+   ========================================================================== */
+
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+
+  --color-bg: #ffffff;
+  --color-sidebar: #fbfbfa;
+  --color-callout: #f7f7f5;
+  --color-hover: #efefed;
+  --color-border: #ebebe9;
+  --color-muted: #6b6b6b;
+  --color-ink: #1f1f1f;
+
+  --color-budget: #c99a1a;
+  --color-budget-ink: #8a6410;
+  --color-budget-soft: #fbf3db;
+  --color-maison: #7c5ce0;
+  --color-maison-ink: #5b3fc4;
+  --color-maison-soft: #f1edfd;
+  --color-auto: #2f7fe0;
+  --color-auto-ink: #1f5fb0;
+  --color-auto-soft: #e8f1fc;
+  --color-menu: #e8604a;
+  --color-menu-ink: #b5412e;
+  --color-menu-soft: #fdece8;
+
+  --color-success: #1e6b40;
+  --color-success-soft: #e7f4ec;
+  --color-warning: #8a5300;
+  --color-warning-soft: #fdf1de;
+  --color-warning-bar: #d98a00;
+  --color-danger: #a8302a;
+  --color-danger-soft: #fbe9e8;
+
+  --radius-tag: 4px;
+  --radius-control: 6px;
+  --radius-card: 8px;
+
+  /* Type scale: page 36/700, section 16/600, body 14/400, label 13 */
+  --text-page: 2.25rem;
+  --text-page--line-height: 1.2;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-bg font-sans text-sm text-ink antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-ink text-bg;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ink;
+  }
+}
+
+/* ==========================================================================
+   Toasts (Sonner, unstyled mode)
+   ========================================================================== */
+[data-sonner-toaster] {
+  --width: 380px;
+  font-family: var(--font-sans);
+}
+[data-sonner-toaster] [data-sonner-toast] {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.18);
+}
+[data-sonner-toaster] [data-sonner-toast] [data-icon] {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
+  color: var(--color-success);
+}
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-icon] {
+  color: var(--color-danger);
+}
+[data-sonner-toaster] [data-sonner-toast] [data-button] {
+  margin-left: auto;
+  align-self: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-button]:hover {
+  background: var(--color-hover);
+}
+
+/*
+ * Printing: the « Compte rendu du mois » is an A4 sheet. Domain colours
+ * are kept (dots, bars), the navigation is hidden by `print:hidden`.
+ */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

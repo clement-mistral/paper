@@ -1,0 +1,8 @@
+[Unit]
+Description=Paper: nightly database backup
+
+[Service]
+Type=oneshot
+# Adjust to where the repository lives on the server.
+WorkingDirectory=%h/paper
+ExecStart=%h/paper/deploy/backup.sh

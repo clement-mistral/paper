@@ -1,0 +1,77 @@
+# Local services for development.
+#   podman compose -f dev.compose.yaml up -d
+#
+# MinIO no longer publishes official images; `pgsty/minio` is the
+# community build maintained by Pigsty (same binary, console included).
+
+name: paper
+
+services:
+  postgres:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-paper}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-paper}
+      POSTGRES_DB: ${DB_DATABASE:-paper}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # `z` relabels the bind mount for SELinux (Fedora).
+      - ./database/init:/docker-entrypoint-initdb.d:ro,z
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: docker.io/library/redis:7-alpine
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: docker.io/pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-paper}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-paperpaper}
+    ports:
+      - '${S3_PORT:-9000}:9000' # S3 API
+      - '9001:9001' # web console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-fs', 'http://localhost:9000/minio/health/live']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot job: creates the application bucket, then exits.
+  minio-init:
+    image: docker.io/pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-paper}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-paperpaper}
+      S3_BUCKET: ${S3_BUCKET:-paper}
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" &&
+        mc mb --ignore-existing "local/$$S3_BUCKET"
+    restart: 'no'
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

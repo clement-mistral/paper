@@ -1,0 +1,75 @@
+# Production on the household server:
+#   podman compose -f compose.prod.yaml --env-file .env.production up -d --build
+#
+# Postgres and Redis stay on the internal network; only the app port is
+# published, on the loopback, for `tailscale serve` (HTTPS, required by
+# the PWA). See deploy/README.md.
+
+name: paper-prod
+
+services:
+  app:
+    container_name: paper-app
+    build:
+      context: .
+      dockerfile: Containerfile
+    # Image built by the CI on each push to `prod` (PAPER_IMAGE in
+    # .env.production, e.g. ghcr.io/<owner>/paper:latest), or built here
+    # with --build when PAPER_IMAGE is not set.
+    image: ${PAPER_IMAGE:-localhost/paper:latest}
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      REDIS_HOST: redis
+      REDIS_PORT: '6379'
+      SESSION_DRIVER: redis
+    ports:
+      - '127.0.0.1:${APP_PORT:-3333}:3333'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:3333/login || exit 1']
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    container_name: paper-postgres
+    image: docker.io/library/postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-paper}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_DATABASE:-paper}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Extensions only: the test database is a development concern.
+      - ./database/init/01_extensions.sql:/docker-entrypoint-initdb.d/01_extensions.sql:ro,z
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    container_name: paper-redis
+    image: docker.io/library/redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
