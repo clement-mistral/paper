@@ -11,6 +11,12 @@ export const GRACE_HOUR = 12
  */
 export const EVENING_HOUR = 18
 
+/**
+ * From this hour, a reminder is sent when yesterday's review is still
+ * waiting (until the noon deadline).
+ */
+export const MORNING_HOUR = 10
+
 export function deadlineOf(day: DateTime): DateTime {
   return day.startOf('day').plus({ days: 1 }).set({ hour: GRACE_HOUR })
 }

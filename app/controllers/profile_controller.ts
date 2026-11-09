@@ -1,15 +1,32 @@
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 import { errors } from '@vinejs/vine'
 import User from '#models/user'
 import { passwordValidator, profileValidator } from '#validators/user'
+import PushService from '#domains/notifications/services/push_service'
+import ReviewReminders from '#domains/routine/services/review_reminders'
+import type { NotificationsPanel } from '#shared/types/notifications'
 
 /**
- * « Profil » : the user's own information and password.
+ * « Profil » : the user's own information, password and notifications.
  */
+@inject()
 export default class ProfileController {
+  constructor(
+    private push: PushService,
+    private reminders: ReviewReminders
+  ) {}
+
   async show({ inertia }: HttpContext) {
-    return inertia.render('profile', {})
+    const [devices, reminders] = await Promise.all([this.push.devices(), this.reminders.settings()])
+    const notifications: NotificationsPanel = {
+      configured: this.push.configured,
+      publicKey: this.push.publicKey(),
+      devices,
+      reminders,
+    }
+    return inertia.render('profile', { notifications })
   }
 
   async update({ request, response, auth, session }: HttpContext) {

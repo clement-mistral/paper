@@ -7,7 +7,9 @@
 | the web server: subscription debits are recorded at boot (catching up
 | any missed day) and automatic tasks are reconciled (a bill becoming due
 | soon), at boot and then every hour. Both jobs are idempotent.
-| `node ace subscriptions:charge` runs the debits by hand.
+| `node ace subscriptions:charge` runs the debits by hand. The reminders
+| of the daily review (push notifications) are checked every 5 minutes;
+| each one is sent at most once a day.
 |
 */
 
@@ -15,8 +17,11 @@ import app from '@adonisjs/core/services/app'
 import logger from '@adonisjs/core/services/logger'
 
 const EVERY_HOUR = 60 * 60 * 1000
+const EVERY_FIVE_MINUTES = 5 * 60 * 1000
 
 let timer: NodeJS.Timeout | undefined
+let reminderTimer: NodeJS.Timeout | undefined
+let remindersRunning = false
 
 async function chargeSubscriptions() {
   try {
@@ -49,6 +54,20 @@ async function refreshNews() {
   }
 }
 
+async function sendReviewReminders() {
+  if (remindersRunning) return
+  remindersRunning = true
+  try {
+    const { default: ReviewReminders } = await import('#domains/routine/services/review_reminders')
+    const reminders = await app.container.make(ReviewReminders)
+    await reminders.run()
+  } catch (error) {
+    logger.error({ err: error }, 'review reminders failed')
+  } finally {
+    remindersRunning = false
+  }
+}
+
 async function hourly() {
   await chargeSubscriptions()
   await syncTasks()
@@ -58,6 +77,11 @@ async function hourly() {
 await app.ready(async () => {
   await hourly()
   timer = setInterval(hourly, EVERY_HOUR)
+  await sendReviewReminders()
+  reminderTimer = setInterval(sendReviewReminders, EVERY_FIVE_MINUTES)
 })
 
-app.terminating(() => clearInterval(timer))
+app.terminating(() => {
+  clearInterval(timer)
+  clearInterval(reminderTimer)
+})

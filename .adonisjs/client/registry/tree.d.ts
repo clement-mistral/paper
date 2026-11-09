@@ -256,6 +256,15 @@ export interface ApiDefinition {
     update: typeof routes['profile.update']
     password: typeof routes['profile.password']
   }
+  notifications: {
+    subscribe: typeof routes['notifications.subscribe']
+    unsubscribe: typeof routes['notifications.unsubscribe']
+    devices: {
+      destroy: typeof routes['notifications.devices.destroy']
+    }
+    test: typeof routes['notifications.test']
+    reminders: typeof routes['notifications.reminders']
+  }
   changelog: typeof routes['changelog']
   design: typeof routes['design']
 }

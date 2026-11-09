@@ -978,6 +978,25 @@ export class ProjectSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class PushSubscriptionSchema extends BaseModel {
+  static $columns = ['auth', 'createdAt', 'endpoint', 'id', 'label', 'p256Dh', 'updatedAt'] as const
+  $columns = PushSubscriptionSchema.$columns
+  @column()
+  declare auth: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endpoint: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare label: string
+  @column()
+  declare p256Dh: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class RecipeIngredientSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -1062,6 +1081,36 @@ export class RememberMeTokenSchema extends BaseModel {
   declare tokenableId: number
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+}
+
+export class ReviewReminderSettingSchema extends BaseModel {
+  static $columns = [
+    'createdAt',
+    'eveningEnabled',
+    'eveningSentOn',
+    'eveningTime',
+    'id',
+    'morningEnabled',
+    'morningSentOn',
+    'updatedAt',
+  ] as const
+  $columns = ReviewReminderSettingSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eveningEnabled: boolean
+  @column.date()
+  declare eveningSentOn: DateTime | null
+  @column()
+  declare eveningTime: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare morningEnabled: boolean
+  @column.date()
+  declare morningSentOn: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class ShoppingItemSchema extends BaseModel {

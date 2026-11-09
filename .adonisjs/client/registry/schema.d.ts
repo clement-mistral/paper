@@ -2309,6 +2309,71 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'notifications.subscribe': {
+    methods: ["POST"]
+    pattern: '/profil/notifications/appareils'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/notifications/validators/push').subscribeValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/notifications/validators/push').subscribeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['subscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['subscribe']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['subscribe']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'notifications.unsubscribe': {
+    methods: ["POST"]
+    pattern: '/profil/notifications/appareils/retirer'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/notifications/validators/push').unsubscribeValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/notifications/validators/push').unsubscribeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['unsubscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['unsubscribe']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['unsubscribe']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'notifications.devices.destroy': {
+    methods: ["DELETE"]
+    pattern: '/profil/notifications/appareils/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['destroyDevice']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['destroyDevice']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['destroyDevice']>>>
+    }
+  }
+  'notifications.test': {
+    methods: ["POST"]
+    pattern: '/profil/notifications/test'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['test']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['test']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['test']>>>
+    }
+  }
+  'notifications.reminders': {
+    methods: ["PUT"]
+    pattern: '/profil/notifications/rappels'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/routine/validators/reminders').remindersValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/routine/validators/reminders').remindersValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateReminders']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateReminders']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateReminders']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'changelog': {
     methods: ["GET","HEAD"]
     pattern: '/nouveautes'

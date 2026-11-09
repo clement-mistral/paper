@@ -351,6 +351,24 @@ router
     router
       .put('profil/mot-de-passe', [controllers.Profile, 'updatePassword'])
       .as('profile.password')
+    router
+      .group(() => {
+        router
+          .post('appareils', [controllers.Notifications, 'subscribe'])
+          .as('notifications.subscribe')
+        router
+          .post('appareils/retirer', [controllers.Notifications, 'unsubscribe'])
+          .as('notifications.unsubscribe')
+        router
+          .delete('appareils/:id', [controllers.Notifications, 'destroyDevice'])
+          .as('notifications.devices.destroy')
+        router.post('test', [controllers.Notifications, 'test']).as('notifications.test')
+        router
+          .put('rappels', [controllers.Notifications, 'updateReminders'])
+          .as('notifications.reminders')
+      })
+      .prefix('profil/notifications')
+      .where('id', router.matchers.number())
 
     router.get('nouveautes', [controllers.Changelog, 'index']).as('changelog')
 

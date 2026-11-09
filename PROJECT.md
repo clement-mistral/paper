@@ -27,7 +27,7 @@ La navigation principale est transverse :
 - **Argent** — chaque euro, d'où qu'il vienne (un plein, une facture, des courses)
 - **Listes** — Courses, À faire, Placards ; remplies automatiquement par les autres domaines
 - **Fiches** — les objets du quotidien : Véhicules, Logement, Abonnements, Recettes, Placements (propriétés + éléments liés + « Mentionnée dans »)
-- **Bilan du jour** (`/bilan`) — chaque soir : argent du jour confirmé, tâches triées (fait / demain / plus tard / abandon), repas (cuisiné / autre / dehors → dépense), habitudes, humeur et note. Faisable jusqu'au lendemain midi ; la **série** de jours validés est le moteur de la routine (module `app/domains/routine`).
+- **Bilan du jour** (`/bilan`) — chaque soir : argent du jour confirmé, tâches triées (fait / demain / plus tard / abandon), repas (cuisiné / autre / dehors → dépense), habitudes, humeur et note. Faisable jusqu'au lendemain midi ; la **série** de jours validés est le moteur de la routine (module `app/domains/routine`). Rappels par **notification Web Push** (Profil → Notifications) : le soir à l'heure choisie si le bilan n'est pas validé, et à 10 h si celui de la veille attend encore (module `app/domains/notifications`, VAPID + chiffrement RFC 8291 écrits avec `node:crypto`, sans dépendance ; clé `VAPID_PRIVATE_KEY` via `node ace push:keys`).
 - **Saisie universelle** (`Ctrl K`) — une phrase (« plein 38 L 67 € ») → aperçu des effets → enregistrement
 
 **Pas de liberté façon Notion** : les types de fiches, leurs champs et les vues sont définis dans le code. L'utilisateur remplit, Paper relie.
@@ -121,7 +121,7 @@ Implémenté à ce jour :
 
 Un repas marqué cuisiné décrémente le stock **dans la même transaction** (le stock appartient à Menu) ; chaque mouvement de stock est journalisé par source (`pantry_movements`), ce qui rend ces effets idempotents et réversibles. Les mouvements d'argent (plein, facture, prélèvement, entretien, travaux) appellent `TransactionService` **dans la même transaction**, jamais via un événement. Les virements entre comptes sont deux transactions `source_type = 'transfer'`, exclues de toute somme de dépenses ou d'entrées (`NOT_TRANSFER_SQL`).
 
-**Prélèvements d'abonnements** : tâche horaire dans le serveur web (`start/scheduler.ts`, rattrape les jours manqués, idempotente) ; équivalent manuel `node ace subscriptions:charge`.
+**Prélèvements d'abonnements** : tâche horaire dans le serveur web (`start/scheduler.ts`, rattrape les jours manqués, idempotente) ; équivalent manuel `node ace subscriptions:charge`. **Rappels du bilan** : vérifiés toutes les 5 minutes par le même scheduler, chacun envoyé au plus une fois par jour (`review_reminder_settings`).
 
 ### 3.4 Auth
 

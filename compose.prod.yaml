@@ -18,7 +18,9 @@ services:
     # with --build when PAPER_IMAGE is not set.
     image: ${PAPER_IMAGE:-localhost/paper:latest}
     restart: unless-stopped
-    env_file: .env.production
+    env_file: .env
+    networks:
+      - forge
     environment:
       DB_HOST: postgres
       DB_PORT: '5432'
@@ -43,6 +45,8 @@ services:
     container_name: paper-postgres
     image: docker.io/library/postgres:17-alpine
     restart: unless-stopped
+    networks:
+      - forge
     environment:
       POSTGRES_USER: ${DB_USER:-paper}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -62,6 +66,8 @@ services:
     image: docker.io/library/redis:7-alpine
     restart: unless-stopped
     command: ['redis-server', '--appendonly', 'yes']
+    networks:
+      - forge
     volumes:
       - redis_data:/data
     healthcheck:
@@ -73,3 +79,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  forge:
+    external: true

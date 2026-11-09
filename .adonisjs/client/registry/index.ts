@@ -1070,6 +1070,36 @@ const routes = {
     tokens: [[0,"profil"],[0,"mot-de-passe"]],
     types: placeholder as Registry['profile.password']['types'],
   },
+  'notifications.subscribe': {
+    methods: ["POST"],
+    pattern: '/profil/notifications/appareils',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"appareils"]],
+    types: placeholder as Registry['notifications.subscribe']['types'],
+  },
+  'notifications.unsubscribe': {
+    methods: ["POST"],
+    pattern: '/profil/notifications/appareils/retirer',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"appareils"],[0,"retirer"]],
+    types: placeholder as Registry['notifications.unsubscribe']['types'],
+  },
+  'notifications.devices.destroy': {
+    methods: ["DELETE"],
+    pattern: '/profil/notifications/appareils/:id',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"appareils"],[1,"id"]],
+    types: placeholder as Registry['notifications.devices.destroy']['types'],
+  },
+  'notifications.test': {
+    methods: ["POST"],
+    pattern: '/profil/notifications/test',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"test"]],
+    types: placeholder as Registry['notifications.test']['types'],
+  },
+  'notifications.reminders': {
+    methods: ["PUT"],
+    pattern: '/profil/notifications/rappels',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"rappels"]],
+    types: placeholder as Registry['notifications.reminders']['types'],
+  },
   'changelog': {
     methods: ["GET","HEAD"],
     pattern: '/nouveautes',

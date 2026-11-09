@@ -25,6 +25,7 @@ export const controllers = {
   Money: () => import('#controllers/money_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Newspapers: () => import('#controllers/newspapers_controller'),
+  Notifications: () => import('#controllers/notifications_controller'),
   Pantry: () => import('#controllers/pantry_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Projects: () => import('#controllers/projects_controller'),

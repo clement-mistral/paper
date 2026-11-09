@@ -16,6 +16,14 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
 ## [Non publié]
 
+### Ajouté
+
+- Notifications du bilan du soir : un rappel à l'heure choisie (21 h par
+  défaut) tant que le bilan du jour n'est pas validé, avec ce qu'il reste à
+  trier et la série en cours. Un second rappel à 10 h si le bilan de la
+  veille est encore à faire avant midi. À activer appareil par appareil dans
+  Profil → Notifications (sur iPhone, depuis l'app installée).
+
 ## [1.0.0] - 2026-11-04
 
 ### Ajouté

@@ -40,6 +40,24 @@ Reporter cette adresse dans `APP_URL`, puis
 `podman compose -f compose.prod.yaml --env-file .env.production up -d`.
 Sur le téléphone : ouvrir l'adresse, puis « Ajouter à l'écran d'accueil ».
 
+### Notifications du bilan du soir
+
+Les rappels du bilan sont des notifications Web Push, signées par une clé
+propre au serveur. La générer une fois :
+
+```bash
+podman exec paper-app node ace push:keys
+```
+
+Reporter la ligne `VAPID_PRIVATE_KEY=…` dans le fichier d'environnement, puis
+relancer l'app (`up -d`). Ne plus la changer : une nouvelle clé oblige chaque
+appareil à réactiver les notifications. `VAPID_SUBJECT` (facultatif) est le
+contact transmis aux services de notification (`mailto:…`), `APP_URL` par
+défaut.
+
+Sur chaque appareil : Profil → Notifications → « Activer sur cet appareil ».
+Sur iPhone/iPad, uniquement depuis l'app ajoutée à l'écran d'accueil.
+
 ### Redémarrage automatique
 
 ```bash

@@ -181,6 +181,11 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple?: []; params?: {} }
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
+    'notifications.subscribe': { paramsTuple?: []; params?: {} }
+    'notifications.unsubscribe': { paramsTuple?: []; params?: {} }
+    'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'notifications.test': { paramsTuple?: []; params?: {} }
+    'notifications.reminders': { paramsTuple?: []; params?: {} }
     'changelog': { paramsTuple?: []; params?: {} }
     'design': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
@@ -391,6 +396,9 @@ export type ScannedRoutes = {
     'circuits.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.readings.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'notifications.subscribe': { paramsTuple?: []; params?: {} }
+    'notifications.unsubscribe': { paramsTuple?: []; params?: {} }
+    'notifications.test': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
   DELETE: {
@@ -421,6 +429,7 @@ export type ScannedRoutes = {
     'circuits.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.readings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
     'shopping.toggle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -453,6 +462,7 @@ export type ScannedRoutes = {
     'meters.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
+    'notifications.reminders': { paramsTuple?: []; params?: {} }
   }
 }
 declare module '@adonisjs/core/types/http' {
