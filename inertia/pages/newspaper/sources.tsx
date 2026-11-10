@@ -5,14 +5,21 @@ import { RefreshCw, Trash2 } from 'lucide-react'
 import { urlFor } from '~/client'
 import AppShell from '~/layouts/app_shell'
 import Button from '~/components/ui/button'
+import Checkbox from '~/components/ui/checkbox'
 import DataTable from '~/components/ui/data_table'
 import EmptyState from '~/components/ui/empty_state'
 import Input from '~/components/ui/input'
+import Select from '~/components/ui/select'
 import Page from '~/components/ui/page'
 import Section from '~/components/ui/section'
 import StatusTag from '~/components/ui/status_tag'
 import { ICON_STROKE } from '~/lib/icons'
-import type { NewsSourceRow, NewspaperSettings } from '#shared/types/news'
+import {
+  SCHOOL_ZONES,
+  ZODIAC_SIGNS,
+  type NewsSourceRow,
+  type NewspaperSettings,
+} from '#shared/types/news'
 import { Plus } from 'lucide-react'
 import type { InertiaProps } from '~/types'
 
@@ -238,6 +245,49 @@ export default function NewspaperSources({
                   error={errors.perSection}
                 />
               </div>
+              <Select
+                label="Vacances scolaires"
+                name="schoolZone"
+                defaultValue={settings.schoolZone ?? ''}
+                hint="Calendrier officiel de l’Éducation nationale."
+                error={errors.schoolZone}
+                className="sm:max-w-[calc(50%-0.5rem)]"
+              >
+                <option value="">Ne pas les afficher</option>
+                {SCHOOL_ZONES.map((zone) => (
+                  <option key={zone} value={zone}>
+                    {zone === 'Corse' ? 'Corse' : `Zone ${zone}`}
+                  </option>
+                ))}
+              </Select>
+              <fieldset className="flex flex-col gap-1.5">
+                <legend className="text-sm font-medium text-ink">Horoscope</legend>
+                <p className="text-label text-muted">
+                  Les signes du foyer, imprimés en bas de la une. Aucun coché : pas d’horoscope.
+                </p>
+                <div className="grid grid-cols-2 gap-x-4 sm:grid-cols-4">
+                  {ZODIAC_SIGNS.map((sign) => (
+                    <Checkbox
+                      key={sign.key}
+                      name="horoscopeSigns[]"
+                      value={sign.key}
+                      defaultChecked={settings.horoscopeSigns.includes(sign.key)}
+                      strike={false}
+                      label={
+                        <>
+                          <span aria-hidden="true" className="mr-1 text-muted">
+                            {sign.symbol}
+                          </span>
+                          {sign.label}
+                        </>
+                      }
+                    />
+                  ))}
+                </div>
+                {errors.horoscopeSigns && (
+                  <p className="text-label text-danger">{errors.horoscopeSigns}</p>
+                )}
+              </fieldset>
               <div>
                 <Button type="submit" variant="secondary" disabled={processing}>
                   Enregistrer

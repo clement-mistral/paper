@@ -11,7 +11,10 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
+  CalendarDays,
+  GraduationCap,
   ListChecks,
+  Moon,
   Printer,
   RefreshCw,
   Rss,
@@ -25,10 +28,10 @@ import ProgressBar from '~/components/ui/progress_bar'
 import NewspaperDaySwitch from '~/components/domain/newspaper_day_switch'
 import { cn } from '~/lib/cn'
 import { domainMeta } from '~/lib/domains'
-import { formatAmount, formatClock, formatFullDate, shiftDay } from '~/lib/format'
+import { formatAmount, formatClock, formatFullDate, formatLongDate, shiftDay } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
 import type { Domain } from '#shared/types/domain'
-import type { FullArticle, NewsItemRow, Newspaper } from '#shared/types/news'
+import type { FullArticle, HoroscopeEntry, NewsItemRow, Newspaper } from '#shared/types/news'
 
 type FrontItem = NewsItemRow & { continuesOn: number | null }
 import type { InertiaProps } from '~/types'
@@ -129,6 +132,92 @@ function Figure({ value, label }: { value: string; label: string }) {
   )
 }
 
+/** « samedi 19 décembre » */
+function inlineDate(iso: string): string {
+  return formatLongDate(iso).toLowerCase()
+}
+
+/** « demain », « dans 12 jours » */
+function inDays(days: number): string {
+  if (days <= 1) return 'demain'
+  return `dans ${days} jours`
+}
+
+function CalendarLine({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <li className="flex items-start gap-2 text-[11px] leading-snug text-ink">
+      <span aria-hidden="true" className="mt-px shrink-0 text-muted">
+        {icon}
+      </span>
+      <span className="min-w-0">{children}</span>
+    </li>
+  )
+}
+
+/**
+ * Moon, public holidays and school holidays.
+ */
+function CalendarBlock({ calendar }: { calendar: Newspaper['calendar'] }) {
+  const { moon, holiday, school } = calendar
+  const iconProps = { size: 12, strokeWidth: ICON_STROKE } as const
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-border pt-3">
+      <Kicker>Calendrier</Kicker>
+      <ul className="flex flex-col gap-1">
+        <CalendarLine icon={<Moon {...iconProps} />}>
+          <strong className="font-semibold">{moon.label}</strong>
+          {moon.time && ` à ${moon.time}`}
+          <span className="text-muted">
+            {moon.principal !== 'full'
+              ? ` · pleine lune le ${inlineDate(moon.nextFull)}`
+              : ` · nouvelle lune le ${inlineDate(moon.nextNew)}`}
+          </span>
+        </CalendarLine>
+        <CalendarLine icon={<CalendarDays {...iconProps} />}>
+          {holiday.today ? (
+            <>
+              <strong className="font-semibold">Jour férié</strong> : {holiday.today}
+            </>
+          ) : (
+            <>
+              Prochain férié : <strong className="font-semibold">{holiday.next.name}</strong>
+            </>
+          )}
+          <span className="text-muted">
+            {holiday.today ? ' · prochain : ' + holiday.next.name + ', ' : ' · '}
+            {inDays(holiday.next.inDays)}, {inlineDate(holiday.next.day)}
+            {holiday.next.bridge && ' (pont possible)'}
+          </span>
+        </CalendarLine>
+        {school && (school.current || school.next) && (
+          <CalendarLine icon={<GraduationCap {...iconProps} />}>
+            {school.current ? (
+              <>
+                <strong className="font-semibold">{school.current.name}</strong>
+                <span className="text-muted">
+                  {' '}
+                  (zone {school.zone}) jusqu’au {inlineDate(school.current.lastDay)}
+                </span>
+              </>
+            ) : (
+              school.next && (
+                <>
+                  <strong className="font-semibold">{school.next.name}</strong>
+                  <span className="text-muted">
+                    {' '}
+                    (zone {school.zone}) {inDays(school.next.inDays)},{' '}
+                    {inlineDate(school.next.firstDay)}
+                  </span>
+                </>
+              )
+            )}
+          </CalendarLine>
+        )}
+      </ul>
+    </div>
+  )
+}
+
 /**
  * « Votre journée » : the household's day and figures, set apart in a
  * tinted box like a newspaper's sidebar.
@@ -190,6 +279,8 @@ function DaySidebar({ newspaper }: { newspaper: Newspaper }) {
           </p>
         )}
       </div>
+
+      <CalendarBlock calendar={newspaper.calendar} />
 
       <div className="flex flex-col gap-2 border-t border-border pt-3">
         <Kicker>Le foyer ce mois-ci</Kicker>
@@ -262,6 +353,42 @@ function FullStory({ article }: { article: FullArticle }) {
   )
 }
 
+/** Literal classes, for Tailwind to see them: one column per sign up to three. */
+const HOROSCOPE_COLUMNS = {
+  1: 'sm:grid-cols-1 print:grid-cols-1',
+  2: 'sm:grid-cols-2 print:grid-cols-2',
+  3: 'sm:grid-cols-3 print:grid-cols-3',
+} as const
+
+/**
+ * « Horoscope » : the household's signs, in a band above the quotation.
+ */
+function Horoscope({ entries }: { entries: HoroscopeEntry[] }) {
+  const columns = Math.min(entries.length, 3) as keyof typeof HOROSCOPE_COLUMNS
+  return (
+    <section className="break-inside-avoid border-t border-ink pt-2.5">
+      <Kicker className="mb-2 text-ink">Horoscope</Kicker>
+      <div className={cn('grid grid-cols-1 gap-x-5 gap-y-2.5', HOROSCOPE_COLUMNS[columns])}>
+        {entries.map((entry) => (
+          <article key={entry.sign} className="break-inside-avoid">
+            <h3 className="flex items-baseline gap-1.5 font-serif text-[13px] font-bold text-ink">
+              <span aria-hidden="true" className="font-normal">
+                {entry.symbol}
+              </span>
+              {entry.label}
+              <span className="text-[9px] font-normal tracking-wide text-muted uppercase">
+                {entry.dates}
+              </span>
+            </h3>
+            <p className="mt-0.5 text-[11px] leading-[1.45] text-ink/85">{entry.text}</p>
+            <p className="mt-0.5 text-[10px] text-muted italic">Porte-bonheur : {entry.charm}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 const SHEET =
   'flex w-full max-w-[210mm] flex-col bg-bg p-[12mm] text-ink shadow-[0_1px_3px_rgb(0_0_0/0.08),0_8px_24px_rgb(0_0_0/0.06)] print:max-w-none print:p-0 print:shadow-none'
 
@@ -286,6 +413,136 @@ function FullTextPage({
         {page.articles.map((article) => (
           <FullStory key={article.id} article={article} />
         ))}
+      </div>
+    </section>
+  )
+}
+
+/**
+ * A 9×9 grid, thick lines around the 3×3 boxes. `muted` cells print
+ * lighter (the digits the solver found, on yesterday's solution).
+ */
+function SudokuGrid({
+  digits,
+  muted,
+  size,
+  label,
+}: {
+  digits: number[]
+  muted?: boolean[]
+  size: 'large' | 'small'
+  label: string
+}) {
+  const large = size === 'large'
+  return (
+    <div
+      role="img"
+      aria-label={label}
+      className={cn(
+        'grid grid-cols-9 border-ink',
+        large ? 'w-full max-w-[110mm] border-2' : 'w-full max-w-[52mm] border-[1.5px]'
+      )}
+    >
+      {digits.map((digit, cell) => {
+        const row = Math.floor(cell / 9)
+        const col = cell % 9
+        return (
+          <span
+            key={cell}
+            className={cn(
+              'grid aspect-square place-items-center font-serif tabular-nums',
+              large ? 'text-[19px] font-semibold' : 'text-[9px]',
+              col < 8 &&
+                (col % 3 === 2 ? 'border-r-[1.5px] border-r-ink' : 'border-r border-r-border'),
+              row < 8 &&
+                (row % 3 === 2 ? 'border-b-[1.5px] border-b-ink' : 'border-b border-b-border'),
+              muted?.[cell] ? 'text-muted' : 'text-ink'
+            )}
+          >
+            {digit === 0 ? '' : digit}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+/**
+ * Last page: the sudoku of the day, yesterday's solution, and the
+ * fruits and vegetables of the month with the household's recipes.
+ */
+function LeisurePage({ newspaper }: { newspaper: Newspaper }) {
+  const { sudoku, yesterday, season, page } = newspaper.leisure
+  return (
+    <section className={cn(SHEET, 'gap-4 print:break-before-page')}>
+      <header className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-1">
+        <span className="font-serif text-[15px] font-black tracking-tight text-ink">
+          {newspaper.title}
+        </span>
+        <span className="text-[9.5px] tracking-[0.14em] text-muted uppercase">
+          {formatFullDate(newspaper.day)} · page {page}
+        </span>
+      </header>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <section className="flex flex-col gap-2">
+          <Kicker className="border-b border-ink pb-1 text-ink">Sudoku · {sudoku.level}</Kicker>
+          <p className="text-[11px] text-muted">
+            Chaque ligne, colonne et carré contient une fois chaque chiffre de 1 à 9. Solution dans
+            le journal de demain.
+          </p>
+          <SudokuGrid digits={sudoku.grid} size="large" label={`Sudoku ${sudoku.level}`} />
+        </section>
+
+        <div className="flex flex-col gap-5">
+          <section className="flex flex-col gap-2">
+            <Kicker className="border-b border-ink pb-1 text-ink">
+              Solution d’hier · {yesterday.level}
+            </Kicker>
+            <SudokuGrid
+              digits={yesterday.solution}
+              muted={yesterday.givens}
+              size="small"
+              label="Solution du sudoku d’hier"
+            />
+            <p className="text-[9.5px] text-muted">En gris, les chiffres donnés.</p>
+          </section>
+
+          <section className="flex flex-col gap-2 rounded-card bg-callout p-3.5">
+            <Kicker>Le marché de {season.month}</Kicker>
+            {season.vegetables.length > 0 && (
+              <p className="text-[11px] leading-[1.45] text-ink">
+                <strong className="font-semibold">Légumes</strong> :{' '}
+                {capitalize(season.vegetables.join(', '))}.
+              </p>
+            )}
+            {season.fruits.length > 0 && (
+              <p className="text-[11px] leading-[1.45] text-ink">
+                <strong className="font-semibold">Fruits</strong> :{' '}
+                {capitalize(season.fruits.join(', '))}.
+              </p>
+            )}
+            {season.recipes.length > 0 && (
+              <div className="flex flex-col gap-1 border-t border-border pt-2">
+                <p className="text-[9.5px] font-semibold tracking-[0.14em] text-muted uppercase">
+                  À cuisiner avec vos recettes
+                </p>
+                <ul className="flex flex-col gap-0.5">
+                  {season.recipes.map((recipe) => (
+                    <li key={recipe.name} className="text-[11px] leading-snug text-ink">
+                      <span className="font-serif font-bold">{recipe.name}</span>
+                      <span className="text-muted"> · {recipe.produce.join(', ')}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </section>
   )
@@ -377,7 +634,10 @@ export default function NewspaperShow({
             <span className="font-serif text-[13px] font-semibold text-ink">
               {formatFullDate(newspaper.day)}
             </span>
-            <span className="text-muted">Saint {ephemeris.saint}</span>
+            <span className="text-muted">
+              Saint {ephemeris.saint}
+              {ephemeris.sunSign && ` · Soleil en ${ephemeris.sunSign}`}
+            </span>
             {weather ? (
               <span className="inline-flex items-center gap-1.5 text-ink">
                 <WeatherGlyph code={weather.code} />
@@ -441,6 +701,19 @@ export default function NewspaperShow({
           </div>
         )}
 
+        {/* Horoscope ----------------------------------------------------- */}
+        {newspaper.horoscope.length > 0 ? (
+          <Horoscope entries={newspaper.horoscope} />
+        ) : (
+          <p className="text-[11px] text-muted print:hidden">
+            Horoscope : cochez les signes du foyer dans{' '}
+            <Link route="newspapers.sources" className="underline hover:text-ink">
+              Sources
+            </Link>
+            .
+          </p>
+        )}
+
         {/* Quote and ephemeris ------------------------------------------- */}
         <footer className="mt-auto break-inside-avoid border-t border-ink pt-2.5 text-center">
           <p className="mx-auto max-w-[160mm] font-serif text-[13.5px] leading-snug text-ink">
@@ -455,6 +728,8 @@ export default function NewspaperShow({
       {newspaper.pages.map((page) => (
         <FullTextPage key={page.number} newspaper={newspaper} page={page} />
       ))}
+
+      <LeisurePage newspaper={newspaper} />
     </div>
   )
 }

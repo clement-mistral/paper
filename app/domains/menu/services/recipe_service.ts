@@ -8,6 +8,7 @@ import IngredientService from '#domains/menu/services/ingredient_service'
 import AliasService from '#capture/services/alias_service'
 import { normalize, normalizePhrases } from '#capture/normalizer'
 import { toIsoDate } from '#support/dates'
+import { produceOf } from '#domains/menu/seasons'
 import type { RecipeDetail, RecipeSummary, Unit } from '#shared/types/menu'
 
 export type RecipeInput = {
@@ -99,6 +100,35 @@ export default class RecipeService {
       .whereRaw(`${similarity} >= 0.6`, [text, text])
       .orderBy('score', 'desc')
       .first()
+  }
+
+  /**
+   * Finished recipes made with produce of the month, the most seasonal
+   * first: main ingredients count double.
+   */
+  async inSeason(
+    month: number
+  ): Promise<Array<{ id: number; name: string; produce: string[]; score: number }>> {
+    const recipes = await Recipe.query()
+      .where('is_draft', false)
+      .preload('ingredients', (query) => query.preload('ingredient').orderBy('position'))
+    const found: Array<{ id: number; name: string; produce: string[]; score: number }> = []
+    for (const recipe of recipes) {
+      const produce = new Map<string, number>()
+      for (const line of recipe.ingredients) {
+        const match = produceOf(line.ingredient.key)
+        if (!match?.months.includes(month)) continue
+        produce.set(match.name, Math.max(produce.get(match.name) ?? 0, line.isMain ? 2 : 1))
+      }
+      if (produce.size === 0) continue
+      found.push({
+        id: recipe.id,
+        name: recipe.name,
+        produce: [...produce.keys()],
+        score: [...produce.values()].reduce((total, weight) => total + weight, 0),
+      })
+    }
+    return found.sort((left, right) => right.score - left.score)
   }
 
   async drafts(): Promise<Array<{ id: number; name: string }>> {

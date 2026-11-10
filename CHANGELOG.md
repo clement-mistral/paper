@@ -14,6 +14,24 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
+## [1.2.0] - 2026-11-10
+
+### Ajouté
+
+- Horoscope dans le journal du jour : cochez les signes du foyer dans
+  Journal → Sources → Réglages de la feuille, et chacun a sa ligne en bas de
+  la une (le climat du jour, un conseil et un porte-bonheur). Le bandeau
+  indique aussi dans quel signe se trouve le Soleil.
+- Page « Détente » à la fin du journal : un sudoku du jour, facile en début
+  de semaine et plus corsé le week-end, avec la solution de celui de la
+  veille.
+- Le marché du mois sur la page Détente : les fruits et légumes de saison,
+  et vos recettes qui en contiennent.
+- Encadré « Calendrier » sur la une : la phase de la lune et la prochaine
+  pleine lune, le prochain jour férié (avec les ponts possibles) et, si vous
+  choisissez votre zone dans les réglages du journal, les vacances scolaires
+  d'après le calendrier officiel.
+
 ## [1.1.0] - 2026-11-09
 
 ### Ajouté

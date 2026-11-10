@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { SCHOOL_ZONES, ZODIAC_KEYS } from '#shared/types/news'
 
 const section = () => vine.string().trim().minLength(1).maxLength(40)
 
@@ -25,4 +26,6 @@ export const newspaperSettingsValidator = vine.create({
   title: vine.string().trim().minLength(1).maxLength(80),
   city: vine.string().trim().maxLength(80).optional(),
   perSection: vine.number().withoutDecimals().min(0).max(10),
+  horoscopeSigns: vine.array(vine.enum(ZODIAC_KEYS)).maxLength(12).optional(),
+  schoolZone: vine.enum(SCHOOL_ZONES).optional(),
 })

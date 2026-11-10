@@ -3,6 +3,12 @@ import { DateTime } from 'luxon'
 import NewsService, { isLiveOrMedia } from '#domains/news/services/news_service'
 import WeatherService from '#domains/news/services/weather_service'
 import { quoteOf, saintOf } from '#domains/news/ephemeris'
+import { horoscopeOf, sunSignOf } from '#domains/news/horoscope'
+import { holidayOf, moonOf } from '#domains/news/calendar'
+import { sudokuOf } from '#domains/news/sudoku'
+import SchoolHolidaysService from '#domains/news/services/school_holidays_service'
+import RecipeService from '#domains/menu/services/recipe_service'
+import { inSeason } from '#domains/menu/seasons'
 import HomeService from '#domains/maison/services/home_service'
 import MeterService from '#domains/maison/services/meter_service'
 import MealPlanService from '#domains/menu/services/meal_plan_service'
@@ -11,9 +17,12 @@ import AgendaView from '#views/agenda_view'
 import MoneyView from '#views/money_view'
 import { HOME_ZONE, toIsoDate, today } from '#support/dates'
 import { formatDate, formatNumber } from '#support/format'
+import { shuffled } from '#support/seeded'
 import type { EditionItem, FullArticle, Newspaper } from '#shared/types/news'
 
 const SLOT_LABELS = { lunch: 'Midi', dinner: 'Soir' } as const
+/** Recipes of the season suggested on the leisure page. */
+const SEASON_RECIPES = 3
 
 /**
  * What fits on one A4 page of full texts (three columns of 10.5px text),
@@ -130,7 +139,9 @@ export default class NewspaperView {
     private meals: MealPlanService,
     private routine: RoutineService,
     private homes: HomeService,
-    private meters: MeterService
+    private meters: MeterService,
+    private school: SchoolHolidaysService,
+    private recipes: RecipeService
   ) {}
 
   async newspaper(day: string): Promise<Newspaper> {
@@ -138,17 +149,20 @@ export default class NewspaperView {
     const isToday = day === toIsoDate(today())
     const settings = await this.news.settings()
 
-    const [sections, agenda, overview, meals, status, weather, meters] = await Promise.all([
-      this.news.edition(day),
-      isToday ? this.agenda.today() : null,
-      this.money.overview(),
-      this.meals.between(day, day),
-      this.routine.status(),
-      settings.latitude !== null && settings.longitude !== null
-        ? this.weather.forecast(settings.latitude, settings.longitude, day)
-        : null,
-      this.meterLines(),
-    ])
+    const [sections, agenda, overview, meals, status, weather, meters, school, seasonal] =
+      await Promise.all([
+        this.news.edition(day),
+        isToday ? this.agenda.today() : null,
+        this.money.overview(),
+        this.meals.between(day, day),
+        this.routine.status(),
+        settings.latitude !== null && settings.longitude !== null
+          ? this.weather.forecast(settings.latitude, settings.longitude, day)
+          : null,
+        this.meterLines(),
+        settings.schoolZone ? this.school.on(settings.schoolZone, day) : null,
+        this.recipes.inSeason(date.month),
+      ])
     const items = agenda ? agenda.today : await this.agenda.items(date, date)
     const layout = layoutFullText(sections.flatMap((section) => section.items))
 
@@ -195,6 +209,41 @@ export default class NewspaperView {
         daysLeft: (date.isInLeapYear ? 366 : 365) - date.ordinal,
         week: date.weekNumber,
         quote: quoteOf(date),
+        sunSign: sunSignOf(date),
+      },
+      horoscope: horoscopeOf(date, settings.horoscopeSigns),
+      calendar: { moon: moonOf(date), holiday: holidayOf(date), school },
+      leisure: this.leisure(date, layout.pages.at(-1)?.number ?? 1, seasonal),
+    }
+  }
+
+  /**
+   * The last page: today's sudoku, yesterday's solved, and the season.
+   * Recipes of equal score come in an order of the day, for variety.
+   */
+  private leisure(
+    date: DateTime,
+    lastPage: number,
+    seasonal: Array<{ name: string; produce: string[]; score: number }>
+  ): Newspaper['leisure'] {
+    const sudoku = sudokuOf(date)
+    const yesterday = sudokuOf(date.minus({ days: 1 }))
+    const recipes = shuffled(seasonal, `${toIsoDate(date)}:season`)
+      .sort((left, right) => right.score - left.score)
+      .slice(0, SEASON_RECIPES)
+      .map(({ name, produce }) => ({ name, produce }))
+    return {
+      page: lastPage + 1,
+      sudoku: { level: sudoku.level, grid: sudoku.puzzle },
+      yesterday: {
+        level: yesterday.level,
+        solution: yesterday.solution,
+        givens: yesterday.puzzle.map((digit) => digit !== 0),
+      },
+      season: {
+        month: date.setLocale('fr').toFormat('LLLL'),
+        ...inSeason(date.month),
+        recipes,
       },
     }
   }

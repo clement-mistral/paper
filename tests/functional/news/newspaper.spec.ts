@@ -9,6 +9,9 @@ import NewsItem from '#domains/news/models/news_item'
 import NewsSource from '#domains/news/models/news_source'
 import NewsService from '#domains/news/services/news_service'
 import TaskService from '#domains/lists/services/task_service'
+import RecipeService from '#domains/menu/services/recipe_service'
+import { inSeason } from '#domains/menu/seasons'
+import { countSolutions, sudokuOf } from '#domains/news/sudoku'
 import { toIsoDate, today } from '#support/dates'
 import { Browser } from '#tests/helpers/browser'
 import { renderPage } from '#tests/helpers/ssr'
@@ -248,7 +251,41 @@ test.group('News | journal du jour', (group) => {
     assert.containsSubset(await news.settings(), {
       title: 'La Gazette de la maison',
       perSection: 2,
+      horoscopeSigns: [],
     })
+
+    await browser.request(urlFor('newspapers.settings'), {
+      method: 'PUT',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: 'title=La+Gazette&perSection=2&horoscopeSigns[]=leo&horoscopeSigns[]=aries',
+    })
+    const saved = await news.settings()
+    assert.deepEqual(saved.horoscopeSigns, ['aries', 'leo'])
+    const withHoroscope = await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    const sheet = withHoroscope.props.newspaper as Newspaper
+    assert.deepEqual(
+      sheet.horoscope.map((entry) => entry.label),
+      ['Bélier', 'Lion']
+    )
+    const printed = await renderPage(withHoroscope)
+    assert.include(printed, 'Horoscope')
+    assert.include(printed, sheet.horoscope[0].charm)
+
+    /** Saved only now: with a zone, the sheet would call the official calendar. */
+    await browser.submit(
+      urlFor('newspapers.settings'),
+      { title: 'La Gazette', perSection: '2', schoolZone: 'B' },
+      'PUT'
+    )
+    const zoned = await news.settings()
+    assert.equal(zoned.schoolZone, 'B')
+    await browser.submit(
+      urlFor('newspapers.settings'),
+      { title: 'La Gazette', perSection: '2', schoolZone: '' },
+      'PUT'
+    )
+    const unzoned = await news.settings()
+    assert.isNull(unzoned.schoolZone)
   })
 })
 
@@ -309,5 +346,41 @@ test.group('News | journal du lendemain', (group) => {
 
     const choice = await browser.page(urlFor('newspapers.choice', { day: tomorrow }))
     assert.equal(choice.component, 'newspaper/choice')
+  })
+})
+
+test.group('News | page détente', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('sudoku, yesterday’s solution, the season with the household’s recipes', async ({
+    assert,
+  }) => {
+    const produce = inSeason(today().month).vegetables[0]
+    const recipes = await app.container.make(RecipeService)
+    await recipes.create({
+      name: 'Velouté du marché',
+      servings: 4,
+      ingredients: [{ name: produce, isMain: true }, { name: 'Crème' }],
+    })
+    await recipes.create({ name: 'Pâtes au beurre', servings: 2, ingredients: [{ name: 'Pâtes' }] })
+    await User.create({ email: 'detente@paper.local', password: 'secret123' })
+    const browser = new Browser()
+    await browser.login('detente@paper.local', 'secret123')
+
+    const page = await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    const { leisure, calendar } = page.props.newspaper as Newspaper
+    assert.equal(leisure.page, 2, 'no full texts: right after the front page')
+    assert.lengthOf(leisure.sudoku.grid, 81)
+    assert.equal(countSolutions(leisure.sudoku.grid), 1)
+    assert.deepEqual(leisure.yesterday.solution, sudokuOf(today().minus({ days: 1 })).solution)
+    assert.include(leisure.season.vegetables, produce)
+    assert.deepEqual(leisure.season.recipes, [{ name: 'Velouté du marché', produce: [produce] }])
+    assert.isNull(calendar.school, 'no zone set')
+    assert.isString(calendar.moon.label)
+
+    const html = await renderPage(page)
+    assert.include(html, 'Solution d’hier')
+    assert.include(html, 'Velouté du marché')
+    assert.include(html, calendar.holiday.next.name)
   })
 })

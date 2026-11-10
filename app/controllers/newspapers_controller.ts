@@ -149,7 +149,9 @@ export default class NewspapersController {
    * The city is turned into coordinates for the weather (Open-Meteo).
    */
   async saveSettings({ request, response, session }: HttpContext) {
-    const { title, city, perSection } = await request.validateUsing(newspaperSettingsValidator)
+    const { title, city, perSection, horoscopeSigns, schoolZone } = await request.validateUsing(
+      newspaperSettingsValidator
+    )
     let place: { name: string; latitude: number; longitude: number } | null = null
     if (city) {
       try {
@@ -169,6 +171,8 @@ export default class NewspapersController {
     await this.news.saveSettings({
       title,
       perSection,
+      horoscopeSigns: horoscopeSigns ?? [],
+      schoolZone: schoolZone ?? null,
       city: place?.name ?? null,
       latitude: place?.latitude ?? null,
       longitude: place?.longitude ?? null,

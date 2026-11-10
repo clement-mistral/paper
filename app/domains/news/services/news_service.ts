@@ -7,6 +7,7 @@ import NewsItem from '#domains/news/models/news_item'
 import NewsPick from '#domains/news/models/news_pick'
 import NewsSource from '#domains/news/models/news_source'
 import NewspaperSetting from '#domains/news/models/newspaper_setting'
+import { parseSigns } from '#domains/news/horoscope'
 import { cleanSummary, parseFeed, type ParsedFeed } from '#domains/news/services/feed_parser'
 import {
   DEFAULT_SOURCES,
@@ -26,6 +27,7 @@ import type {
   NewsSourceRow,
   NewspaperSettings,
 } from '#shared/types/news'
+import { SCHOOL_ZONES } from '#shared/types/news'
 
 /** Articles not picked are forgotten after this many days. */
 export const KEEP_DAYS = 7
@@ -308,12 +310,14 @@ export default class NewsService {
       longitude:
         row?.longitude === null || row?.longitude === undefined ? null : Number(row.longitude),
       perSection: row?.perSection ?? 2,
+      horoscopeSigns: parseSigns(row?.horoscopeSigns),
+      schoolZone: SCHOOL_ZONES.find((zone) => zone === row?.schoolZone) ?? null,
     }
   }
 
-  async saveSettings(input: NewspaperSettings) {
+  async saveSettings({ horoscopeSigns, ...input }: NewspaperSettings) {
     const row = (await NewspaperSetting.query().orderBy('id').first()) ?? new NewspaperSetting()
-    row.merge(input)
+    row.merge({ ...input, horoscopeSigns: parseSigns(horoscopeSigns.join(',')).join(',') })
     await row.save()
   }
 
