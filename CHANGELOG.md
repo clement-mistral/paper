@@ -14,7 +14,7 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
-## [Non publié]
+## [1.3.0] - 2026-11-11
 
 ### Ajouté
 
