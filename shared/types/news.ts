@@ -1,3 +1,5 @@
+import type { MarketKind } from './budget.js'
+
 /**
  * « Journal du jour » types shared by the server and the client.
  */
@@ -107,9 +109,66 @@ export type NewspaperSettings = {
   horoscopeSigns: ZodiacSign[]
   /** Zone of the school holidays; null: not printed. */
   schoolZone: SchoolZone | null
+  /** Values of the « Marchés » page (Yahoo Finance symbols); none: no page. */
+  marketSymbols: string[]
 }
 
 export type SudokuLevel = 'Facile' | 'Moyen' | 'Difficile'
+
+export type { MarketKind }
+
+/** A value of the « Marchés » page, at the last close before the sheet's day. */
+export type MarketQuote = {
+  symbol: string
+  name: string
+  kind: MarketKind
+  currency: string | null
+  price: number
+  /** Date of the last session counted, ISO. */
+  asOf: string
+  /** Changes in percent; null when the history is too short. */
+  changeDay: number | null
+  changeMonth: number | null
+  changeYear: number | null
+  /** From the highest and lowest close of the year, percent. */
+  fromHigh: number
+  fromLow: number
+  /** Close above its 200-session average; null under 200 sessions. */
+  aboveMa200: boolean | null
+  /** The 50-session average crossed the 200 one in the last five sessions. */
+  cross: 'golden' | 'death' | null
+  /** RSI over 14 sessions. */
+  rsi: number | null
+  /** The last closes, oldest first, for the small curve. */
+  spark: number[]
+}
+
+/** A followed value that stands out, put in words. */
+export type MarketSignal = {
+  symbol: string
+  name: string
+  tone: 'up' | 'down'
+  label: string
+  detail: string
+}
+
+export type Markets = {
+  page: number
+  /** The most recent session among the values. */
+  asOf: string
+  indices: MarketQuote[]
+  /** Companies and funds followed. */
+  stocks: MarketQuote[]
+  cryptos: MarketQuote[]
+  signals: MarketSignal[]
+  /** Followed symbols Yahoo Finance did not know or did not answer for. */
+  missing: string[]
+}
+
+/** A crossword cell: null outside the words. */
+export type CrosswordCell = { number: number | null } | null
+
+export type CrosswordClueRow = { number: number; clue: string; length: number }
 
 /** The Moon of a day. */
 export type MoonInfo = {
@@ -214,12 +273,23 @@ export type Newspaper = {
     /** Null without a zone, or when the official calendar is unreachable. */
     school: SchoolHolidays | null
   }
+  /** Page before the games; null without followed values or data. */
+  markets: Markets | null
   /** Last page: games and the season. */
   leisure: {
     page: number
     sudoku: { level: SudokuLevel; grid: number[] }
     /** Yesterday's grid solved; `givens` marks the digits it gave. */
     yesterday: { level: SudokuLevel; solution: number[]; givens: boolean[] }
+    /** The crossword of the day, without its letters. */
+    crossword: {
+      cols: number
+      cells: CrosswordCell[]
+      across: CrosswordClueRow[]
+      down: CrosswordClueRow[]
+    }
+    /** Yesterday's crossword filled in. */
+    crosswordSolution: { cols: number; letters: Array<string | null> }
     season: {
       month: string
       vegetables: string[]

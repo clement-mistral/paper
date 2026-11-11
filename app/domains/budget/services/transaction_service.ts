@@ -19,13 +19,17 @@ export type ExpenseMeta = {
 
 /**
  * SQL condition keeping transactions that are real money in or out: the
- * two legs of a transfer between accounts are neither an expense nor
- * income. Every spending or income aggregation must use it.
+ * two legs of a transfer between accounts, and the purchases and sales of
+ * an investment account (cash turned into shares and back), are neither
+ * an expense nor income. Every spending or income aggregation must use it.
  */
 export const NOT_TRANSFER_SQL =
-  "(transactions.source_type is null or transactions.source_type <> 'transfer')"
+  "(transactions.source_type is null or transactions.source_type not in ('transfer', 'investment_trade'))"
 
 export const TRANSFER_SOURCE = 'transfer'
+
+/** Cash of an investment account spent on a purchase or got from a sale. */
+export const TRADE_SOURCE = 'investment_trade'
 
 export type IncomeInput = {
   amountCents: number
@@ -86,10 +90,12 @@ export default class TransactionService {
   async recordIncome(
     input: IncomeInput,
     trx: TransactionClientContract,
-    meta: { captureText?: string } = {}
+    meta: { captureText?: string; sourceType?: string; sourceId?: number } = {}
   ): Promise<Transaction> {
     const transaction = new Transaction().useTransaction(trx)
     transaction.merge({
+      sourceType: meta.sourceType ?? null,
+      sourceId: meta.sourceId ?? null,
       amountCents: Math.abs(input.amountCents),
       label: input.label,
       occurredOn: fromIsoDate(input.occurredOn),
@@ -100,6 +106,32 @@ export default class TransactionService {
     })
     await transaction.save()
     return transaction
+  }
+
+  /**
+   * Cash moved inside an investment account by a purchase (negative) or a
+   * sale (positive): neither spent nor earned.
+   */
+  async recordTrade(
+    input: { accountId: number; amountCents: number; label: string; occurredOn: string },
+    sourceId: number,
+    trx: TransactionClientContract,
+    meta: { captureText?: string } = {}
+  ): Promise<Transaction> {
+    return Transaction.create(
+      {
+        accountId: input.accountId,
+        envelopeId: null,
+        label: input.label,
+        amountCents: input.amountCents,
+        occurredOn: fromIsoDate(input.occurredOn),
+        domain: 'budget',
+        sourceType: TRADE_SOURCE,
+        sourceId,
+        captureText: meta.captureText ?? null,
+      },
+      { client: trx }
+    )
   }
 
   /**

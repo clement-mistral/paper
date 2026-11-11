@@ -8,6 +8,7 @@ import NewsPick from '#domains/news/models/news_pick'
 import NewsSource from '#domains/news/models/news_source'
 import NewspaperSetting from '#domains/news/models/newspaper_setting'
 import { parseSigns } from '#domains/news/horoscope'
+import { DEFAULT_MARKET_SYMBOLS, parseSymbols } from '#domains/news/markets'
 import { cleanSummary, parseFeed, type ParsedFeed } from '#domains/news/services/feed_parser'
 import {
   DEFAULT_SOURCES,
@@ -312,12 +313,20 @@ export default class NewsService {
       perSection: row?.perSection ?? 2,
       horoscopeSigns: parseSigns(row?.horoscopeSigns),
       schoolZone: SCHOOL_ZONES.find((zone) => zone === row?.schoolZone) ?? null,
+      marketSymbols:
+        row?.marketSymbols === null || row?.marketSymbols === undefined
+          ? DEFAULT_MARKET_SYMBOLS
+          : parseSymbols(row.marketSymbols),
     }
   }
 
-  async saveSettings({ horoscopeSigns, ...input }: NewspaperSettings) {
+  async saveSettings({ horoscopeSigns, marketSymbols, ...input }: NewspaperSettings) {
     const row = (await NewspaperSetting.query().orderBy('id').first()) ?? new NewspaperSetting()
-    row.merge({ ...input, horoscopeSigns: parseSigns(horoscopeSigns.join(',')).join(',') })
+    row.merge({
+      ...input,
+      horoscopeSigns: parseSigns(horoscopeSigns.join(',')).join(','),
+      marketSymbols: parseSymbols(marketSymbols.join(',')).join(','),
+    })
     await row.save()
   }
 

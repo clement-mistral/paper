@@ -13,9 +13,20 @@ import Page from '~/components/ui/page'
 import PropertyList from '~/components/ui/property_list'
 import Section from '~/components/ui/section'
 import { accountTypeLabels } from '~/lib/budget'
-import { formatAmount, formatAxisAmount, formatMonthLong, formatMonthShort } from '~/lib/format'
+import {
+  formatAmount,
+  formatAxisAmount,
+  formatDate,
+  formatMonthLong,
+  formatMonthShort,
+} from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
-import type { AccountDetail, MonthlyAmount, TransactionRow } from '#shared/types/budget'
+import {
+  WRAPPER_LABELS,
+  type AccountDetail,
+  type MonthlyAmount,
+  type TransactionRow,
+} from '#shared/types/budget'
 import type { InertiaProps } from '~/types'
 
 export default function AccountShow({
@@ -48,6 +59,15 @@ export default function AccountShow({
       breadcrumb={<FicheBreadcrumb type="comptes" />}
       actions={
         <>
+          {(account.type === 'investment' || (account.wrapper && account.wrapper !== 'livret')) && (
+            <Link
+              route="portfolios.show"
+              routeParams={{ id: account.id }}
+              className={buttonClasses('secondary')}
+            >
+              Voir les lignes
+            </Link>
+          )}
           <Link
             route="accounts.edit"
             routeParams={{ id: account.id }}
@@ -67,6 +87,12 @@ export default function AccountShow({
         properties={[
           { label: 'Domaine', value: <DomainTag domain="budget" /> },
           { label: 'Type', value: accountTypeLabels[account.type] },
+          ...(account.wrapper
+            ? [{ label: 'Enveloppe', value: WRAPPER_LABELS[account.wrapper] }]
+            : []),
+          ...(account.openedOn
+            ? [{ label: 'Ouvert le', value: formatDate(account.openedOn) }]
+            : []),
           { label: 'Banque', value: account.institution ?? '—' },
           {
             label: 'Solde',

@@ -31,7 +31,14 @@ import { domainMeta } from '~/lib/domains'
 import { formatAmount, formatClock, formatFullDate, formatLongDate, shiftDay } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
 import type { Domain } from '#shared/types/domain'
-import type { FullArticle, HoroscopeEntry, NewsItemRow, Newspaper } from '#shared/types/news'
+import type {
+  FullArticle,
+  HoroscopeEntry,
+  MarketQuote,
+  Markets,
+  NewsItemRow,
+  Newspaper,
+} from '#shared/types/news'
 
 type FrontItem = NewsItemRow & { continuesOn: number | null }
 import type { InertiaProps } from '~/types'
@@ -392,6 +399,19 @@ function Horoscope({ entries }: { entries: HoroscopeEntry[] }) {
 const SHEET =
   'flex w-full max-w-[210mm] flex-col bg-bg p-[12mm] text-ink shadow-[0_1px_3px_rgb(0_0_0/0.08),0_8px_24px_rgb(0_0_0/0.06)] print:max-w-none print:p-0 print:shadow-none'
 
+function SheetHeader({ newspaper, page }: { newspaper: Newspaper; page: number }) {
+  return (
+    <header className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-1">
+      <span className="font-serif text-[15px] font-black tracking-tight text-ink">
+        {newspaper.title}
+      </span>
+      <span className="text-[9.5px] tracking-[0.14em] text-muted uppercase">
+        {formatFullDate(newspaper.day)} · page {page}
+      </span>
+    </header>
+  )
+}
+
 function FullTextPage({
   newspaper,
   page,
@@ -401,14 +421,7 @@ function FullTextPage({
 }) {
   return (
     <section className={cn(SHEET, 'gap-3 print:break-before-page')}>
-      <header className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-1">
-        <span className="font-serif text-[15px] font-black tracking-tight text-ink">
-          {newspaper.title}
-        </span>
-        <span className="text-[9.5px] tracking-[0.14em] text-muted uppercase">
-          {formatFullDate(newspaper.day)} · page {page.number}
-        </span>
-      </header>
+      <SheetHeader newspaper={newspaper} page={page.number} />
       <div className="columns-1 gap-5 sm:columns-3 print:columns-3 [column-rule:1px_solid_var(--color-border)]">
         {page.articles.map((article) => (
           <FullStory key={article.id} article={article} />
@@ -440,7 +453,7 @@ function SudokuGrid({
       aria-label={label}
       className={cn(
         'grid grid-cols-9 border-ink',
-        large ? 'w-full max-w-[110mm] border-2' : 'w-full max-w-[52mm] border-[1.5px]'
+        large ? 'w-full max-w-[88mm] border-2' : 'w-full max-w-[52mm] border-[1.5px]'
       )}
     >
       {digits.map((digit, cell) => {
@@ -471,78 +484,395 @@ function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+/** A grid of letters cut to its words: numbered blank cells, or the solution. */
+function CrosswordGrid({
+  cols,
+  cells,
+  size,
+  label,
+}: {
+  cols: number
+  cells: Array<{ number: number | null; letter?: string } | null>
+  size: 'large' | 'small'
+  label: string
+}) {
+  const large = size === 'large'
+  return (
+    <div
+      role="img"
+      aria-label={label}
+      className={cn('grid w-full', large ? 'max-w-[88mm]' : 'max-w-[52mm]')}
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
+      {cells.map((cell, index) =>
+        cell === null ? (
+          <span key={index} aria-hidden="true" className="aspect-square" />
+        ) : (
+          <span
+            key={index}
+            className={cn(
+              'relative -mt-px -ml-px grid aspect-square place-items-center border-ink font-serif',
+              large ? 'border-[1.2px]' : 'border'
+            )}
+          >
+            {cell.number !== null && large && (
+              <span className="absolute top-[1px] left-[2px] text-[6.5px] leading-none font-semibold text-ink">
+                {cell.number}
+              </span>
+            )}
+            {cell.letter && (
+              <span
+                className={cn('text-ink', large ? 'text-[15px]' : 'text-[7.5px] font-semibold')}
+              >
+                {cell.letter}
+              </span>
+            )}
+          </span>
+        )
+      )}
+    </div>
+  )
+}
+
+function Clues({
+  title,
+  clues,
+}: {
+  title: string
+  clues: Newspaper['leisure']['crossword']['across']
+}) {
+  return (
+    <div className="break-inside-avoid">
+      <p className="mb-1 font-serif text-[12px] font-bold text-ink">{title}</p>
+      <ol className="flex flex-col gap-0.5">
+        {clues.map((clue) => (
+          <li key={clue.number} className="flex gap-1.5 text-[10.5px] leading-snug text-ink">
+            <span className="w-4 shrink-0 text-right font-semibold tabular-nums">
+              {clue.number}
+            </span>
+            <span className="min-w-0">
+              {clue.clue} <span className="text-muted">({clue.length})</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 /**
- * Last page: the sudoku of the day, yesterday's solution, and the
- * fruits and vegetables of the month with the household's recipes.
+ * Last page: the sudoku and crossword of the day, yesterday's solutions,
+ * and the fruits and vegetables of the month with the household's recipes.
  */
 function LeisurePage({ newspaper }: { newspaper: Newspaper }) {
-  const { sudoku, yesterday, season, page } = newspaper.leisure
+  const { sudoku, yesterday, crossword, crosswordSolution, season, page } = newspaper.leisure
   return (
     <section className={cn(SHEET, 'gap-4 print:break-before-page')}>
-      <header className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-1">
-        <span className="font-serif text-[15px] font-black tracking-tight text-ink">
-          {newspaper.title}
-        </span>
-        <span className="text-[9.5px] tracking-[0.14em] text-muted uppercase">
-          {formatFullDate(newspaper.day)} · page {page}
-        </span>
-      </header>
+      <SheetHeader newspaper={newspaper} page={page} />
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 print:grid-cols-2">
         <section className="flex flex-col gap-2">
           <Kicker className="border-b border-ink pb-1 text-ink">Sudoku · {sudoku.level}</Kicker>
-          <p className="text-[11px] text-muted">
-            Chaque ligne, colonne et carré contient une fois chaque chiffre de 1 à 9. Solution dans
-            le journal de demain.
+          <p className="text-[10.5px] text-muted">
+            Chaque ligne, colonne et carré contient une fois chaque chiffre de 1 à 9.
           </p>
           <SudokuGrid digits={sudoku.grid} size="large" label={`Sudoku ${sudoku.level}`} />
         </section>
+        <section className="flex flex-col gap-2">
+          <Kicker className="border-b border-ink pb-1 text-ink">Mots croisés</Kicker>
+          <p className="text-[10.5px] text-muted">
+            Sans accents. Entre parenthèses, le nombre de lettres.
+          </p>
+          <CrosswordGrid
+            cols={crossword.cols}
+            cells={crossword.cells}
+            size="large"
+            label="Grille de mots croisés"
+          />
+        </section>
+      </div>
 
-        <div className="flex flex-col gap-5">
-          <section className="flex flex-col gap-2">
-            <Kicker className="border-b border-ink pb-1 text-ink">
-              Solution d’hier · {yesterday.level}
-            </Kicker>
-            <SudokuGrid
-              digits={yesterday.solution}
-              muted={yesterday.givens}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 print:grid-cols-2">
+        <Clues title="Horizontalement" clues={crossword.across} />
+        <Clues title="Verticalement" clues={crossword.down} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 border-t border-ink pt-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] print:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <section className="flex flex-col gap-2">
+          <Kicker className="text-ink">Solutions d’hier</Kicker>
+          <div className="grid grid-cols-2 items-start gap-3">
+            <div className="flex flex-col gap-1">
+              <SudokuGrid
+                digits={yesterday.solution}
+                muted={yesterday.givens}
+                size="small"
+                label="Solution du sudoku d’hier"
+              />
+              <p className="text-[9px] text-muted">
+                Sudoku {yesterday.level.toLowerCase()} · en gris, les chiffres donnés.
+              </p>
+            </div>
+            <CrosswordGrid
+              cols={crosswordSolution.cols}
+              cells={crosswordSolution.letters.map((letter) =>
+                letter === null ? null : { number: null, letter }
+              )}
               size="small"
-              label="Solution du sudoku d’hier"
+              label="Solution des mots croisés d’hier"
             />
-            <p className="text-[9.5px] text-muted">En gris, les chiffres donnés.</p>
-          </section>
+          </div>
+        </section>
 
-          <section className="flex flex-col gap-2 rounded-card bg-callout p-3.5">
-            <Kicker>Le marché de {season.month}</Kicker>
-            {season.vegetables.length > 0 && (
-              <p className="text-[11px] leading-[1.45] text-ink">
-                <strong className="font-semibold">Légumes</strong> :{' '}
-                {capitalize(season.vegetables.join(', '))}.
+        <section className="flex flex-col gap-2 rounded-card bg-callout p-3.5">
+          <Kicker>Le marché de {season.month}</Kicker>
+          {season.vegetables.length > 0 && (
+            <p className="text-[11px] leading-[1.45] text-ink">
+              <strong className="font-semibold">Légumes</strong> :{' '}
+              {capitalize(season.vegetables.join(', '))}.
+            </p>
+          )}
+          {season.fruits.length > 0 && (
+            <p className="text-[11px] leading-[1.45] text-ink">
+              <strong className="font-semibold">Fruits</strong> :{' '}
+              {capitalize(season.fruits.join(', '))}.
+            </p>
+          )}
+          {season.recipes.length > 0 && (
+            <div className="flex flex-col gap-1 border-t border-border pt-2">
+              <p className="text-[9.5px] font-semibold tracking-[0.14em] text-muted uppercase">
+                À cuisiner avec vos recettes
               </p>
-            )}
-            {season.fruits.length > 0 && (
-              <p className="text-[11px] leading-[1.45] text-ink">
-                <strong className="font-semibold">Fruits</strong> :{' '}
-                {capitalize(season.fruits.join(', '))}.
-              </p>
-            )}
-            {season.recipes.length > 0 && (
-              <div className="flex flex-col gap-1 border-t border-border pt-2">
-                <p className="text-[9.5px] font-semibold tracking-[0.14em] text-muted uppercase">
-                  À cuisiner avec vos recettes
-                </p>
-                <ul className="flex flex-col gap-0.5">
-                  {season.recipes.map((recipe) => (
-                    <li key={recipe.name} className="text-[11px] leading-snug text-ink">
-                      <span className="font-serif font-bold">{recipe.name}</span>
-                      <span className="text-muted"> · {recipe.produce.join(', ')}</span>
-                    </li>
-                  ))}
-                </ul>
+              <ul className="flex flex-col gap-0.5">
+                {season.recipes.map((recipe) => (
+                  <li key={recipe.name} className="text-[11px] leading-snug text-ink">
+                    <span className="font-serif font-bold">{recipe.name}</span>
+                    <span className="text-muted"> · {recipe.produce.join(', ')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      </div>
+    </section>
+  )
+}
+
+/** « 1 234,56 € », « 8 278 » for an index, « 1,1642 » for a rate. */
+function formatQuote(quote: MarketQuote): string {
+  const digits =
+    quote.kind === 'currency' ? 4 : quote.kind === 'index' || quote.price >= 10_000 ? 0 : 2
+  const value = quote.price.toLocaleString('fr-FR', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })
+  if (quote.kind === 'index' || quote.kind === 'currency' || quote.kind === 'commodity') {
+    return value
+  }
+  const symbol = quote.currency === 'EUR' ? '€' : quote.currency === 'USD' ? '$' : quote.currency
+  return symbol ? `${value} ${symbol}` : value
+}
+
+/** « +1,2 % » in green, « −3,4 % » in red. */
+function Change({ value, className }: { value: number | null; className?: string }) {
+  if (value === null) return <span className={cn('text-muted', className)}>—</span>
+  const rounded = Math.round(value * 10) / 10
+  return (
+    <span
+      className={cn(
+        'tabular-nums',
+        rounded > 0 ? 'text-success' : rounded < 0 ? 'text-danger' : 'text-muted',
+        className
+      )}
+    >
+      {rounded > 0 ? '+' : rounded < 0 ? '−' : ''}
+      {Math.abs(rounded).toLocaleString('fr-FR', { minimumFractionDigits: 1 })} %
+    </span>
+  )
+}
+
+/** The last closes as a small line, its color the month's direction. */
+function Spark({ points, className }: { points: number[]; className?: string }) {
+  if (points.length < 2) return null
+  const min = Math.min(...points)
+  const max = Math.max(...points)
+  const span = max - min || 1
+  const width = 60
+  const height = 16
+  const path = points
+    .map((point, index) => {
+      const x = (index / (points.length - 1)) * width
+      const y = height - 1 - ((point - min) / span) * (height - 2)
+      return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+    })
+    .join(' ')
+  const up = points.at(-1)! >= points[0]
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden="true"
+      className={cn('h-4 w-[60px] shrink-0', up ? 'text-success' : 'text-danger', className)}
+    >
+      <path d={path} fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function QuoteTable({ title, quotes }: { title: string; quotes: MarketQuote[] }) {
+  if (quotes.length === 0) return null
+  return (
+    <section className="break-inside-avoid">
+      <Kicker className="mb-1 border-b border-ink pb-1 text-ink">{title}</Kicker>
+      <table className="w-full text-[10.5px] leading-tight text-ink">
+        <thead>
+          <tr className="text-[8.5px] tracking-wide text-muted uppercase">
+            <th className="py-1 text-left font-semibold">Valeur</th>
+            <th className="py-1 text-right font-semibold">Cours</th>
+            <th className="py-1 pl-2 text-right font-semibold">Jour</th>
+            <th className="py-1 pl-2 text-right font-semibold">1 mois</th>
+            <th className="py-1 pl-2 text-right font-semibold">1 an</th>
+            <th className="py-1 pl-2 text-right font-semibold" title="Écart au plus haut sur un an">
+              Sommet
+            </th>
+            <th className="py-1 pl-2 text-right font-semibold">RSI</th>
+            <th className="py-1 pl-2 text-right font-semibold">3 mois</th>
+          </tr>
+        </thead>
+        <tbody>
+          {quotes.map((quote) => (
+            <tr key={quote.symbol} className="border-t border-border">
+              <td className="py-[3px] pr-2 font-serif font-bold">{quote.name}</td>
+              <td className="py-[3px] text-right whitespace-nowrap tabular-nums">
+                {formatQuote(quote)}
+              </td>
+              <td className="py-[3px] pl-2 text-right whitespace-nowrap">
+                <Change value={quote.changeDay} />
+              </td>
+              <td className="py-[3px] pl-2 text-right whitespace-nowrap">
+                <Change value={quote.changeMonth} />
+              </td>
+              <td className="py-[3px] pl-2 text-right whitespace-nowrap">
+                <Change value={quote.changeYear} />
+              </td>
+              <td className="py-[3px] pl-2 text-right whitespace-nowrap">
+                <Change value={quote.fromHigh} />
+              </td>
+              <td
+                className={cn(
+                  'py-[3px] pl-2 text-right tabular-nums',
+                  quote.rsi !== null && (quote.rsi >= 70 || quote.rsi <= 30)
+                    ? 'font-semibold'
+                    : 'text-muted'
+                )}
+              >
+                {quote.rsi === null ? '—' : Math.round(quote.rsi)}
+              </td>
+              <td className="py-[3px] pl-2">
+                <Spark points={quote.spark} className="ml-auto" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
+/**
+ * « Marchés » : the indices, the followed companies and cryptocurrencies
+ * at the last close, and what stands out among them.
+ */
+function MarketsPage({ newspaper, markets }: { newspaper: Newspaper; markets: Markets }) {
+  return (
+    <section className={cn(SHEET, 'gap-4 print:break-before-page')}>
+      <SheetHeader newspaper={newspaper} page={markets.page} />
+
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-serif text-[24px] leading-none font-black tracking-tight text-ink">
+          Marchés
+        </h2>
+        <p className="text-[10px] tracking-wide text-muted uppercase">
+          Clôtures du {inlineDate(markets.asOf)}
+        </p>
+      </div>
+
+      {markets.indices.length > 0 && (
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-y border-ink py-2.5 sm:grid-cols-3 print:grid-cols-3">
+          {markets.indices.map((quote) => (
+            <div key={quote.symbol} className="flex items-end justify-between gap-2">
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[9px] font-semibold tracking-[0.14em] text-muted uppercase">
+                  {quote.name}
+                </span>
+                <span className="font-serif text-[17px] leading-tight font-bold text-ink tabular-nums">
+                  {formatQuote(quote)}
+                </span>
+                <span className="text-[10.5px]">
+                  <Change value={quote.changeDay} />
+                  <span className="text-muted"> · 1 an </span>
+                  <Change value={quote.changeYear} />
+                </span>
               </div>
-            )}
-          </section>
+              <Spark points={quote.spark} />
+            </div>
+          ))}
         </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] print:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-4 overflow-x-auto">
+          <QuoteTable title="Actions et fonds suivis" quotes={markets.stocks} />
+          <QuoteTable title="Cryptomonnaies" quotes={markets.cryptos} />
+          {markets.missing.length > 0 && (
+            <p className="text-[9.5px] text-muted print:hidden">
+              Sans réponse de Yahoo Finance : {markets.missing.join(', ')}. Vérifiez les symboles
+              dans Sources.
+            </p>
+          )}
+        </div>
+
+        <aside className="flex flex-col gap-2.5 self-start rounded-card bg-callout p-3.5">
+          <Kicker>À surveiller</Kicker>
+          {markets.signals.length === 0 ? (
+            <p className="font-serif text-[12px] text-muted italic">
+              Rien de marquant parmi vos valeurs.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {markets.signals.map((signal) => (
+                <li key={signal.symbol} className="flex flex-col gap-0.5">
+                  <p className="flex items-baseline gap-1.5 text-[11.5px] leading-tight">
+                    <span
+                      aria-hidden="true"
+                      className={signal.tone === 'up' ? 'text-success' : 'text-danger'}
+                    >
+                      {signal.tone === 'up' ? '▲' : '▼'}
+                    </span>
+                    <span className="font-serif font-bold text-ink">{signal.name}</span>
+                  </p>
+                  <p className="pl-4 text-[9px] font-semibold tracking-wide text-muted uppercase">
+                    {signal.label}
+                  </p>
+                  <p className="pl-4 text-[10.5px] leading-snug text-ink/85">{signal.detail}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-col gap-1 border-t border-border pt-2 text-[9.5px] leading-snug text-muted">
+            <p>
+              <strong className="font-semibold text-ink">RSI</strong> : de 0 à 100, au-dessus de 70
+              la hausse a été rapide, sous 30 la baisse.
+            </p>
+            <p>
+              <strong className="font-semibold text-ink">Croisements</strong> : la moyenne des 50
+              dernières séances passe au-dessus (haussier) ou sous (baissier) celle des 200.
+            </p>
+            <p className="italic">
+              Indicateurs calculés sur les cours passés, à titre d’information : ce n’est pas un
+              conseil d’investissement. Les cryptomonnaies sont très volatiles.
+            </p>
+          </div>
+        </aside>
       </div>
     </section>
   )
@@ -728,6 +1058,8 @@ export default function NewspaperShow({
       {newspaper.pages.map((page) => (
         <FullTextPage key={page.number} newspaper={newspaper} page={page} />
       ))}
+
+      {newspaper.markets && <MarketsPage newspaper={newspaper} markets={newspaper.markets} />}
 
       <LeisurePage newspaper={newspaper} />
     </div>

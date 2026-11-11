@@ -47,6 +47,9 @@ declare module '@adonisjs/inertia/types' {
     'fiches/maintenances/form': ExtractProps<(typeof import('../../inertia/pages/fiches/maintenances/form.tsx'))['default']>
     'fiches/meters/form': ExtractProps<(typeof import('../../inertia/pages/fiches/meters/form.tsx'))['default']>
     'fiches/meters/show': ExtractProps<(typeof import('../../inertia/pages/fiches/meters/show.tsx'))['default']>
+    'fiches/placements/holding': ExtractProps<(typeof import('../../inertia/pages/fiches/placements/holding.tsx'))['default']>
+    'fiches/placements/index': ExtractProps<(typeof import('../../inertia/pages/fiches/placements/index.tsx'))['default']>
+    'fiches/placements/show': ExtractProps<(typeof import('../../inertia/pages/fiches/placements/show.tsx'))['default']>
     'fiches/projects/form': ExtractProps<(typeof import('../../inertia/pages/fiches/projects/form.tsx'))['default']>
     'fiches/projects/show': ExtractProps<(typeof import('../../inertia/pages/fiches/projects/show.tsx'))['default']>
     'fiches/recipes/form': ExtractProps<(typeof import('../../inertia/pages/fiches/recipes/form.tsx'))['default']>

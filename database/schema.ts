@@ -8,7 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AccountSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'institution', 'isDefault', 'name', 'notes', 'openingBalanceCents', 'type', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'institution', 'isDefault', 'name', 'notes', 'openedOn', 'openingBalanceCents', 'type', 'updatedAt', 'wrapper'] as const
   $columns = AccountSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -22,12 +22,16 @@ export class AccountSchema extends BaseModel {
   declare name: string
   @column()
   declare notes: string | null
+  @column.date()
+  declare openedOn: DateTime | null
   @column()
   declare openingBalanceCents: number
   @column()
   declare type: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare wrapper: string | null
 }
 
 export class BillSchema extends BaseModel {
@@ -355,6 +359,31 @@ export class HabitSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class HoldingSchema extends BaseModel {
+  static $columns = ['accountId', 'assetClass', 'createdAt', 'id', 'manualPrice', 'manualPricedOn', 'name', 'notes', 'symbol', 'updatedAt'] as const
+  $columns = HoldingSchema.$columns
+  @column()
+  declare accountId: number
+  @column()
+  declare assetClass: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
+  declare manualPrice: number | null
+  @column.date()
+  declare manualPricedOn: DateTime | null
+  @column()
+  declare name: string
+  @column()
+  declare notes: string | null
+  @column()
+  declare symbol: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class HomeSchema extends BaseModel {
   static $columns = ['address', 'builtYear', 'createdAt', 'id', 'kind', 'name', 'notes', 'occupancy', 'surfaceSqm', 'updatedAt'] as const
   $columns = HomeSchema.$columns
@@ -416,6 +445,33 @@ export class IngredientSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class InvestmentOperationSchema extends BaseModel {
+  static $columns = ['amountCents', 'captureText', 'createdAt', 'feesCents', 'holdingId', 'id', 'kind', 'occurredOn', 'quantity', 'unitPrice', 'updatedAt'] as const
+  $columns = InvestmentOperationSchema.$columns
+  @column()
+  declare amountCents: number
+  @column()
+  declare captureText: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare feesCents: number
+  @column()
+  declare holdingId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare kind: string
+  @column.date()
+  declare occurredOn: DateTime
+  @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
+  declare quantity: number | null
+  @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
+  declare unitPrice: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class MaintenanceSchema extends BaseModel {
   static $columns = ['accountId', 'costCents', 'createdAt', 'doneOn', 'dueOdometerKm', 'dueOn', 'envelopeId', 'garage', 'id', 'intervalKm', 'intervalMonths', 'kind', 'label', 'notes', 'odometerKm', 'updatedAt', 'vehicleId'] as const
   $columns = MaintenanceSchema.$columns
@@ -453,6 +509,27 @@ export class MaintenanceSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare vehicleId: number
+}
+
+export class MarketInstrumentSchema extends BaseModel {
+  static $columns = ['createdAt', 'currency', 'fetchedAt', 'kind', 'lastError', 'name', 'symbol', 'updatedAt'] as const
+  $columns = MarketInstrumentSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare currency: string | null
+  @column.dateTime()
+  declare fetchedAt: DateTime | null
+  @column()
+  declare kind: string
+  @column()
+  declare lastError: string | null
+  @column()
+  declare name: string | null
+  @column({ isPrimary: true })
+  declare symbol: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class MealPlanSchema extends BaseModel {
@@ -586,7 +663,7 @@ export class NewsSourceSchema extends BaseModel {
 }
 
 export class NewspaperSettingSchema extends BaseModel {
-  static $columns = ['city', 'createdAt', 'defaultsInstalled', 'defaultsVersion', 'horoscopeSigns', 'id', 'latitude', 'longitude', 'perSection', 'schoolZone', 'title', 'updatedAt'] as const
+  static $columns = ['city', 'createdAt', 'defaultsInstalled', 'defaultsVersion', 'horoscopeSigns', 'id', 'latitude', 'longitude', 'marketSymbols', 'perSection', 'schoolZone', 'title', 'updatedAt'] as const
   $columns = NewspaperSettingSchema.$columns
   @column()
   declare city: string | null
@@ -604,6 +681,8 @@ export class NewspaperSettingSchema extends BaseModel {
   declare latitude: number | null
   @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
   declare longitude: number | null
+  @column()
+  declare marketSymbols: string | null
   @column()
   declare perSection: number
   @column()
@@ -656,6 +735,17 @@ export class PantryMovementSchema extends BaseModel {
   declare unit: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class PriceQuoteSchema extends BaseModel {
+  static $columns = ['close', 'day', 'symbol'] as const
+  $columns = PriceQuoteSchema.$columns
+  @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
+  declare close: number
+  @column.date()
+  declare day: DateTime
+  @column({ isPrimary: true })
+  declare symbol: string
 }
 
 export class ProjectItemSchema extends BaseModel {

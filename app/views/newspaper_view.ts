@@ -6,6 +6,8 @@ import { quoteOf, saintOf } from '#domains/news/ephemeris'
 import { horoscopeOf, sunSignOf } from '#domains/news/horoscope'
 import { holidayOf, moonOf } from '#domains/news/calendar'
 import { sudokuOf } from '#domains/news/sudoku'
+import { crosswordOf } from '#domains/news/crossword'
+import MarketService from '#domains/news/services/market_service'
 import SchoolHolidaysService from '#domains/news/services/school_holidays_service'
 import RecipeService from '#domains/menu/services/recipe_service'
 import { inSeason } from '#domains/menu/seasons'
@@ -141,7 +143,8 @@ export default class NewspaperView {
     private homes: HomeService,
     private meters: MeterService,
     private school: SchoolHolidaysService,
-    private recipes: RecipeService
+    private recipes: RecipeService,
+    private market: MarketService
   ) {}
 
   async newspaper(day: string): Promise<Newspaper> {
@@ -149,7 +152,7 @@ export default class NewspaperView {
     const isToday = day === toIsoDate(today())
     const settings = await this.news.settings()
 
-    const [sections, agenda, overview, meals, status, weather, meters, school, seasonal] =
+    const [sections, agenda, overview, meals, status, weather, meters, school, seasonal, markets] =
       await Promise.all([
         this.news.edition(day),
         isToday ? this.agenda.today() : null,
@@ -162,9 +165,11 @@ export default class NewspaperView {
         this.meterLines(),
         settings.schoolZone ? this.school.on(settings.schoolZone, day) : null,
         this.recipes.inSeason(date.month),
+        this.market.markets(settings.marketSymbols, day),
       ])
     const items = agenda ? agenda.today : await this.agenda.items(date, date)
     const layout = layoutFullText(sections.flatMap((section) => section.items))
+    const lastText = layout.pages.at(-1)?.number ?? 1
 
     return {
       day,
@@ -213,12 +218,14 @@ export default class NewspaperView {
       },
       horoscope: horoscopeOf(date, settings.horoscopeSigns),
       calendar: { moon: moonOf(date), holiday: holidayOf(date), school },
-      leisure: this.leisure(date, layout.pages.at(-1)?.number ?? 1, seasonal),
+      markets: markets ? { ...markets, page: lastText + 1 } : null,
+      leisure: this.leisure(date, markets ? lastText + 1 : lastText, seasonal),
     }
   }
 
   /**
-   * The last page: today's sudoku, yesterday's solved, and the season.
+   * The last page: today's sudoku and crossword, yesterday's solved, and
+   * the season.
    * Recipes of equal score come in an order of the day, for variety.
    */
   private leisure(
@@ -228,6 +235,10 @@ export default class NewspaperView {
   ): Newspaper['leisure'] {
     const sudoku = sudokuOf(date)
     const yesterday = sudokuOf(date.minus({ days: 1 }))
+    const crossword = crosswordOf(date)
+    const solved = crosswordOf(date.minus({ days: 1 }))
+    const clues = (list: typeof crossword.across) =>
+      list.map(({ number, clue, answer }) => ({ number, clue, length: answer.length }))
     const recipes = shuffled(seasonal, `${toIsoDate(date)}:season`)
       .sort((left, right) => right.score - left.score)
       .slice(0, SEASON_RECIPES)
@@ -240,6 +251,15 @@ export default class NewspaperView {
         solution: yesterday.solution,
         givens: yesterday.puzzle.map((digit) => digit !== 0),
       },
+      crossword: {
+        cols: crossword.cols,
+        cells: crossword.letters.map((letter, cell) =>
+          letter === null ? null : { number: crossword.numbers[cell] }
+        ),
+        across: clues(crossword.across),
+        down: clues(crossword.down),
+      },
+      crosswordSolution: { cols: solved.cols, letters: solved.letters },
       season: {
         month: date.setLocale('fr').toFormat('LLLL'),
         ...inSeason(date.month),

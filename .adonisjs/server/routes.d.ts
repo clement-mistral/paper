@@ -68,6 +68,13 @@ export type ScannedRoutes = {
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.index': { paramsTuple?: []; params?: {} }
+    'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.index': { paramsTuple?: []; params?: {} }
     'envelopes.create': { paramsTuple?: []; params?: {} }
     'envelopes.store': { paramsTuple?: []; params?: {} }
@@ -214,6 +221,9 @@ export type ScannedRoutes = {
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.index': { paramsTuple?: []; params?: {} }
+    'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.index': { paramsTuple?: []; params?: {} }
     'envelopes.create': { paramsTuple?: []; params?: {} }
     'envelopes.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -293,6 +303,9 @@ export type ScannedRoutes = {
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.index': { paramsTuple?: []; params?: {} }
+    'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.index': { paramsTuple?: []; params?: {} }
     'envelopes.create': { paramsTuple?: []; params?: {} }
     'envelopes.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -371,6 +384,7 @@ export type ScannedRoutes = {
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.store': { paramsTuple?: []; params?: {} }
+    'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.store': { paramsTuple?: []; params?: {} }
     'recipes.import.store': { paramsTuple?: []; params?: {} }
     'recipes.plan': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -411,6 +425,8 @@ export type ScannedRoutes = {
     'newspapers.sources.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'recipes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'ingredients.substitutions.destroy': { paramsTuple: [ParamValue]; params: {'substitutionId': ParamValue} }
@@ -445,6 +461,7 @@ export type ScannedRoutes = {
     'newspapers.choice.save': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'reviews.journal': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'recipes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'ingredients.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

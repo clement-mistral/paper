@@ -14,6 +14,34 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
+## [Non publié]
+
+### Ajouté
+
+- Fiche « Placements » (Fiches → Placements) : vos PEA, comptes-titres,
+  assurances-vie et portefeuilles crypto, ligne par ligne, valorisés au
+  dernier cours. Pour chaque ligne : le prix de revient moyen, la
+  plus-value latente, la performance depuis le 1er janvier et son poids ;
+  pour l'ensemble, la répartition entre actions, fonds, crypto, fonds
+  euros, liquidités et épargne. Les fonds non cotés (fonds euros, unités
+  de compte) se valorisent avec la valeur de part de votre relevé.
+- Achats, ventes, dividendes et frais s'enregistrent sur la fiche du
+  compte. Un achat ou une vente ne compte ni comme une dépense ni comme un
+  revenu dans Argent ; un dividende est un revenu, des frais une dépense.
+- Les comptes ont maintenant une enveloppe (PEA, assurance-vie, livret…)
+  et une date d'ouverture.
+
+- Mots croisés sur la page Détente du journal : une nouvelle grille chaque
+  jour, à côté du sudoku, avec la solution de celle de la veille.
+- Page « Marchés » dans le journal, avant les jeux : les grands indices
+  (CAC 40, Euro Stoxx 50, S&P 500, Nasdaq), l'euro en dollars et l'or, puis
+  vos actions et cryptomonnaies avec leur évolution sur un jour, un mois et
+  un an. L'encadré « À surveiller » signale ce qui ressort (croisement des
+  moyennes, titre survendu ou suracheté, plus haut annuel, forte variation),
+  à titre d'information et non comme conseil d'investissement. Choisissez
+  les valeurs suivies dans Journal → Sources → Réglages de la feuille ;
+  laissez le champ vide pour ne pas imprimer cette page.
+
 ## [1.2.0] - 2026-11-10
 
 ### Ajouté

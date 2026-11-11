@@ -392,6 +392,48 @@ const routes = {
     tokens: [[0,"fiches"],[0,"comptes"],[1,"id"]],
     types: placeholder as Registry['accounts.destroy']['types'],
   },
+  'portfolios.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/fiches/placements',
+    tokens: [[0,"fiches"],[0,"placements"]],
+    types: placeholder as Registry['portfolios.index']['types'],
+  },
+  'portfolios.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/fiches/placements/:id',
+    tokens: [[0,"fiches"],[0,"placements"],[1,"id"]],
+    types: placeholder as Registry['portfolios.show']['types'],
+  },
+  'portfolios.operations.store': {
+    methods: ["POST"],
+    pattern: '/fiches/placements/:id/operations',
+    tokens: [[0,"fiches"],[0,"placements"],[1,"id"],[0,"operations"]],
+    types: placeholder as Registry['portfolios.operations.store']['types'],
+  },
+  'portfolios.operations.destroy': {
+    methods: ["DELETE"],
+    pattern: '/fiches/placements/operations/:id',
+    tokens: [[0,"fiches"],[0,"placements"],[0,"operations"],[1,"id"]],
+    types: placeholder as Registry['portfolios.operations.destroy']['types'],
+  },
+  'portfolios.holdings.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/fiches/placements/lignes/:id',
+    tokens: [[0,"fiches"],[0,"placements"],[0,"lignes"],[1,"id"]],
+    types: placeholder as Registry['portfolios.holdings.show']['types'],
+  },
+  'portfolios.holdings.update': {
+    methods: ["PUT"],
+    pattern: '/fiches/placements/lignes/:id',
+    tokens: [[0,"fiches"],[0,"placements"],[0,"lignes"],[1,"id"]],
+    types: placeholder as Registry['portfolios.holdings.update']['types'],
+  },
+  'portfolios.holdings.destroy': {
+    methods: ["DELETE"],
+    pattern: '/fiches/placements/lignes/:id',
+    tokens: [[0,"fiches"],[0,"placements"],[0,"lignes"],[1,"id"]],
+    types: placeholder as Registry['portfolios.holdings.destroy']['types'],
+  },
   'envelopes.index': {
     methods: ["GET","HEAD"],
     pattern: '/fiches/enveloppes',

@@ -12,6 +12,10 @@ import TaskService from '#domains/lists/services/task_service'
 import RecipeService from '#domains/menu/services/recipe_service'
 import { inSeason } from '#domains/menu/seasons'
 import { countSolutions, sudokuOf } from '#domains/news/sudoku'
+import { crosswordOf } from '#domains/news/crossword'
+import QuoteService from '#domains/budget/services/quote_service'
+import { DEFAULT_MARKET_SYMBOLS } from '#domains/news/markets'
+import { chartOf } from '#tests/helpers/market_chart'
 import { toIsoDate, today } from '#support/dates'
 import { Browser } from '#tests/helpers/browser'
 import { renderPage } from '#tests/helpers/ssr'
@@ -286,6 +290,24 @@ test.group('News | journal du jour', (group) => {
     )
     const unzoned = await news.settings()
     assert.isNull(unzoned.schoolZone)
+    assert.deepEqual(unzoned.marketSymbols, [], 'emptied: no Marchés page')
+
+    await browser.submit(
+      urlFor('newspapers.settings'),
+      { title: 'La Gazette', perSection: '2', marketSymbols: 'mc.pa, AAPL; btc-eur' },
+      'PUT'
+    )
+    const followed = await news.settings()
+    assert.deepEqual(followed.marketSymbols, ['MC.PA', 'AAPL', 'BTC-EUR'])
+    await browser.submit(
+      urlFor('newspapers.settings'),
+      { title: 'La Gazette', perSection: '2', marketSymbols: 'AAPL, <b>' },
+      'PUT'
+    )
+    const rejected = await browser.page(urlFor('newspapers.sources'))
+    assert.properties(rejected.props.errors as Record<string, string>, ['marketSymbols'])
+    const kept = await news.settings()
+    assert.deepEqual(kept.marketSymbols, ['MC.PA', 'AAPL', 'BTC-EUR'])
   })
 })
 
@@ -378,9 +400,122 @@ test.group('News | page détente', (group) => {
     assert.isNull(calendar.school, 'no zone set')
     assert.isString(calendar.moon.label)
 
+    const crossword = crosswordOf(today())
+    assert.equal(leisure.crossword.cols, crossword.cols)
+    assert.deepEqual(
+      leisure.crossword.across.map((clue) => clue.length),
+      crossword.across.map((clue) => clue.answer.length)
+    )
+    assert.notInclude(JSON.stringify(leisure.crossword), crossword.across[0].answer)
+    assert.deepEqual(
+      leisure.crosswordSolution.letters,
+      crosswordOf(today().minus({ days: 1 })).letters
+    )
+
     const html = await renderPage(page)
-    assert.include(html, 'Solution d’hier')
+    assert.include(html, 'Solutions d’hier')
+    assert.include(html, 'Horizontalement')
+    assert.include(html, 'Verticalement')
     assert.include(html, 'Velouté du marché')
     assert.include(html, calendar.holiday.next.name)
+  })
+})
+
+/** Yahoo Finance answering from fixtures: the indices flat, the values rising. */
+class FakeMarkets extends QuoteService {
+  asked: string[] = []
+  protected async download(symbol: string) {
+    this.asked.push(symbol)
+    if (symbol === 'INCONNU') return null
+    const last = toIsoDate(today())
+    if (symbol.startsWith('^') || symbol.includes('=')) {
+      return chartOf(
+        Array.from({ length: 300 }, () => 1000),
+        { last, type: 'INDEX' }
+      )
+    }
+    const crypto = symbol.endsWith('-EUR')
+    const closes = Array.from({ length: 300 }, (_, index) => 100 + index)
+    return chartOf(closes, {
+      last,
+      type: crypto ? 'CRYPTOCURRENCY' : 'EQUITY',
+      name: crypto ? 'Bitcoin EUR' : 'EXEMPLE SA',
+    })
+  }
+}
+
+test.group('News | marchés', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('indices, followed values and cryptos before the games, signals put in words', async ({
+    assert,
+    cleanup,
+  }) => {
+    const fake = new FakeMarkets()
+    app.container.swap(QuoteService, () => fake)
+    cleanup(() => app.container.restore(QuoteService))
+    const news = await app.container.make(NewsService)
+    const defaults = await news.settings()
+    assert.deepEqual(defaults.marketSymbols, DEFAULT_MARKET_SYMBOLS)
+    await news.saveSettings({
+      ...(await news.settings()),
+      marketSymbols: ['MC.PA', 'BTC-EUR', 'INCONNU'],
+    })
+    await User.create({ email: 'bourse@paper.local', password: 'secret123' })
+    const browser = new Browser()
+    await browser.login('bourse@paper.local', 'secret123')
+
+    const page = await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    const { markets, leisure } = page.props.newspaper as Newspaper
+    assert.isNotNull(markets)
+    assert.equal(markets!.page, 2)
+    assert.equal(leisure.page, 3, 'the games come after the markets')
+    assert.equal(markets!.asOf, toIsoDate(today().minus({ days: 1 })))
+    assert.deepEqual(
+      markets!.indices.map((quote) => quote.name),
+      ['CAC 40', 'Euro Stoxx 50', 'S&P 500', 'Nasdaq', 'Euro en dollars', 'Once d’or ($)']
+    )
+    assert.deepEqual(
+      markets!.stocks.map((quote) => quote.name),
+      ['LVMH']
+    )
+    assert.deepEqual(
+      markets!.cryptos.map((quote) => quote.name),
+      ['Bitcoin']
+    )
+    assert.deepEqual(markets!.missing, ['INCONNU'])
+    assert.includeMembers(
+      markets!.signals.map((signal) => signal.label),
+      ['Suracheté']
+    )
+
+    const html = await renderPage(page)
+    assert.include(html, 'Marchés')
+    assert.include(html, 'À surveiller')
+    assert.include(html, 'LVMH')
+    assert.notMatch(html, /NaN|Infinity|>undefined</)
+
+    const asked = fake.asked.length
+    await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    assert.equal(fake.asked.length, asked, 'kept an hour')
+  })
+
+  test('no values followed, or no answer: no page', async ({ assert, cleanup }) => {
+    const fake = new FakeMarkets()
+    app.container.swap(QuoteService, () => fake)
+    cleanup(() => app.container.restore(QuoteService))
+    const news = await app.container.make(NewsService)
+    await news.saveSettings({ ...(await news.settings()), marketSymbols: [] })
+    await User.create({ email: 'sans@paper.local', password: 'secret123' })
+    const browser = new Browser()
+    await browser.login('sans@paper.local', 'secret123')
+    const page = await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    assert.isNull((page.props.newspaper as Newspaper).markets)
+    assert.lengthOf(fake.asked, 0)
+
+    app.container.restore(QuoteService)
+    await news.saveSettings({ ...(await news.settings()), marketSymbols: ['MC.PA'] })
+    const offline = await browser.page(urlFor('newspapers.show', { day: toIsoDate(today()) }))
+    assert.isNull((offline.props.newspaper as Newspaper).markets, 'never online in tests')
   })
 })

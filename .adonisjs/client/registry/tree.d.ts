@@ -100,6 +100,19 @@ export interface ApiDefinition {
     update: typeof routes['accounts.update']
     destroy: typeof routes['accounts.destroy']
   }
+  portfolios: {
+    index: typeof routes['portfolios.index']
+    show: typeof routes['portfolios.show']
+    operations: {
+      store: typeof routes['portfolios.operations.store']
+      destroy: typeof routes['portfolios.operations.destroy']
+    }
+    holdings: {
+      show: typeof routes['portfolios.holdings.show']
+      update: typeof routes['portfolios.holdings.update']
+      destroy: typeof routes['portfolios.holdings.destroy']
+    }
+  }
   envelopes: {
     index: typeof routes['envelopes.index']
     create: typeof routes['envelopes.create']

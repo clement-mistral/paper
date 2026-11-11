@@ -4,7 +4,11 @@ import { type DateTime } from 'luxon'
 import Transaction from '#domains/budget/models/transaction'
 import AccountService from '#domains/budget/services/account_service'
 import EnvelopeService from '#domains/budget/services/envelope_service'
-import { NOT_TRANSFER_SQL, TRANSFER_SOURCE } from '#domains/budget/services/transaction_service'
+import {
+  NOT_TRANSFER_SQL,
+  TRADE_SOURCE,
+  TRANSFER_SOURCE,
+} from '#domains/budget/services/transaction_service'
 import { today, toIsoDate } from '#support/dates'
 import type { MonthlyAmount, MoneyOverview, TransactionRow } from '#shared/types/budget'
 
@@ -203,7 +207,7 @@ export default class MoneyView {
       envelope: row.envelope ? { id: row.envelope.id, name: row.envelope.name } : null,
       account: row.account ? { id: row.account.id, name: row.account.name } : null,
       kind:
-        row.sourceType === TRANSFER_SOURCE
+        row.sourceType === TRANSFER_SOURCE || row.sourceType === TRADE_SOURCE
           ? 'transfer'
           : row.amountCents < 0
             ? 'expense'

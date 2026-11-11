@@ -260,6 +260,14 @@ export default function NewspaperSources({
                   </option>
                 ))}
               </Select>
+              <Input
+                label="Valeurs suivies en Bourse"
+                name="marketSymbols"
+                defaultValue={settings.marketSymbols.join(', ')}
+                placeholder="MC.PA, AAPL, BTC-EUR"
+                hint="Symboles Yahoo Finance séparés par des virgules (.PA pour Paris, -EUR pour les cryptomonnaies). Vide : pas de page Marchés."
+                error={errors.marketSymbols}
+              />
               <fieldset className="flex flex-col gap-1.5">
                 <legend className="text-sm font-medium text-ink">Horoscope</legend>
                 <p className="text-label text-muted">

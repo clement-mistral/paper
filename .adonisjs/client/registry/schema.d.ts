@@ -840,6 +840,97 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['destroy']>>>
     }
   }
+  'portfolios.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/fiches/placements'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['index']>>>
+    }
+  }
+  'portfolios.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/fiches/placements/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['show']>>>
+    }
+  }
+  'portfolios.operations.store': {
+    methods: ["POST"]
+    pattern: '/fiches/placements/:id/operations'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/budget/validators/portfolio').operationValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/budget/validators/portfolio').operationValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storeOperation']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storeOperation']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storeOperation']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'portfolios.operations.destroy': {
+    methods: ["DELETE"]
+    pattern: '/fiches/placements/operations/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyOperation']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyOperation']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyOperation']>>>
+    }
+  }
+  'portfolios.holdings.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/fiches/placements/lignes/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['holding']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['holding']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['holding']>>>
+    }
+  }
+  'portfolios.holdings.update': {
+    methods: ["PUT"]
+    pattern: '/fiches/placements/lignes/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/budget/validators/portfolio').holdingValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/budget/validators/portfolio').holdingValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['updateHolding']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['updateHolding']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['updateHolding']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'portfolios.holdings.destroy': {
+    methods: ["DELETE"]
+    pattern: '/fiches/placements/lignes/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyHolding']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyHolding']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyHolding']>>>
+    }
+  }
   'envelopes.index': {
     methods: ["GET","HEAD"]
     pattern: '/fiches/enveloppes'

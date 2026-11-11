@@ -11,6 +11,8 @@ import {
   newspaperSettingsValidator,
 } from '#domains/news/validators/news'
 import NewspaperView from '#views/newspaper_view'
+import { MAX_MARKET_SYMBOLS, parseSymbols } from '#domains/news/markets'
+import { MARKET_SYMBOL } from '#domains/budget/market/yahoo'
 import { SAFE_FETCH_CODE } from '#support/safe_fetch'
 import { toIsoDate, today } from '#support/dates'
 import app from '@adonisjs/core/services/app'
@@ -149,9 +151,22 @@ export default class NewspapersController {
    * The city is turned into coordinates for the weather (Open-Meteo).
    */
   async saveSettings({ request, response, session }: HttpContext) {
-    const { title, city, perSection, horoscopeSigns, schoolZone } = await request.validateUsing(
-      newspaperSettingsValidator
-    )
+    const { title, city, perSection, horoscopeSigns, schoolZone, marketSymbols } =
+      await request.validateUsing(newspaperSettingsValidator)
+    const symbols = (marketSymbols ?? '').split(/[\s,;]+/).filter(Boolean)
+    const invalid = symbols.filter((symbol) => !MARKET_SYMBOL.test(symbol))
+    if (invalid.length > 0 || symbols.length > MAX_MARKET_SYMBOLS) {
+      throw new errors.E_VALIDATION_ERROR([
+        {
+          field: 'marketSymbols',
+          message:
+            invalid.length > 0
+              ? `Symbole invalide : ${invalid.join(', ')}`
+              : `${MAX_MARKET_SYMBOLS} valeurs au plus`,
+          rule: 'symbols',
+        },
+      ])
+    }
     let place: { name: string; latitude: number; longitude: number } | null = null
     if (city) {
       try {
@@ -173,6 +188,7 @@ export default class NewspapersController {
       perSection,
       horoscopeSigns: horoscopeSigns ?? [],
       schoolZone: schoolZone ?? null,
+      marketSymbols: parseSymbols(symbols.join(',')),
       city: place?.name ?? null,
       latitude: place?.latitude ?? null,
       longitude: place?.longitude ?? null,

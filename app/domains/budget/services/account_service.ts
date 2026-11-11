@@ -1,12 +1,21 @@
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import Account from '#domains/budget/models/account'
-import type { AccountDetail, AccountSummary, AccountType } from '#shared/types/budget'
+import type {
+  AccountDetail,
+  AccountSummary,
+  AccountType,
+  AccountWrapper,
+} from '#shared/types/budget'
+import { fromIsoDate, toIsoDate } from '#support/dates'
 
 export type AccountInput = {
   name: string
   type: AccountType
   institution?: string
+  wrapper?: AccountWrapper | null
+  /** ISO date. */
+  openedOn?: string | null
   openingBalance?: number
   isDefault?: boolean
   notes?: string
@@ -41,6 +50,8 @@ export default class AccountService {
     return {
       ...this.toSummary(account),
       balanceCents: account.openingBalanceCents + Number(totals.total),
+      wrapper: account.wrapper,
+      openedOn: account.openedOn ? toIsoDate(account.openedOn) : null,
       openingBalanceCents: account.openingBalanceCents,
       notes: account.notes,
       transactionCount: Number(totals.count),
@@ -99,6 +110,8 @@ export default class AccountService {
     account.name = input.name
     account.type = input.type
     account.institution = input.institution ?? null
+    account.wrapper = input.wrapper ?? null
+    account.openedOn = input.openedOn ? fromIsoDate(input.openedOn) : null
     account.openingBalanceCents = input.openingBalance ?? 0
     account.isDefault = input.isDefault ?? false
     account.notes = input.notes ?? null

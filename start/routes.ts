@@ -152,6 +152,27 @@ router
 
     router
       .group(() => {
+        router.get('/', [controllers.Portfolios, 'index'])
+        router.get(':id', [controllers.Portfolios, 'show'])
+        router
+          .post(':id/operations', [controllers.Portfolios, 'storeOperation'])
+          .as('portfolios.operations.store')
+        router
+          .delete('operations/:id', [controllers.Portfolios, 'destroyOperation'])
+          .as('portfolios.operations.destroy')
+        router.get('lignes/:id', [controllers.Portfolios, 'holding']).as('portfolios.holdings.show')
+        router
+          .put('lignes/:id', [controllers.Portfolios, 'updateHolding'])
+          .as('portfolios.holdings.update')
+        router
+          .delete('lignes/:id', [controllers.Portfolios, 'destroyHolding'])
+          .as('portfolios.holdings.destroy')
+      })
+      .prefix('fiches/placements')
+      .where('id', router.matchers.number())
+
+    router
+      .group(() => {
         router.get('/', [controllers.Envelopes, 'index'])
         router.get('nouveau', [controllers.Envelopes, 'create'])
         router.post('/', [controllers.Envelopes, 'store'])

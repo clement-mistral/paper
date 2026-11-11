@@ -1,5 +1,6 @@
 import {
   Car,
+  ChartLine,
   ChefHat,
   Carrot,
   FileText,
@@ -19,6 +20,7 @@ import type { Domain } from '#shared/types/domain'
  */
 export const FICHE_TYPES = [
   'comptes',
+  'placements',
   'enveloppes',
   'vehicules',
   'logement',
@@ -41,6 +43,13 @@ export const ficheMeta: Record<
     domain: 'budget',
     icon: Landmark,
     description: 'Comptes courants, épargne et placements.',
+  },
+  placements: {
+    label: 'Placements',
+    singular: 'Placement',
+    domain: 'budget',
+    icon: ChartLine,
+    description: 'PEA, assurance-vie, crypto : vos lignes valorisées au cours du jour.',
   },
   enveloppes: {
     label: 'Enveloppes',
@@ -107,6 +116,8 @@ export function ficheHref(type: FicheType): string {
   switch (type) {
     case 'comptes':
       return urlFor('accounts.index')
+    case 'placements':
+      return urlFor('portfolios.index')
     case 'enveloppes':
       return urlFor('envelopes.index')
     case 'vehicules':

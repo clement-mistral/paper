@@ -9,7 +9,12 @@ import Select from '~/components/ui/select'
 import Textarea from '~/components/ui/textarea'
 import { accountTypeLabels } from '~/lib/budget'
 import { centsToInput } from '~/lib/format'
-import { ACCOUNT_TYPES, type AccountDetail } from '#shared/types/budget'
+import {
+  ACCOUNT_TYPES,
+  ACCOUNT_WRAPPERS,
+  WRAPPER_LABELS,
+  type AccountDetail,
+} from '#shared/types/budget'
 import type { InertiaProps } from '~/types'
 
 export default function AccountForm({ account }: InertiaProps<{ account: AccountDetail | null }>) {
@@ -42,6 +47,30 @@ export default function AccountForm({ account }: InertiaProps<{ account: Account
           defaultValue={account?.institution ?? ''}
           placeholder="Optionnel"
           error={errors.institution}
+        />
+      </div>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <Select
+          label="Enveloppe"
+          name="wrapper"
+          defaultValue={account?.wrapper ?? ''}
+          hint="PEA, assurance-vie… : ses lignes apparaissent dans Placements."
+          error={errors.wrapper}
+        >
+          <option value="">Aucune</option>
+          {ACCOUNT_WRAPPERS.map((wrapper) => (
+            <option key={wrapper} value={wrapper}>
+              {WRAPPER_LABELS[wrapper]}
+            </option>
+          ))}
+        </Select>
+        <Input
+          label="Ouvert le"
+          name="openedOn"
+          type="date"
+          defaultValue={account?.openedOn ?? ''}
+          hint="Compte les 5 ans d’un PEA, les 8 ans d’une assurance-vie."
+          error={errors.openedOn}
         />
       </div>
       <Input

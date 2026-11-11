@@ -28,4 +28,12 @@ export const newspaperSettingsValidator = vine.create({
   perSection: vine.number().withoutDecimals().min(0).max(10),
   horoscopeSigns: vine.array(vine.enum(ZODIAC_KEYS)).maxLength(12).optional(),
   schoolZone: vine.enum(SCHOOL_ZONES).optional(),
+  /** « MC.PA, AAPL, BTC-EUR »: checked symbol by symbol. */
+  marketSymbols: vine
+    .string()
+    .trim()
+    .maxLength(500)
+    .toUpperCase()
+    .regex(/^[A-Z0-9.=^\-\s,;]*$/)
+    .optional(),
 })
