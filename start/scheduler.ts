@@ -8,8 +8,8 @@
 | any missed day) and automatic tasks are reconciled (a bill becoming due
 | soon), at boot and then every hour. Both jobs are idempotent.
 | `node ace subscriptions:charge` runs the debits by hand. The reminders
-| of the daily review (push notifications) are checked every 5 minutes;
-| each one is sent at most once a day.
+| of the daily review and of deadlines (push notifications) are checked
+| every 5 minutes; each one is sent once.
 |
 */
 
@@ -55,14 +55,32 @@ async function refreshNews() {
 }
 
 async function sendReviewReminders() {
-  if (remindersRunning) return
-  remindersRunning = true
   try {
     const { default: ReviewReminders } = await import('#domains/routine/services/review_reminders')
     const reminders = await app.container.make(ReviewReminders)
     await reminders.run()
   } catch (error) {
     logger.error({ err: error }, 'review reminders failed')
+  }
+}
+
+async function sendDeadlineReminders() {
+  try {
+    const { default: DeadlineReminders } =
+      await import('#domains/notifications/services/deadline_reminders')
+    const reminders = await app.container.make(DeadlineReminders)
+    await reminders.run()
+  } catch (error) {
+    logger.error({ err: error }, 'deadline reminders failed')
+  }
+}
+
+async function everyFiveMinutes() {
+  if (remindersRunning) return
+  remindersRunning = true
+  try {
+    await sendReviewReminders()
+    await sendDeadlineReminders()
   } finally {
     remindersRunning = false
   }
@@ -77,8 +95,8 @@ async function hourly() {
 await app.ready(async () => {
   await hourly()
   timer = setInterval(hourly, EVERY_HOUR)
-  await sendReviewReminders()
-  reminderTimer = setInterval(sendReviewReminders, EVERY_FIVE_MINUTES)
+  await everyFiveMinutes()
+  reminderTimer = setInterval(everyFiveMinutes, EVERY_FIVE_MINUTES)
 })
 
 app.terminating(() => {

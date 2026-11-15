@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#94690b" />
     <title>Hors ligne · Paper</title>
     <style>
       body {
@@ -20,8 +20,10 @@
       img { width: 48px; height: 48px; border-radius: 12px; }
       h1 { font-size: 20px; margin: 16px 0 4px; }
       p { color: #6b6b6b; font-size: 14px; line-height: 1.5; margin: 0 0 20px; }
+      nav { margin-top: 24px; font-size: 13px; color: #6b6b6b; }
+      nav a { color: #94690b; margin: 0 6px; }
       button {
-        font: inherit; font-size: 14px; color: #ffffff; background: #1f1f1f;
+        font: inherit; font-size: 14px; color: #ffffff; background: #94690b;
         border: 0; border-radius: 6px; height: 40px; padding: 0 16px; cursor: pointer;
       }
     </style>
@@ -32,6 +34,12 @@
       <h1>Paper est hors ligne</h1>
       <p>Le serveur du foyer ne répond pas. Vérifiez la connexion (Wi-Fi ou Tailscale), puis réessayez.</p>
       <button type="button" onclick="location.reload()">Réessayer</button>
+      <nav aria-label="Pages consultables hors ligne">
+        Déjà ouvertes sur cet appareil, ces pages restent consultables :
+        <p style="margin: 8px 0 0">
+          <a href="/listes">Listes</a><a href="/">Aujourd’hui</a><a href="/agenda">Agenda</a><a href="/repas">Repas</a>
+        </p>
+      </nav>
     </main>
   </body>
 </html>

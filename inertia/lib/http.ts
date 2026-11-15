@@ -24,3 +24,45 @@ export async function postJson<T>(url: string, body: unknown, signal?: AbortSign
   }
   return (await response.json()) as T
 }
+
+/**
+ * JSON GET for the same kind of endpoints (global search).
+ */
+export async function getJson<T>(
+  url: string,
+  query: Record<string, string>,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetch(`${url}?${new URLSearchParams(query)}`, {
+    headers: { Accept: 'application/json' },
+    credentials: 'same-origin',
+    signal,
+  })
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`)
+  }
+  return (await response.json()) as T
+}
+
+/**
+ * Replays a form action (an offline queue entry) without following the
+ * redirect back: returns the status and type for `settled()`.
+ */
+export async function sendAction(
+  method: 'POST' | 'PATCH',
+  url: string,
+  body: unknown
+): Promise<{ status: number; type: string }> {
+  const response = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/html',
+      'X-XSRF-TOKEN': xsrfToken(),
+    },
+    body: JSON.stringify(body),
+    credentials: 'same-origin',
+    redirect: 'manual',
+  })
+  return { status: response.status, type: response.type }
+}

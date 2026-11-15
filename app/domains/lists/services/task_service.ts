@@ -7,6 +7,7 @@ import { nextOccurrence } from '#domains/lists/services/recurrence'
 import { HOME_ZONE, fromIsoDate, toIsoDate, today } from '#support/dates'
 import type { Domain } from '#shared/types/domain'
 import type { Recurrence, TaskDetail, TaskRow } from '#shared/types/lists'
+import { currentUserId } from '#support/actor'
 
 export type TaskInput = {
   title: string
@@ -143,6 +144,7 @@ export default class TaskService {
       if (task.doneAt) return null
 
       task.doneAt = DateTime.now()
+      task.doneById = currentUserId()
       await task.save()
 
       if (!task.recurrence) return null
@@ -174,6 +176,7 @@ export default class TaskService {
   async reopen(id: number) {
     const task = await Task.findOrFail(id)
     task.doneAt = null
+    task.doneById = null
     task.cancelledAt = null
     await task.save()
   }
@@ -371,6 +374,7 @@ export default class TaskService {
       recurrence: task.recurrence,
       recurrenceInterval: task.recurrenceInterval,
       done: task.doneAt !== null,
+      doneById: task.doneAt === null ? null : task.doneById,
       overdue: task.doneAt === null && task.dueOn !== null && task.dueOn < today(),
       automatic: task.sourceType !== null,
       itemCount: Number(task.$extras.item_count ?? 0),

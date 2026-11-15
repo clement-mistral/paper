@@ -48,7 +48,7 @@ function Checklist({ task }: { task: TaskDetail }) {
                     { preserveScroll: true }
                   )
                 }
-                className="size-4 cursor-pointer accent-ink"
+                className="size-4 cursor-pointer accent-accent"
               />
               <label
                 htmlFor={`item-${item.id}`}
@@ -92,7 +92,7 @@ function Checklist({ task }: { task: TaskDetail }) {
           onChange={(event) => setLabel(event.target.value)}
           placeholder="Ajouter un élément…"
           autoComplete="off"
-          className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm focus:border-ink focus:outline-none"
+          className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm focus:border-accent focus:outline-none"
         />
         <Button type="submit" variant="secondary" disabled={label.trim() === ''}>
           Ajouter

@@ -298,6 +298,16 @@ function DaySidebar({ newspaper }: { newspaper: Newspaper }) {
           ) : figures.incomeCents > 0 ? (
             <Figure value={formatAmount(figures.incomeCents)} label="entrés" />
           ) : null}
+          {figures.netWorth && (
+            <Figure
+              value={formatAmount(figures.netWorth.cents)}
+              label={
+                figures.netWorth.monthChangeCents === null
+                  ? 'de patrimoine'
+                  : `de patrimoine (${figures.netWorth.monthChangeCents >= 0 ? '+' : ''}${formatAmount(figures.netWorth.monthChangeCents)} sur le mois)`
+              }
+            />
+          )}
         </div>
         {budget !== null && budgetTotal !== null && budgetTotal > 0 && (
           <ProgressBar

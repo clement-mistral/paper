@@ -20,6 +20,8 @@ export type MonthlyReport = {
     incomeCents: number
     budgetedCents: number
     netWorthCents: number
+    /** Against the end of the previous month. */
+    netWorthChangeCents: number | null
     byDomain: Array<{ domain: Domain; cents: number }>
     byEnvelope: Array<{ name: string; spentCents: number; budgetCents: number }>
     topExpenses: Array<{ label: string; occurredOn: string; cents: number; domain: Domain }>

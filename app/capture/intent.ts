@@ -30,6 +30,7 @@ export type CaptureRef = {
     | 'maintenance'
     | 'maintenance_completion'
     | 'meter_reading'
+    | 'investment_operation'
   id: number
 }
 

@@ -1,5 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
-import { Download, Plus } from 'lucide-react'
+import { CalendarDays, Download, Plus } from 'lucide-react'
 import MealSuggestions from '~/components/domain/meal_suggestions'
 import Section from '~/components/ui/section'
 import { urlFor } from '~/client'
@@ -29,6 +29,10 @@ export default function RecipesIndex({
       description={meta.description}
       actions={
         <>
+          <Link route="meals.week" className={buttonClasses('secondary')}>
+            <CalendarDays size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />
+            Repas de la semaine
+          </Link>
           <Link route="recipes.import" className={buttonClasses('secondary')}>
             <Download size={16} strokeWidth={ICON_STROKE} aria-hidden="true" />
             Importer

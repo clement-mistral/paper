@@ -19,6 +19,9 @@ router
 
     router.get('login', [controllers.Session, 'create'])
     router.post('login', [controllers.Session, 'store'])
+
+    router.get('invitation/:token', [controllers.Invitations, 'show']).as('invitations.show')
+    router.post('invitation/:token', [controllers.Invitations, 'accept']).as('invitations.accept')
   })
   .use(middleware.guest())
 
@@ -129,6 +132,46 @@ router
       .as('habits.archive')
       .where('id', router.matchers.number())
 
+    router.get('recherche', [controllers.Search, 'index']).as('search')
+    router
+      .group(() => {
+        const ctl = controllers.PersonalProjects
+        router.get('/', [ctl, 'index']).as('personal_projects.index')
+        router.post('/', [ctl, 'store']).as('personal_projects.store')
+        router.get(':id', [ctl, 'show']).as('personal_projects.show')
+        router.put(':id', [ctl, 'update']).as('personal_projects.update')
+        router.delete(':id', [ctl, 'destroy']).as('personal_projects.destroy')
+        router.post(':id/notes', [ctl, 'storeNote']).as('personal_projects.notes.store')
+        router.put(':id/notes/:itemId', [ctl, 'updateNote']).as('personal_projects.notes.update')
+        router
+          .delete(':id/notes/:itemId', [ctl, 'destroyNote'])
+          .as('personal_projects.notes.destroy')
+        router.post(':id/taches', [ctl, 'storeTask']).as('personal_projects.tasks.store')
+        router.patch(':id/taches/:itemId', [ctl, 'toggleTask']).as('personal_projects.tasks.toggle')
+        router
+          .delete(':id/taches/:itemId', [ctl, 'destroyTask'])
+          .as('personal_projects.tasks.destroy')
+        router.post(':id/liens', [ctl, 'storeLink']).as('personal_projects.links.store')
+        router
+          .delete(':id/liens/:itemId', [ctl, 'destroyLink'])
+          .as('personal_projects.links.destroy')
+        router.post(':id/depenses', [ctl, 'storeExpense']).as('personal_projects.expenses.store')
+        router
+          .delete(':id/depenses/:itemId', [ctl, 'destroyExpense'])
+          .as('personal_projects.expenses.destroy')
+      })
+      .prefix('projets')
+      .where('id', router.matchers.number())
+      .where('itemId', router.matchers.number())
+    router
+      .group(() => {
+        router.get('/', [controllers.Meals, 'index']).as('meals.week')
+        router.post('/', [controllers.Meals, 'store']).as('meals.store')
+        router.post('propositions', [controllers.Meals, 'storeMany']).as('meals.store_many')
+        router.delete(':id', [controllers.Meals, 'destroy']).as('meals.destroy')
+      })
+      .prefix('repas')
+      .where('id', router.matchers.number())
     router.post('capture/preview', [controllers.Capture, 'preview'])
     router.post('capture/commit', [controllers.Capture, 'commit'])
     router
@@ -146,7 +189,19 @@ router
         router.get(':id/modifier', [controllers.Accounts, 'edit'])
         router.put(':id', [controllers.Accounts, 'update'])
         router.delete(':id', [controllers.Accounts, 'destroy'])
+        router.get(':id/import', [controllers.BankImports, 'create']).as('bank_imports.create')
+        router.post(':id/import', [controllers.BankImports, 'store']).as('bank_imports.store')
+        router
+          .get(':id/imports/:importId', [controllers.BankImports, 'show'])
+          .as('bank_imports.show')
+        router
+          .post(':id/imports/:importId/valider', [controllers.BankImports, 'confirm'])
+          .as('bank_imports.confirm')
+        router
+          .delete(':id/imports/:importId', [controllers.BankImports, 'destroy'])
+          .as('bank_imports.destroy')
       })
+      .where('importId', router.matchers.number())
       .prefix('fiches/comptes')
       .where('id', router.matchers.number())
 
@@ -157,6 +212,13 @@ router
         router
           .post(':id/operations', [controllers.Portfolios, 'storeOperation'])
           .as('portfolios.operations.store')
+        router
+          .post(':id/versements', [controllers.Portfolios, 'storePlan'])
+          .as('portfolios.plans.store')
+        router
+          .delete(':id/versements/:planId', [controllers.Portfolios, 'destroyPlan'])
+          .where('planId', router.matchers.number())
+          .as('portfolios.plans.destroy')
         router
           .delete('operations/:id', [controllers.Portfolios, 'destroyOperation'])
           .as('portfolios.operations.destroy')
@@ -387,8 +449,20 @@ router
         router
           .put('rappels', [controllers.Notifications, 'updateReminders'])
           .as('notifications.reminders')
+        router
+          .put('echeances', [controllers.Notifications, 'updateDeadlines'])
+          .as('notifications.deadlines')
       })
       .prefix('profil/notifications')
+      .where('id', router.matchers.number())
+
+    router
+      .group(() => {
+        router.post('invitations', [controllers.Household, 'invite']).as('household.invite')
+        router.delete('invitations/:id', [controllers.Household, 'revoke']).as('household.revoke')
+        router.delete('membres/:id', [controllers.Household, 'remove']).as('household.remove')
+      })
+      .prefix('profil/foyer')
       .where('id', router.matchers.number())
 
     router.get('nouveautes', [controllers.Changelog, 'index']).as('changelog')

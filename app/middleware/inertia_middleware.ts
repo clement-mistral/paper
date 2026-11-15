@@ -4,6 +4,8 @@ import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 import app from '@adonisjs/core/services/app'
 import RoutineService from '#domains/routine/services/routine_service'
+import HouseholdService from '#services/household_service'
+import type { HouseholdMember } from '#shared/types/household'
 import type { CaptureReceipt } from '#shared/types/capture'
 import type { RoutineStatus } from '#shared/types/routine'
 import { appVersion } from '#support/release'
@@ -24,9 +26,16 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
      * Streak and pending review, shown in the sidebar and « Aujourd'hui ».
      */
     let routine: RoutineStatus | null = null
+    /**
+     * The people of the household, for « coché par Léa ».
+     */
+    let members: HouseholdMember[] = []
     if (auth?.user) {
-      const service = await app.container.make(RoutineService)
-      routine = await service.status()
+      const [service, household] = await Promise.all([
+        app.container.make(RoutineService),
+        app.container.make(HouseholdService),
+      ])
+      ;[routine, members] = await Promise.all([service.status(auth.user.id), household.members()])
     }
 
     /**
@@ -37,6 +46,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       errors: ctx.inertia.always(this.getValidationErrors(ctx)),
       user: ctx.inertia.always(auth?.user ? UserTransformer.transform(auth.user) : undefined),
       routine: ctx.inertia.always(routine),
+      members: ctx.inertia.always(members),
       /**
        * Shown at the bottom of the rail, links to « Nouveautés ».
        */
@@ -58,8 +68,12 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
      * Receipt of the last capture, so the toast can offer « Annuler ».
      */
     const capture: CaptureReceipt | undefined = session?.flashMessages.get('capture')
+    /**
+     * A new invitation link, shown once in the profile.
+     */
+    const invitation: string | undefined = session?.flashMessages.get('invitation')
 
-    return { success, error, capture }
+    return { success, error, capture, invitation }
   }
 
   async handle(ctx: HttpContext, next: NextFn) {

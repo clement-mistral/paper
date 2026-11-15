@@ -13,6 +13,7 @@ type ExtractProps<T> =
 declare module '@adonisjs/inertia/types' {
   export interface InertiaPages {
     'agenda': ExtractProps<(typeof import('../../inertia/pages/agenda.tsx'))['default']>
+    'auth/invitation': ExtractProps<(typeof import('../../inertia/pages/auth/invitation.tsx'))['default']>
     'auth/login': ExtractProps<(typeof import('../../inertia/pages/auth/login.tsx'))['default']>
     'auth/signup': ExtractProps<(typeof import('../../inertia/pages/auth/signup.tsx'))['default']>
     'changelog': ExtractProps<(typeof import('../../inertia/pages/changelog.tsx'))['default']>
@@ -20,6 +21,8 @@ declare module '@adonisjs/inertia/types' {
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
     'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.tsx'))['default']>
     'fiches/accounts/form': ExtractProps<(typeof import('../../inertia/pages/fiches/accounts/form.tsx'))['default']>
+    'fiches/accounts/import_review': ExtractProps<(typeof import('../../inertia/pages/fiches/accounts/import_review.tsx'))['default']>
+    'fiches/accounts/import': ExtractProps<(typeof import('../../inertia/pages/fiches/accounts/import.tsx'))['default']>
     'fiches/accounts/index': ExtractProps<(typeof import('../../inertia/pages/fiches/accounts/index.tsx'))['default']>
     'fiches/accounts/show': ExtractProps<(typeof import('../../inertia/pages/fiches/accounts/show.tsx'))['default']>
     'fiches/bills/form': ExtractProps<(typeof import('../../inertia/pages/fiches/bills/form.tsx'))['default']>
@@ -63,6 +66,7 @@ declare module '@adonisjs/inertia/types' {
     'fiches/vehicles/index': ExtractProps<(typeof import('../../inertia/pages/fiches/vehicles/index.tsx'))['default']>
     'fiches/vehicles/show': ExtractProps<(typeof import('../../inertia/pages/fiches/vehicles/show.tsx'))['default']>
     'lists': ExtractProps<(typeof import('../../inertia/pages/lists.tsx'))['default']>
+    'meals/week': ExtractProps<(typeof import('../../inertia/pages/meals/week.tsx'))['default']>
     'money': ExtractProps<(typeof import('../../inertia/pages/money.tsx'))['default']>
     'money/income': ExtractProps<(typeof import('../../inertia/pages/money/income.tsx'))['default']>
     'money/transfer': ExtractProps<(typeof import('../../inertia/pages/money/transfer.tsx'))['default']>
@@ -70,6 +74,8 @@ declare module '@adonisjs/inertia/types' {
     'newspaper/show': ExtractProps<(typeof import('../../inertia/pages/newspaper/show.tsx'))['default']>
     'newspaper/sources': ExtractProps<(typeof import('../../inertia/pages/newspaper/sources.tsx'))['default']>
     'profile': ExtractProps<(typeof import('../../inertia/pages/profile.tsx'))['default']>
+    'projects/index': ExtractProps<(typeof import('../../inertia/pages/projects/index.tsx'))['default']>
+    'projects/show': ExtractProps<(typeof import('../../inertia/pages/projects/show.tsx'))['default']>
     'report': ExtractProps<(typeof import('../../inertia/pages/report.tsx'))['default']>
     'review': ExtractProps<(typeof import('../../inertia/pages/review.tsx'))['default']>
     'tasks/show': ExtractProps<(typeof import('../../inertia/pages/tasks/show.tsx'))['default']>

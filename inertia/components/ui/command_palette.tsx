@@ -1,5 +1,6 @@
 import {
   type FormEvent,
+  type KeyboardEvent,
   type MouseEvent,
   useCallback,
   useEffect,
@@ -8,13 +9,15 @@ import {
   useState,
 } from 'react'
 import { router } from '@inertiajs/react'
-import { ArrowRight, CircleAlert, CornerDownLeft, Sparkle } from 'lucide-react'
+import { Link } from '@adonisjs/inertia/react'
+import { ArrowRight, CircleAlert, CornerDownLeft, Search, Sparkle } from 'lucide-react'
 import { urlFor } from '~/client'
 import DomainTag from '~/components/ui/domain_tag'
 import Kbd from '~/components/ui/kbd'
 import { cn } from '~/lib/cn'
 import { centsToInput } from '~/lib/format'
-import { postJson } from '~/lib/http'
+import { getJson, postJson } from '~/lib/http'
+import { domainMeta } from '~/lib/domains'
 import { ICON_STROKE } from '~/lib/icons'
 import type {
   CaptureAnswer,
@@ -26,6 +29,7 @@ import type {
   IntentName,
   IntentPreview,
 } from '#shared/types/capture'
+import type { SearchResponse, SearchResult } from '#shared/types/search'
 
 const EXAMPLES = [
   'café 4,50 €',
@@ -55,6 +59,7 @@ type SegmentChoice = { intent?: IntentName; overrides: CaptureOverrides }
  * The universal capture palette (Ctrl K): a sentence, a live preview of
  * its effects, then Entrée to record. Nothing is written before that.
  * Questions get an answer instead; several captures can be typed at once.
+ * The same text searches the fiches: ↑ ↓ pick a result, Entrée opens it.
  */
 export default function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -70,8 +75,12 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
   const [failed, setFailed] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [active, setActive] = useState(-1)
 
   const reset = useCallback(() => {
+    setResults([])
+    setActive(-1)
     setText('')
     setIntent(undefined)
     setOverrides({})
@@ -122,6 +131,33 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
     }
   }, [text, intent, overrides, segments])
 
+  /**
+   * Global search, debounced like the preview.
+   */
+  useEffect(() => {
+    if (text.trim().length < 2) return
+
+    const controller = new AbortController()
+    const timer = setTimeout(async () => {
+      try {
+        const found = await getJson<SearchResponse>(
+          urlFor('search'),
+          { q: text },
+          controller.signal
+        )
+        setResults(found.results)
+        setActive((current) => Math.min(current, found.results.length - 1))
+      } catch {
+        if (!controller.signal.aborted) setResults([])
+      }
+    }, DEBOUNCE_MS)
+
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [text])
+
   const close = () => {
     onClose()
     reset()
@@ -130,6 +166,8 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
   const changeText = (value: string) => {
     setText(value)
     if (value.trim() === '') setPreview({ status: 'empty' })
+    if (value.trim().length < 2) setResults([])
+    setActive(-1)
     setIntent(undefined)
     setOverrides({})
     setSegments([])
@@ -155,10 +193,35 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
     preview.status === 'answer' ||
     (preview.status === 'multiple' &&
       preview.segments.every((segment) => segment.preview.status === 'ready'))
-  const canSubmit = ready && !loading && !processing
+  const picked = active >= 0 ? results[active] : undefined
+  const canSubmit = Boolean(picked) || (ready && !loading && !processing)
+
+  const openResult = (result: SearchResult) => {
+    router.visit(result.href)
+    close()
+  }
+
+  /**
+   * ↑ ↓ move through the search results; back above the first one,
+   * Entrée records the capture again.
+   */
+  const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (results.length === 0) return
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActive((current) => Math.min(current + 1, results.length - 1))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActive((current) => Math.max(current - 1, -1))
+    }
+  }
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if (picked) {
+      openResult(picked)
+      return
+    }
     if (!canSubmit) return
 
     /**
@@ -217,14 +280,20 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
             className={cn('text-muted', loading && 'animate-pulse')}
           />
           <label htmlFor={`${titleId}-input`} className="sr-only">
-            Que voulez-vous noter ?
+            Que voulez-vous noter ou chercher ?
           </label>
           <input
             ref={inputRef}
             id={`${titleId}-input`}
             value={text}
             onChange={(event) => changeText(event.target.value)}
-            placeholder="Noter, planifier, demander…"
+            onKeyDown={onInputKeyDown}
+            role="combobox"
+            aria-expanded={results.length > 0}
+            aria-controls={`${titleId}-results`}
+            aria-activedescendant={picked ? `${titleId}-results-${active}` : undefined}
+            aria-autocomplete="list"
+            placeholder="Noter, planifier, demander, chercher…"
             autoComplete="off"
             spellCheck={false}
             className="h-13 flex-1 bg-transparent text-base text-ink placeholder:text-muted/70 focus:outline-none"
@@ -232,6 +301,16 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
         </div>
 
         <div aria-live="polite" className="max-h-[62vh] overflow-y-auto px-4 py-4">
+          {results.length > 0 && preview.status === 'unknown' && (
+            <SearchResults
+              id={`${titleId}-results`}
+              results={results}
+              active={active}
+              onHover={setActive}
+              onOpen={close}
+              className="mb-4"
+            />
+          )}
           {failed ? (
             <Notice>La prévisualisation a échoué. Réessayez dans un instant.</Notice>
           ) : (
@@ -249,6 +328,16 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
               onSegment={updateSegment}
             />
           )}
+          {results.length > 0 && preview.status !== 'unknown' && (
+            <SearchResults
+              id={`${titleId}-results`}
+              results={results}
+              active={active}
+              onHover={setActive}
+              onOpen={close}
+              className="mt-5 border-t border-border pt-4"
+            />
+          )}
         </div>
 
         <footer className="flex items-center justify-end gap-4 border-t border-border px-4 py-2.5 text-label text-muted">
@@ -260,7 +349,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
             <Kbd>
               <CornerDownLeft size={11} strokeWidth={ICON_STROKE} aria-label="Entrée" />
             </Kbd>
-            {preview.status === 'answer'
+            {picked || preview.status === 'answer'
               ? 'Ouvrir'
               : processing
                 ? 'Enregistrement…'
@@ -275,6 +364,84 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
         </footer>
       </form>
     </dialog>
+  )
+}
+
+/**
+ * Matches of the global search, grouped by kind of fiche. The active one
+ * (↑ ↓) is what Entrée opens.
+ */
+function SearchResults({
+  id,
+  results,
+  active,
+  onHover,
+  onOpen,
+  className,
+}: {
+  id: string
+  results: SearchResult[]
+  active: number
+  onHover: (index: number) => void
+  onOpen: () => void
+  className?: string
+}) {
+  const groups: Array<{ name: string; items: Array<{ result: SearchResult; index: number }> }> = []
+  results.forEach((result, index) => {
+    const group = groups.find((candidate) => candidate.name === result.group)
+    if (group) group.items.push({ result, index })
+    else groups.push({ name: result.group, items: [{ result, index }] })
+  })
+
+  return (
+    <div className={cn('flex flex-col gap-3', className)}>
+      <p className="flex items-center gap-1.5 text-label text-muted">
+        <Search size={13} strokeWidth={ICON_STROKE} aria-hidden="true" />
+        Dans vos fiches
+      </p>
+      <div
+        id={id}
+        role="listbox"
+        aria-label="Résultats de la recherche"
+        className="flex flex-col gap-3"
+      >
+        {groups.map((group) => (
+          <div key={group.name} role="group" aria-label={group.name} className="flex flex-col">
+            <p aria-hidden="true" className="px-2 pb-1 text-xs font-medium text-muted">
+              {group.name}
+            </p>
+            {group.items.map(({ result, index }) => (
+              <Link
+                key={result.key}
+                id={`${id}-${index}`}
+                href={result.href}
+                role="option"
+                aria-selected={index === active}
+                tabIndex={-1}
+                onMouseEnter={() => onHover(index)}
+                onClick={onOpen}
+                className={cn(
+                  'flex min-h-9 items-center gap-2.5 rounded-control px-2 py-1.5 text-sm',
+                  index === active ? 'bg-accent-soft text-accent-ink' : 'text-ink hover:bg-hover'
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'size-2 shrink-0 rounded-full',
+                    result.domain ? domainMeta[result.domain].bar : 'bg-accent'
+                  )}
+                />
+                <span className="min-w-0 flex-1 truncate">{result.title}</span>
+                {result.detail && (
+                  <span className="shrink-0 truncate text-label text-muted">{result.detail}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -571,7 +738,7 @@ function FieldRow({
 }) {
   const id = useId()
   const control =
-    'h-8 w-full min-w-0 rounded-control border border-transparent bg-transparent px-2 text-sm text-ink hover:border-border focus:border-ink focus:outline-none'
+    'h-8 w-full min-w-0 rounded-control border border-transparent bg-transparent px-2 text-sm text-ink hover:border-border focus:border-accent focus:outline-none'
 
   let input
   if (field.kind === 'select') {

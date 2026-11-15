@@ -26,6 +26,11 @@ function browserKeys() {
   return { p256dh: toBase64Url(ecdh.getPublicKey()), auth: toBase64Url(randomBytes(16)) }
 }
 
+function browserKeysAsColumns() {
+  const keys = browserKeys()
+  return { p256Dh: keys.p256dh, auth: keys.auth }
+}
+
 async function deviceCount() {
   const rows = await PushSubscription.all()
   return rows.length
@@ -36,7 +41,7 @@ class FakePush extends PushService {
   get configured() {
     return true
   }
-  async sendToAll(message: PushMessage) {
+  async sendToUser(_userId: number, message: PushMessage) {
     this.sent.push(message)
     return 1
   }
@@ -104,7 +109,7 @@ test.group('Notifications | devices', (group) => {
   })
 
   test('saves the reminder settings', async ({ assert }) => {
-    await User.create({ email: 'push3@paper.local', password: 'secret123' })
+    const user = await User.create({ email: 'push3@paper.local', password: 'secret123' })
     const browser = new Browser()
     await browser.login('push3@paper.local', 'secret123')
     await browser.request(urlFor('profile.show'))
@@ -117,7 +122,7 @@ test.group('Notifications | devices', (group) => {
     assert.equal(response.status, 302)
 
     const reminders = await app.container.make(ReviewReminders)
-    assert.deepEqual(await reminders.settings(), {
+    assert.deepEqual(await reminders.settings(user.id), {
       eveningEnabled: true,
       eveningTime: '22:15',
       morningEnabled: false,
@@ -153,9 +158,18 @@ test.group('Notifications | sending', (group) => {
       server.close()
     })
 
+    const owner = await User.create({ email: 'devices@paper.local', password: 'secret123' })
+    const other = await User.create({ email: 'other@paper.local', password: 'secret123' })
+    await PushSubscription.create({
+      userId: other.id,
+      endpoint: `http://127.0.0.1:${port}/other`,
+      ...browserKeysAsColumns(),
+      label: 'Autre personne',
+    })
     for (const path of ['/alive', '/gone']) {
       const keys = browserKeys()
       await PushSubscription.create({
+        userId: owner.id,
         endpoint: `http://127.0.0.1:${port}${path}`,
         p256Dh: keys.p256dh,
         auth: keys.auth,
@@ -164,13 +178,14 @@ test.group('Notifications | sending', (group) => {
     }
 
     const push = await app.container.make(PushService)
-    const delivered = await push.sendToAll(
+    const delivered = await push.sendToUser(
+      owner.id,
       { title: 'Bilan du soir', body: 'Test', url: '/bilan', tag: 'bilan' },
       { ttl: 600 }
     )
 
     assert.equal(delivered, 1)
-    assert.lengthOf(requests, 2)
+    assert.lengthOf(requests, 2, 'only the devices of that person')
     for (const request of requests) {
       assert.equal(request.headers['content-encoding'], 'aes128gcm')
       assert.match(String(request.headers['authorization']), /^vapid t=[\w-]+\.[\w-]+\.[\w-]+, k=/)
@@ -179,10 +194,7 @@ test.group('Notifications | sending', (group) => {
       assert.isAbove(request.size, 86)
     }
     const left = await PushSubscription.all()
-    assert.deepEqual(
-      left.map((row) => new URL(row.endpoint).pathname),
-      ['/alive']
-    )
+    assert.deepEqual(left.map((row) => new URL(row.endpoint).pathname).sort(), ['/alive', '/other'])
   })
 
   test('the evening reminder is sent once, not after the day is validated', async ({
@@ -193,21 +205,24 @@ test.group('Notifications | sending', (group) => {
     app.container.swap(PushService, () => fake)
     cleanup(() => app.container.restore(PushService))
     const reminders = await app.container.make(ReviewReminders)
+    const me = await User.create({ email: 'evening@paper.local', password: 'secret123' })
     const evening = today().set({ hour: 21, minute: 30 })
 
-    assert.isNull(await reminders.run(today().set({ hour: 20 })))
-    assert.equal(await reminders.run(evening), 'evening')
-    assert.isNull(await reminders.run(evening.plus({ minutes: 5 })))
+    assert.isNull(await reminders.runFor(me.id, today().set({ hour: 20 })))
+    assert.equal(await reminders.runFor(me.id, evening), 'evening')
+    assert.isNull(await reminders.runFor(me.id, evening.plus({ minutes: 5 })))
     assert.lengthOf(fake.sent, 1)
     assert.equal(fake.sent[0].title, 'Bilan du soir')
     assert.equal(fake.sent[0].url, `/bilan/${toIsoDate(today())}`)
 
     // Next day, review validated in the evening: nothing to remind.
     const routine = await app.container.make(RoutineService)
-    await routine.confirmMoney(toIsoDate(today()))
-    await routine.complete(toIsoDate(today()))
-    assert.isNull(await reminders.run(evening))
-    assert.isNull(await reminders.run(today().plus({ days: 1 }).set({ hour: 10, minute: 30 })))
+    await routine.confirmMoney(me.id, toIsoDate(today()))
+    await routine.complete(me.id, toIsoDate(today()))
+    assert.isNull(await reminders.runFor(me.id, evening))
+    assert.isNull(
+      await reminders.runFor(me.id, today().plus({ days: 1 }).set({ hour: 10, minute: 30 }))
+    )
     assert.lengthOf(fake.sent, 1)
   })
 })

@@ -47,8 +47,8 @@ export default function MaintenanceForm({
               <label
                 key={value}
                 className={cn(
-                  'cursor-pointer rounded-[4px] px-3 py-1.5 text-sm has-focus-visible:outline-2 has-focus-visible:outline-ink',
-                  mode === value ? 'bg-ink text-bg' : 'text-ink hover:bg-hover'
+                  'cursor-pointer rounded-[4px] px-3 py-1.5 text-sm has-focus-visible:outline-2 has-focus-visible:outline-accent',
+                  mode === value ? 'bg-accent text-bg' : 'text-ink hover:bg-hover'
                 )}
               >
                 <input

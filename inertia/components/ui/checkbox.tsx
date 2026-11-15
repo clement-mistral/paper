@@ -20,7 +20,7 @@ export default function Checkbox({
       <input
         id={inputId}
         type="checkbox"
-        className="peer size-4 shrink-0 cursor-pointer rounded-tag border border-border accent-ink"
+        className="peer size-4 shrink-0 cursor-pointer rounded-tag border border-border accent-accent"
         {...props}
       />
       <label

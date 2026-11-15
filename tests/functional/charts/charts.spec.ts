@@ -108,7 +108,9 @@ test.group('Charts', (group) => {
     const browser = await login()
 
     const money = await renderPage(await browser.page(urlFor('money')))
-    const [spendingChart] = svgs(money)
+    const spendingChart = svgs(money).find((svg) =>
+      svg.includes('aria-label="Dépenses des 12 derniers mois"')
+    )!
     assertGeometry(assert, spendingChart)
     assert.lengthOf(spendingChart.match(/<path d="M/g) ?? [], 12)
     assert.include(money, 'Voir les données')

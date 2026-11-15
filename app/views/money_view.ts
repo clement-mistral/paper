@@ -2,7 +2,6 @@ import db from '@adonisjs/lucid/services/db'
 import { inject } from '@adonisjs/core'
 import { type DateTime } from 'luxon'
 import Transaction from '#domains/budget/models/transaction'
-import AccountService from '#domains/budget/services/account_service'
 import EnvelopeService from '#domains/budget/services/envelope_service'
 import {
   NOT_TRANSFER_SQL,
@@ -18,17 +17,13 @@ import type { MonthlyAmount, MoneyOverview, TransactionRow } from '#shared/types
  */
 @inject()
 export default class MoneyView {
-  constructor(
-    private accounts: AccountService,
-    private envelopes: EnvelopeService
-  ) {}
+  constructor(private envelopes: EnvelopeService) {}
 
   async overview(): Promise<MoneyOverview> {
     const start = toIsoDate(today().startOf('month'))
     const end = toIsoDate(today().endOf('month'))
 
-    const [accounts, envelopes, month, transactions, monthlySpending] = await Promise.all([
-      this.accounts.list(),
+    const [envelopes, month, transactions, monthlySpending] = await Promise.all([
       this.envelopes.list(),
       db
         .from('transactions')
@@ -46,7 +41,6 @@ export default class MoneyView {
     ])
 
     return {
-      netWorthCents: accounts.reduce((total, account) => total + account.balanceCents, 0),
       spentThisMonthCents: Number(month.spent),
       incomeThisMonthCents: Number(month.income),
       budgetedThisMonthCents: envelopes.reduce((total, e) => total + e.monthlyBudgetCents, 0),
@@ -213,6 +207,7 @@ export default class MoneyView {
             ? 'expense'
             : 'income',
       deletable: row.sourceType === null || row.sourceType === TRANSFER_SOURCE,
+      createdById: row.createdById,
     }
   }
 }

@@ -12,12 +12,15 @@
 import emitter from '@adonisjs/core/services/emitter'
 
 const AddMealToShoppingList = () => import('#domains/lists/listeners/add_meal_to_shopping_list')
+const RemoveMealFromShoppingList = () =>
+  import('#domains/lists/listeners/remove_meal_from_shopping_list')
 const SyncAutomaticTasks = () => import('#domains/lists/listeners/sync_automatic_tasks')
 const StockFromShopping = () => import('#domains/menu/listeners/stock_from_shopping')
 
 declare module '@adonisjs/core/types' {
   interface EventsList {
     'menu:meal_planned': { mealPlanId: number }
+    'menu:meal_cancelled': { mealPlanId: number }
     'menu:recipe_changed': { recipeId: number }
     'maison:bill_changed': { billId: number }
     'maison:contract_changed': { contractId: number }
@@ -33,6 +36,7 @@ declare module '@adonisjs/core/types' {
 }
 
 emitter.on('menu:meal_planned', [AddMealToShoppingList])
+emitter.on('menu:meal_cancelled', [RemoveMealFromShoppingList])
 emitter.on('menu:recipe_changed', [SyncAutomaticTasks])
 emitter.on('maison:bill_changed', [SyncAutomaticTasks])
 emitter.on('maison:contract_changed', [SyncAutomaticTasks])

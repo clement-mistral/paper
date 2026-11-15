@@ -23,6 +23,7 @@ export const INTENT_NAMES = [
   'maintenance',
   'meter_reading',
   'project_expense',
+  'investment',
 ] as const
 
 export type IntentName = (typeof INTENT_NAMES)[number]

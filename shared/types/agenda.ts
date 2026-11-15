@@ -5,7 +5,15 @@ import type { Domain } from './domain.js'
  */
 export type AgendaItem = {
   key: string
-  kind: 'task' | 'meal' | 'bill' | 'subscription' | 'maintenance' | 'equipment_maintenance'
+  kind:
+    | 'task'
+    | 'meal'
+    | 'bill'
+    | 'subscription'
+    | 'maintenance'
+    | 'equipment_maintenance'
+    | 'investment_plan'
+    | 'milestone'
   domain: Domain
   title: string
   detail: string | null

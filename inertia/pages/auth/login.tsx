@@ -4,8 +4,9 @@ import { Head } from '@inertiajs/react'
 import Button from '~/components/ui/button'
 import Checkbox from '~/components/ui/checkbox'
 import Input from '~/components/ui/input'
+import type { InertiaProps } from '~/types'
 
-export default function Login() {
+export default function Login({ signupOpen }: InertiaProps<{ signupOpen: boolean }>) {
   return (
     <>
       <Head title="Connexion" />
@@ -37,12 +38,18 @@ export default function Login() {
         )}
       </Form>
 
-      <p className="mt-6 text-center text-label text-muted">
-        Pas encore de compte ?{' '}
-        <Link route="new_account.create" className="text-ink underline underline-offset-2">
-          Créer un compte
-        </Link>
-      </p>
+      {signupOpen ? (
+        <p className="mt-6 text-center text-label text-muted">
+          Pas encore de compte ?{' '}
+          <Link route="new_account.create" className="text-ink underline underline-offset-2">
+            Créer un compte
+          </Link>
+        </p>
+      ) : (
+        <p className="mt-6 text-center text-label text-muted">
+          Pour rejoindre le foyer, demandez un lien d’invitation à un membre.
+        </p>
+      )}
     </>
   )
 }

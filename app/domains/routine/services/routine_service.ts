@@ -30,6 +30,10 @@ const CALENDAR_DAYS = 182
 /**
  * Public service of the Routine module: the daily review and habits. It
  * reads and acts on the other domains only through their services.
+ *
+ * Each person of the household has their own review (validation, mood,
+ * note, habits, streak); what it sorts (expenses, tasks, meals) is the
+ * household's, so a task one person triaged is already done for the other.
  */
 @inject()
 export default class RoutineService {
@@ -46,19 +50,19 @@ export default class RoutineService {
    * Which review is waiting: yesterday's until noon if not done, else
    * today's.
    */
-  async status(at: DateTime = now()): Promise<RoutineStatus> {
+  async status(userId: number, at: DateTime = now()): Promise<RoutineStatus> {
     const day = at.startOf('day')
     const yesterday = day.minus({ days: 1 })
     const [completed, streak] = await Promise.all([
-      this.completedDays([toIsoDate(yesterday), toIsoDate(day)]),
-      this.streak(day),
+      this.completedDays(userId, [toIsoDate(yesterday), toIsoDate(day)]),
+      this.streak(userId, day),
     ])
 
     let due: RoutineStatus['due'] = null
     if (
       !completed.has(toIsoDate(yesterday)) &&
       isOpen(yesterday, at) &&
-      (await this.hadActivity(yesterday))
+      (await this.hadActivity(userId, yesterday))
     ) {
       due = {
         day: toIsoDate(yesterday),
@@ -77,15 +81,17 @@ export default class RoutineService {
     }
   }
 
-  async review(dayIso: string, at: DateTime = now()): Promise<DailyReviewData> {
+  async review(userId: number, dayIso: string, at: DateTime = now()): Promise<DailyReviewData> {
     const day = fromIsoDate(dayIso)
     const [review, expenses, tasks, meals, habits, checks] = await Promise.all([
-      DailyReview.findBy('day', dayIso),
+      DailyReview.query().where({ userId, day: dayIso }).first(),
       this.money.transactionsOn(dayIso),
       this.tasks.forReview(dayIso),
       this.meals.between(dayIso, dayIso),
-      Habit.query().whereNull('archived_at').orderBy('position').orderBy('id'),
-      HabitCheck.query().where('day', dayIso),
+      this.activeHabits(userId),
+      HabitCheck.query()
+        .where('day', dayIso)
+        .whereIn('habit_id', Habit.query().select('id').where('user_id', userId)),
     ])
 
     const spent = expenses.filter((row) => row.kind === 'expense')
@@ -117,8 +123,8 @@ export default class RoutineService {
    * Refuses any change to a locked day (past the noon deadline) or an
    * already validated one.
    */
-  async assertOpen(dayIso: string, at: DateTime = now()) {
-    const review = await DailyReview.findBy('day', dayIso)
+  async assertOpen(userId: number, dayIso: string, at: DateTime = now()) {
+    const review = await DailyReview.query().where({ userId, day: dayIso }).first()
     if (review?.completedAt) {
       throw new Exception('Cette journée est déjà validée', { status: 422 })
     }
@@ -127,18 +133,23 @@ export default class RoutineService {
     }
   }
 
-  async confirmMoney(dayIso: string) {
-    await this.assertOpen(dayIso)
-    await this.upsert(dayIso, { moneyConfirmed: true })
+  async confirmMoney(userId: number, dayIso: string) {
+    await this.assertOpen(userId, dayIso)
+    await this.upsert(userId, dayIso, { moneyConfirmed: true })
   }
 
-  async journal(dayIso: string, input: { mood?: Mood | null; note?: string | null }) {
-    await this.assertOpen(dayIso)
-    await this.upsert(dayIso, { mood: input.mood ?? null, note: input.note ?? null })
+  async journal(
+    userId: number,
+    dayIso: string,
+    input: { mood?: Mood | null; note?: string | null }
+  ) {
+    await this.assertOpen(userId, dayIso)
+    await this.upsert(userId, dayIso, { mood: input.mood ?? null, note: input.note ?? null })
   }
 
-  async toggleHabit(dayIso: string, habitId: number) {
-    await this.assertOpen(dayIso)
+  async toggleHabit(userId: number, dayIso: string, habitId: number) {
+    await this.assertOpen(userId, dayIso)
+    await Habit.query().where({ id: habitId, userId }).firstOrFail()
     const check = await HabitCheck.query().where({ habitId, day: dayIso }).first()
     if (check) await check.delete()
     else await HabitCheck.create({ habitId, day: fromIsoDate(dayIso) })
@@ -149,12 +160,13 @@ export default class RoutineService {
    * expense (« Resto » envelope when it exists) dated on the review day.
    */
   async mealOutcome(
+    userId: number,
     dayIso: string,
     mealId: number,
     outcome: MealOutcome,
     amountCents?: number | null
   ) {
-    await this.assertOpen(dayIso)
+    await this.assertOpen(userId, dayIso)
     await db.transaction(async (trx) => {
       await this.meals.setOutcome(mealId, outcome, trx)
       await this.transactions.deleteForSource('meal_plan', mealId, trx)
@@ -181,18 +193,21 @@ export default class RoutineService {
   /**
    * Validates the day once money, tasks and meals have been reviewed.
    */
-  async complete(dayIso: string): Promise<Streak> {
-    await this.assertOpen(dayIso)
-    const review = await this.review(dayIso)
+  async complete(userId: number, dayIso: string): Promise<Streak> {
+    await this.assertOpen(userId, dayIso)
+    const review = await this.review(userId, dayIso)
     if (review.pending.length > 0) {
       throw new Exception('Il reste des sections à compléter', { status: 422 })
     }
-    await this.upsert(dayIso, { completedAt: DateTime.now() })
-    return this.streak(today())
+    await this.upsert(userId, dayIso, { completedAt: DateTime.now() })
+    return this.streak(userId, today())
   }
 
-  async streak(day: DateTime = today()): Promise<Streak> {
-    const rows = await DailyReview.query().whereNotNull('completed_at').select('day')
+  async streak(userId: number, day: DateTime = today()): Promise<Streak> {
+    const rows = await DailyReview.query()
+      .where('user_id', userId)
+      .whereNotNull('completed_at')
+      .select('day')
     const completed = new Set(rows.map((row) => toIsoDate(row.day)))
     const { current, best } = streaks(completed, day)
     return {
@@ -205,36 +220,48 @@ export default class RoutineService {
     }
   }
 
-  async habits() {
-    const habits = await Habit.query().whereNull('archived_at').orderBy('position').orderBy('id')
+  async habits(userId: number) {
+    const habits = await this.activeHabits(userId)
     return habits.map(({ id, name }) => ({ id, name }))
   }
 
-  async addHabit(name: string) {
-    const last = await Habit.query().max('position as max').first()
-    await Habit.create({ name, position: Number(last?.$extras.max ?? -1) + 1 })
+  async addHabit(userId: number, name: string) {
+    const last = await Habit.query().where('user_id', userId).max('position as max').first()
+    await Habit.create({ userId, name, position: Number(last?.$extras.max ?? -1) + 1 })
   }
 
   /**
    * Archived rather than deleted: past checks keep their meaning.
    */
-  async archiveHabit(id: number) {
-    const habit = await Habit.findOrFail(id)
+  async archiveHabit(userId: number, id: number) {
+    const habit = await Habit.query().where({ id, userId }).firstOrFail()
     habit.archivedAt = DateTime.now()
     await habit.save()
   }
 
+  private activeHabits(userId: number) {
+    return Habit.query()
+      .where('user_id', userId)
+      .whereNull('archived_at')
+      .orderBy('position')
+      .orderBy('id')
+  }
+
   private async upsert(
+    userId: number,
     dayIso: string,
     values: Partial<Pick<DailyReview, 'moneyConfirmed' | 'mood' | 'note' | 'completedAt'>>
   ) {
-    const review = await DailyReview.firstOrNew({ day: fromIsoDate(dayIso) }, {})
+    const review = await DailyReview.firstOrNew({ userId, day: fromIsoDate(dayIso) }, {})
     review.merge(values)
     await review.save()
   }
 
-  private async completedDays(days: string[]): Promise<Set<string>> {
-    const rows = await DailyReview.query().whereIn('day', days).whereNotNull('completed_at')
+  private async completedDays(userId: number, days: string[]): Promise<Set<string>> {
+    const rows = await DailyReview.query()
+      .where('user_id', userId)
+      .whereIn('day', days)
+      .whereNotNull('completed_at')
     return new Set(rows.map((row) => toIsoDate(row.day)))
   }
 
@@ -242,8 +269,8 @@ export default class RoutineService {
    * Yesterday is only nagged about when something happened that day or
    * the streak is running (a first-time user is not asked about the past).
    */
-  private async hadActivity(day: DateTime): Promise<boolean> {
-    const before = await this.completedDays([toIsoDate(day.minus({ days: 1 }))])
+  private async hadActivity(userId: number, day: DateTime): Promise<boolean> {
+    const before = await this.completedDays(userId, [toIsoDate(day.minus({ days: 1 }))])
     if (before.size > 0) return true
     const [expenses, tasks] = await Promise.all([
       this.money.transactionsOn(toIsoDate(day)),

@@ -28,7 +28,7 @@ export default function Select({
         aria-invalid={error ? true : undefined}
         className={cn(
           'h-9 rounded-control border border-border bg-bg px-2 text-sm text-ink',
-          'transition-colors focus:border-ink focus:outline-none',
+          'transition-colors focus:border-accent focus:outline-none',
           error && 'border-danger'
         )}
         {...props}

@@ -5,6 +5,7 @@ export default function Textarea({
   label,
   hint,
   error,
+  hideLabel = false,
   id,
   className,
   ...props
@@ -12,13 +13,15 @@ export default function Textarea({
   label: string
   hint?: ReactNode
   error?: string
+  /** Keeps the label for screen readers only. */
+  hideLabel?: boolean
 }) {
   const generatedId = useId()
   const textareaId = id ?? generatedId
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={textareaId} className="text-label text-muted">
+      <label htmlFor={textareaId} className={cn('text-label text-muted', hideLabel && 'sr-only')}>
         {label}
       </label>
       <textarea
@@ -27,7 +30,7 @@ export default function Textarea({
         aria-invalid={error ? true : undefined}
         className={cn(
           'rounded-control border border-border bg-bg px-2.5 py-2 text-sm text-ink placeholder:text-muted/70',
-          'transition-colors focus:border-ink focus:outline-none',
+          'transition-colors focus:border-accent focus:outline-none',
           error && 'border-danger'
         )}
         {...props}

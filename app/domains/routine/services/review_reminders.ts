@@ -1,5 +1,6 @@
 import { type DateTime } from 'luxon'
 import { inject } from '@adonisjs/core'
+import User from '#models/user'
 import ReviewReminderSetting from '#domains/routine/models/review_reminder_setting'
 import RoutineService from '#domains/routine/services/routine_service'
 import { deadlineOf, GRACE_HOUR, MORNING_HOUR } from '#domains/routine/services/review_window'
@@ -107,8 +108,8 @@ export default class ReviewReminders {
     private push: PushService
   ) {}
 
-  async settings(): Promise<ReviewReminderSettings> {
-    const row = await ReviewReminderSetting.query().orderBy('id').first()
+  async settings(userId: number): Promise<ReviewReminderSettings> {
+    const row = await ReviewReminderSetting.findBy('user_id', userId)
     if (!row) return { ...DEFAULTS }
     return {
       eveningEnabled: row.eveningEnabled,
@@ -117,21 +118,36 @@ export default class ReviewReminders {
     }
   }
 
-  async saveSettings(input: ReviewReminderSettings) {
-    const row = await this.row()
+  async saveSettings(userId: number, input: ReviewReminderSettings) {
+    const row = await this.row(userId)
     row.merge(input)
     await row.save()
   }
 
   /**
-   * Sends the reminder due now, if any. Idempotent: the day is recorded
-   * before sending, so a reminder is never sent twice.
+   * Each person of the household, with their own review and settings.
+   * Returns the reminders sent.
    */
-  async run(at: DateTime = now()): Promise<Reminder | null> {
+  async run(at: DateTime = now()): Promise<Reminder[]> {
+    if (!this.push.configured) return []
+    const users = await User.query().select('id').orderBy('id')
+    const sent: Reminder[] = []
+    for (const user of users) {
+      const reminder = await this.runFor(user.id, at)
+      if (reminder) sent.push(reminder)
+    }
+    return sent
+  }
+
+  /**
+   * Sends a person the reminder due now, if any. Idempotent: the day is
+   * recorded before sending, so a reminder is never sent twice.
+   */
+  async runFor(userId: number, at: DateTime = now()): Promise<Reminder | null> {
     if (!this.push.configured) return null
 
-    const row = await this.row()
-    const status = await this.routine.status(at)
+    const row = await this.row(userId)
+    const status = await this.routine.status(userId, at)
     const reminder = dueReminder(
       at,
       {
@@ -150,24 +166,26 @@ export default class ReviewReminders {
     await row.save()
 
     const day = reminder === 'evening' ? toIsoDate(at) : status.due!.day
-    const review = await this.routine.review(day, at)
+    const review = await this.routine.review(userId, day, at)
     // Kept by the push service until the review closes.
     const ttl = Math.max(60, Math.floor(deadlineOf(fromIsoDate(day)).diff(at).as('seconds')))
-    await this.push.sendToAll(reminderMessage(reminder, review, status.streak), { ttl })
+    await this.push.sendToUser(userId, reminderMessage(reminder, review, status.streak), { ttl })
     return reminder
   }
 
   /**
    * A test notification from the profile, with today's real content.
    */
-  async test(at: DateTime = now()): Promise<number> {
-    const status = await this.routine.status(at)
-    const review = await this.routine.review(toIsoDate(at), at)
-    return this.push.sendToAll(reminderMessage('evening', review, status.streak), { ttl: 600 })
+  async test(userId: number, at: DateTime = now()): Promise<number> {
+    const status = await this.routine.status(userId, at)
+    const review = await this.routine.review(userId, toIsoDate(at), at)
+    return this.push.sendToUser(userId, reminderMessage('evening', review, status.streak), {
+      ttl: 600,
+    })
   }
 
-  private async row(): Promise<ReviewReminderSetting> {
-    const existing = await ReviewReminderSetting.query().orderBy('id').first()
-    return existing ?? ReviewReminderSetting.create({ ...DEFAULTS })
+  private async row(userId: number): Promise<ReviewReminderSetting> {
+    const existing = await ReviewReminderSetting.findBy('user_id', userId)
+    return existing ?? ReviewReminderSetting.create({ ...DEFAULTS, userId })
   }
 }

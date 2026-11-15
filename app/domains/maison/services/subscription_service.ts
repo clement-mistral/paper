@@ -91,6 +91,7 @@ export default class SubscriptionService {
       account: null,
       kind: 'expense' as const,
       deletable: false,
+      createdById: null,
     }))
   }
 

@@ -11,6 +11,10 @@ export interface ApiDefinition {
     store: typeof routes['session.store']
     destroy: typeof routes['session.destroy']
   }
+  invitations: {
+    show: typeof routes['invitations.show']
+    accept: typeof routes['invitations.accept']
+  }
   today: typeof routes['today']
   agenda: typeof routes['agenda']
   money: typeof routes['money'] & {
@@ -83,6 +87,38 @@ export interface ApiDefinition {
     store: typeof routes['habits.store']
     archive: typeof routes['habits.archive']
   }
+  search: typeof routes['search']
+  personalProjects: {
+    index: typeof routes['personal_projects.index']
+    store: typeof routes['personal_projects.store']
+    show: typeof routes['personal_projects.show']
+    update: typeof routes['personal_projects.update']
+    destroy: typeof routes['personal_projects.destroy']
+    notes: {
+      store: typeof routes['personal_projects.notes.store']
+      update: typeof routes['personal_projects.notes.update']
+      destroy: typeof routes['personal_projects.notes.destroy']
+    }
+    tasks: {
+      store: typeof routes['personal_projects.tasks.store']
+      toggle: typeof routes['personal_projects.tasks.toggle']
+      destroy: typeof routes['personal_projects.tasks.destroy']
+    }
+    links: {
+      store: typeof routes['personal_projects.links.store']
+      destroy: typeof routes['personal_projects.links.destroy']
+    }
+    expenses: {
+      store: typeof routes['personal_projects.expenses.store']
+      destroy: typeof routes['personal_projects.expenses.destroy']
+    }
+  }
+  meals: {
+    week: typeof routes['meals.week']
+    store: typeof routes['meals.store']
+    storeMany: typeof routes['meals.store_many']
+    destroy: typeof routes['meals.destroy']
+  }
   capture: {
     preview: typeof routes['capture.preview']
     commit: typeof routes['capture.commit']
@@ -100,12 +136,23 @@ export interface ApiDefinition {
     update: typeof routes['accounts.update']
     destroy: typeof routes['accounts.destroy']
   }
+  bankImports: {
+    create: typeof routes['bank_imports.create']
+    store: typeof routes['bank_imports.store']
+    show: typeof routes['bank_imports.show']
+    confirm: typeof routes['bank_imports.confirm']
+    destroy: typeof routes['bank_imports.destroy']
+  }
   portfolios: {
     index: typeof routes['portfolios.index']
     show: typeof routes['portfolios.show']
     operations: {
       store: typeof routes['portfolios.operations.store']
       destroy: typeof routes['portfolios.operations.destroy']
+    }
+    plans: {
+      store: typeof routes['portfolios.plans.store']
+      destroy: typeof routes['portfolios.plans.destroy']
     }
     holdings: {
       show: typeof routes['portfolios.holdings.show']
@@ -277,6 +324,12 @@ export interface ApiDefinition {
     }
     test: typeof routes['notifications.test']
     reminders: typeof routes['notifications.reminders']
+    deadlines: typeof routes['notifications.deadlines']
+  }
+  household: {
+    invite: typeof routes['household.invite']
+    revoke: typeof routes['household.revoke']
+    remove: typeof routes['household.remove']
   }
   changelog: typeof routes['changelog']
   design: typeof routes['design']

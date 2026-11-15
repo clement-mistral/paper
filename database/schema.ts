@@ -34,6 +34,56 @@ export class AccountSchema extends BaseModel {
   declare wrapper: string | null
 }
 
+export class BankImportLineSchema extends BaseModel {
+  static $columns = ['amountCents', 'bankImportId', 'bankRef', 'envelopeId', 'id', 'label', 'matchedTransactionId', 'occurredOn', 'position', 'status', 'transactionId'] as const
+  $columns = BankImportLineSchema.$columns
+  @column()
+  declare amountCents: number
+  @column()
+  declare bankImportId: number
+  @column()
+  declare bankRef: string
+  @column()
+  declare envelopeId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare label: string
+  @column()
+  declare matchedTransactionId: number | null
+  @column.date()
+  declare occurredOn: DateTime
+  @column()
+  declare position: number
+  @column()
+  declare status: string
+  @column()
+  declare transactionId: number | null
+}
+
+export class BankImportSchema extends BaseModel {
+  static $columns = ['accountId', 'confirmedAt', 'createdAt', 'createdById', 'fileName', 'format', 'id', 'status', 'updatedAt'] as const
+  $columns = BankImportSchema.$columns
+  @column()
+  declare accountId: number
+  @column.dateTime()
+  declare confirmedAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdById: number | null
+  @column()
+  declare fileName: string
+  @column()
+  declare format: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class BillSchema extends BaseModel {
   static $columns = ['accountId', 'amountCents', 'captureText', 'createdAt', 'dueOn', 'envelopeId', 'id', 'notes', 'paidOn', 'provider', 'updatedAt'] as const
   $columns = BillSchema.$columns
@@ -176,7 +226,7 @@ export class ContractSchema extends BaseModel {
 }
 
 export class DailyReviewSchema extends BaseModel {
-  static $columns = ['completedAt', 'createdAt', 'day', 'id', 'moneyConfirmed', 'mood', 'note', 'updatedAt'] as const
+  static $columns = ['completedAt', 'createdAt', 'day', 'id', 'moneyConfirmed', 'mood', 'note', 'updatedAt', 'userId'] as const
   $columns = DailyReviewSchema.$columns
   @column.dateTime()
   declare completedAt: DateTime | null
@@ -194,6 +244,42 @@ export class DailyReviewSchema extends BaseModel {
   declare note: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+}
+
+export class DeadlineReminderLogSchema extends BaseModel {
+  static $columns = ['deadlineKey', 'id', 'sentOn', 'stage'] as const
+  $columns = DeadlineReminderLogSchema.$columns
+  @column()
+  declare deadlineKey: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare sentOn: DateTime
+  @column()
+  declare stage: string
+}
+
+export class DeadlineReminderSettingSchema extends BaseModel {
+  static $columns = ['createdAt', 'enabled', 'id', 'leadDays', 'sendTime', 'taskAlerts', 'updatedAt', 'userId'] as const
+  $columns = DeadlineReminderSettingSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare enabled: boolean
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare leadDays: number
+  @column()
+  declare sendTime: string
+  @column()
+  declare taskAlerts: boolean
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class ElectricalCircuitSchema extends BaseModel {
@@ -343,7 +429,7 @@ export class HabitCheckSchema extends BaseModel {
 }
 
 export class HabitSchema extends BaseModel {
-  static $columns = ['archivedAt', 'createdAt', 'id', 'name', 'position', 'updatedAt'] as const
+  static $columns = ['archivedAt', 'createdAt', 'id', 'name', 'position', 'updatedAt', 'userId'] as const
   $columns = HabitSchema.$columns
   @column.dateTime()
   declare archivedAt: DateTime | null
@@ -357,6 +443,8 @@ export class HabitSchema extends BaseModel {
   declare position: number
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class HoldingSchema extends BaseModel {
@@ -405,6 +493,27 @@ export class HomeSchema extends BaseModel {
   declare occupancy: string
   @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
   declare surfaceSqm: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class HouseholdInvitationSchema extends BaseModel {
+  static $columns = ['acceptedAt', 'acceptedById', 'createdAt', 'createdById', 'expiresAt', 'id', 'tokenHash', 'updatedAt'] as const
+  $columns = HouseholdInvitationSchema.$columns
+  @column.dateTime()
+  declare acceptedAt: DateTime | null
+  @column()
+  declare acceptedById: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdById: number
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare tokenHash: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -468,6 +577,27 @@ export class InvestmentOperationSchema extends BaseModel {
   declare quantity: number | null
   @column({ consume: (value: string | number | null) => value === null ? null : Number(value) })
   declare unitPrice: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class InvestmentPlanSchema extends BaseModel {
+  static $columns = ['accountId', 'amountCents', 'createdAt', 'dayOfMonth', 'holdingId', 'id', 'startsOn', 'updatedAt'] as const
+  $columns = InvestmentPlanSchema.$columns
+  @column()
+  declare accountId: number
+  @column()
+  declare amountCents: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare dayOfMonth: number
+  @column()
+  declare holdingId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare startsOn: DateTime
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -737,6 +867,82 @@ export class PantryMovementSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class PersonalProjectLinkSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'personalProjectId', 'title', 'updatedAt', 'url'] as const
+  $columns = PersonalProjectLinkSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column()
+  declare title: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare url: string
+}
+
+export class PersonalProjectNoteSchema extends BaseModel {
+  static $columns = ['body', 'createdAt', 'createdById', 'id', 'personalProjectId', 'updatedAt'] as const
+  $columns = PersonalProjectNoteSchema.$columns
+  @column()
+  declare body: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdById: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PersonalProjectTaskSchema extends BaseModel {
+  static $columns = ['createdAt', 'doneAt', 'id', 'personalProjectId', 'position', 'title', 'updatedAt'] as const
+  $columns = PersonalProjectTaskSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare doneAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column()
+  declare position: number
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PersonalProjectSchema extends BaseModel {
+  static $columns = ['budgetCents', 'createdAt', 'description', 'id', 'shared', 'status', 'title', 'updatedAt', 'userId'] as const
+  $columns = PersonalProjectSchema.$columns
+  @column()
+  declare budgetCents: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare shared: boolean
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class PriceQuoteSchema extends BaseModel {
   static $columns = ['close', 'day', 'symbol'] as const
   $columns = PriceQuoteSchema.$columns
@@ -801,7 +1007,7 @@ export class ProjectSchema extends BaseModel {
 }
 
 export class PushSubscriptionSchema extends BaseModel {
-  static $columns = ['auth', 'createdAt', 'endpoint', 'id', 'label', 'p256Dh', 'updatedAt'] as const
+  static $columns = ['auth', 'createdAt', 'endpoint', 'id', 'label', 'p256Dh', 'updatedAt', 'userId'] as const
   $columns = PushSubscriptionSchema.$columns
   @column()
   declare auth: string
@@ -817,6 +1023,8 @@ export class PushSubscriptionSchema extends BaseModel {
   declare p256Dh: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class RecipeIngredientSchema extends BaseModel {
@@ -885,7 +1093,7 @@ export class RememberMeTokenSchema extends BaseModel {
 }
 
 export class ReviewReminderSettingSchema extends BaseModel {
-  static $columns = ['createdAt', 'eveningEnabled', 'eveningSentOn', 'eveningTime', 'id', 'morningEnabled', 'morningSentOn', 'updatedAt'] as const
+  static $columns = ['createdAt', 'eveningEnabled', 'eveningSentOn', 'eveningTime', 'id', 'morningEnabled', 'morningSentOn', 'updatedAt', 'userId'] as const
   $columns = ReviewReminderSettingSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -903,13 +1111,19 @@ export class ReviewReminderSettingSchema extends BaseModel {
   declare morningSentOn: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class ShoppingItemSchema extends BaseModel {
-  static $columns = ['checkedAt', 'createdAt', 'id', 'ingredientId', 'label', 'quantity', 'reason', 'reasonDomain', 'sourceId', 'sourceType', 'unit', 'updatedAt'] as const
+  static $columns = ['addedById', 'checkedAt', 'checkedById', 'createdAt', 'id', 'ingredientId', 'label', 'quantity', 'reason', 'reasonDomain', 'sourceId', 'sourceType', 'unit', 'updatedAt'] as const
   $columns = ShoppingItemSchema.$columns
+  @column()
+  declare addedById: number | null
   @column.dateTime()
   declare checkedAt: DateTime | null
+  @column()
+  declare checkedById: number | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
@@ -985,7 +1199,7 @@ export class TaskItemSchema extends BaseModel {
 }
 
 export class TaskSchema extends BaseModel {
-  static $columns = ['cancelledAt', 'captureText', 'createdAt', 'domain', 'doneAt', 'dueOn', 'dueTime', 'id', 'isChore', 'lastDoneAt', 'notes', 'recurrence', 'recurrenceInterval', 'room', 'sourceId', 'sourceType', 'title', 'updatedAt'] as const
+  static $columns = ['cancelledAt', 'captureText', 'createdAt', 'createdById', 'domain', 'doneAt', 'doneById', 'dueOn', 'dueTime', 'id', 'isChore', 'lastDoneAt', 'notes', 'recurrence', 'recurrenceInterval', 'room', 'sourceId', 'sourceType', 'title', 'updatedAt'] as const
   $columns = TaskSchema.$columns
   @column.dateTime()
   declare cancelledAt: DateTime | null
@@ -994,9 +1208,13 @@ export class TaskSchema extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
+  declare createdById: number | null
+  @column()
   declare domain: string | null
   @column.dateTime()
   declare doneAt: DateTime | null
+  @column()
+  declare doneById: number | null
   @column.date()
   declare dueOn: DateTime | null
   @column()
@@ -1026,16 +1244,20 @@ export class TaskSchema extends BaseModel {
 }
 
 export class TransactionSchema extends BaseModel {
-  static $columns = ['accountId', 'amountCents', 'captureText', 'createdAt', 'domain', 'envelopeId', 'id', 'label', 'occurredOn', 'sourceId', 'sourceType', 'updatedAt'] as const
+  static $columns = ['accountId', 'amountCents', 'bankRef', 'captureText', 'createdAt', 'createdById', 'domain', 'envelopeId', 'id', 'label', 'occurredOn', 'sourceId', 'sourceType', 'updatedAt'] as const
   $columns = TransactionSchema.$columns
   @column()
   declare accountId: number | null
   @column()
   declare amountCents: number
   @column()
+  declare bankRef: string | null
+  @column()
   declare captureText: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare createdById: number | null
   @column()
   declare domain: string
   @column()

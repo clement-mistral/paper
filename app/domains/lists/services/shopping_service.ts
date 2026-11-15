@@ -5,6 +5,7 @@ import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import ShoppingItem from '#domains/lists/models/shopping_item'
 import type { Domain } from '#shared/types/domain'
 import type { ShoppingItemRow } from '#shared/types/lists'
+import { currentUserId } from '#support/actor'
 
 export type ShoppingItemInput = {
   label: string
@@ -38,6 +39,7 @@ export default class ShoppingService {
       reasonDomain: item.reasonDomain,
       reason: item.reason,
       checked: item.checkedAt !== null,
+      checkedById: item.checkedAt === null ? null : item.checkedById,
     }))
   }
 
@@ -102,6 +104,14 @@ export default class ShoppingService {
     await ShoppingItem.query({ client: trx }).where({ sourceType, sourceId }).delete()
   }
 
+  /**
+   * Removes what another domain added and was not bought yet (a meal
+   * taken off the week): what is checked stays, it is in the stock.
+   */
+  async removeOpenForSource(sourceType: string, sourceId: number) {
+    await ShoppingItem.query().where({ sourceType, sourceId }).whereNull('checked_at').delete()
+  }
+
   async removeMany(ids: number[], trx: TransactionClientContract) {
     await ShoppingItem.query({ client: trx }).whereIn('id', ids).delete()
   }
@@ -112,7 +122,18 @@ export default class ShoppingService {
    */
   async toggle(id: number) {
     const item = await ShoppingItem.findOrFail(id)
-    item.checkedAt = item.checkedAt ? null : DateTime.now()
+    await this.setChecked(id, item.checkedAt === null)
+  }
+
+  /**
+   * Sets the state explicitly: replaying it (an action queued offline) is
+   * harmless, and nothing happens when the item is already in that state.
+   */
+  async setChecked(id: number, checked: boolean) {
+    const item = await ShoppingItem.findOrFail(id)
+    if ((item.checkedAt !== null) === checked) return
+    item.checkedAt = checked ? DateTime.now() : null
+    item.checkedById = item.checkedAt ? currentUserId() : null
     await item.save()
     await emitter.emit('lists:shopping_checked', {
       itemId: item.id,

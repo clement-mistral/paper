@@ -1,6 +1,8 @@
 /* ==========================================================================
    Paper — design tokens (Tailwind v4, CSS-first).
-   Black & white, Notion-like. Colour only ever signals a domain.
+   Notion-like, mostly white. A gold accent carries the app's identity
+   (primary actions, focus, selection, logo); the four domain colours
+   signal a domain.
    ========================================================================== */
 
 @import 'tailwindcss';
@@ -17,9 +19,15 @@
   --color-muted: #6b6b6b;
   --color-ink: #1f1f1f;
 
-  --color-budget: #c99a1a;
-  --color-budget-ink: #8a6410;
-  --color-budget-soft: #fbf3db;
+  /* Accent: the app's own colour (primary buttons, focus, selection). */
+  --color-accent: #94690b;
+  --color-accent-ink: #6b4c08;
+  --color-accent-soft: #fbf3dc;
+  --color-accent-bright: #d4a72c;
+
+  --color-budget: #059669;
+  --color-budget-ink: #047857;
+  --color-budget-soft: #e3f5ec;
   --color-maison: #7c5ce0;
   --color-maison-ink: #5b3fc4;
   --color-maison-soft: #f1edfd;
@@ -60,11 +68,11 @@
   }
 
   ::selection {
-    @apply bg-ink text-bg;
+    @apply bg-accent-soft text-accent-ink;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-ink;
+    @apply outline-2 outline-offset-2 outline-accent;
   }
 }
 
@@ -83,10 +91,18 @@
   padding: 12px 14px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
   border-radius: var(--radius-card);
   box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.18);
 }
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] {
+  border-left-color: var(--color-success);
+}
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] {
+  border-left-color: var(--color-danger);
+}
 [data-sonner-toaster] [data-sonner-toast] [data-icon] {
+  color: var(--color-accent);
   display: inline-flex;
   width: 18px;
   height: 18px;

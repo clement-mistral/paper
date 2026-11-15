@@ -8,6 +8,8 @@ export type ScannedRoutes = {
     'new_account.store': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'invitations.accept': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -57,6 +59,26 @@ export type ScannedRoutes = {
     'reviews.complete': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'habits.store': { paramsTuple?: []; params?: {} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.update': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.notes.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.tasks.toggle': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.links.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.links.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.expenses.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.expenses.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'meals.week': { paramsTuple?: []; params?: {} }
+    'meals.store': { paramsTuple?: []; params?: {} }
+    'meals.store_many': { paramsTuple?: []; params?: {} }
+    'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'capture.preview': { paramsTuple?: []; params?: {} }
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -68,9 +90,16 @@ export type ScannedRoutes = {
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'bank_imports.confirm': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'planId': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -193,6 +222,10 @@ export type ScannedRoutes = {
     'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'notifications.test': { paramsTuple?: []; params?: {} }
     'notifications.reminders': { paramsTuple?: []; params?: {} }
+    'notifications.deadlines': { paramsTuple?: []; params?: {} }
+    'household.invite': { paramsTuple?: []; params?: {} }
+    'household.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'changelog': { paramsTuple?: []; params?: {} }
     'design': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
@@ -200,6 +233,7 @@ export type ScannedRoutes = {
   GET: {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -216,11 +250,17 @@ export type ScannedRoutes = {
     'reports.show': { paramsTuple: [ParamValue]; params: {'month': ParamValue} }
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -282,6 +322,7 @@ export type ScannedRoutes = {
   HEAD: {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -298,11 +339,17 @@ export type ScannedRoutes = {
     'reports.show': { paramsTuple: [ParamValue]; params: {'month': ParamValue} }
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -364,6 +411,7 @@ export type ScannedRoutes = {
   POST: {
     'new_account.store': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
+    'invitations.accept': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'money.income.store': { paramsTuple?: []; params?: {} }
     'money.transfer.store': { paramsTuple?: []; params?: {} }
     'shopping.store': { paramsTuple?: []; params?: {} }
@@ -380,11 +428,21 @@ export type ScannedRoutes = {
     'reviews.habit': { paramsTuple: [ParamValue,ParamValue]; params: {'day': ParamValue,'id': ParamValue} }
     'reviews.complete': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'habits.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.notes.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.tasks.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.links.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.expenses.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'meals.store': { paramsTuple?: []; params?: {} }
+    'meals.store_many': { paramsTuple?: []; params?: {} }
     'capture.preview': { paramsTuple?: []; params?: {} }
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.store': { paramsTuple?: []; params?: {} }
+    'bank_imports.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.confirm': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.store': { paramsTuple?: []; params?: {} }
     'recipes.import.store': { paramsTuple?: []; params?: {} }
     'recipes.plan': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -413,6 +471,7 @@ export type ScannedRoutes = {
     'notifications.subscribe': { paramsTuple?: []; params?: {} }
     'notifications.unsubscribe': { paramsTuple?: []; params?: {} }
     'notifications.test': { paramsTuple?: []; params?: {} }
+    'household.invite': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
   DELETE: {
@@ -424,7 +483,15 @@ export type ScannedRoutes = {
     'tasks.items.destroy': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
     'newspapers.sources.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.links.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.expenses.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'portfolios.plans.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'planId': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -446,12 +513,15 @@ export type ScannedRoutes = {
     'meters.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.readings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
     'shopping.toggle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'pantry.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tasks.toggle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tasks.items.toggle': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
+    'personal_projects.tasks.toggle': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'projects.items.toggle': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
   }
   PUT: {
@@ -460,6 +530,8 @@ export type ScannedRoutes = {
     'newspapers.settings': { paramsTuple?: []; params?: {} }
     'newspapers.choice.save': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'reviews.journal': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'personal_projects.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.update': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -480,6 +552,7 @@ export type ScannedRoutes = {
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
     'notifications.reminders': { paramsTuple?: []; params?: {} }
+    'notifications.deadlines': { paramsTuple?: []; params?: {} }
   }
 }
 declare module '@adonisjs/core/types/http' {

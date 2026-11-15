@@ -246,6 +246,28 @@ export default class PortfolioService {
     }))
   }
 
+  /**
+   * The investment accounts and all their lines, for the universal
+   * capture to recognise « achat 10 CW8 » or « dividende TotalEnergies ».
+   */
+  async catalog(): Promise<{
+    accounts: Array<{ id: number; name: string; wrapper: string | null }>
+    holdings: Array<{ id: number; name: string; symbol: string | null; accountId: number }>
+  }> {
+    const [accounts, holdings] = await Promise.all([
+      Account.query().orderBy('name'),
+      Holding.query().orderBy('name'),
+    ])
+    const investing = accounts.filter((account) => this.isInvestment(account))
+    const ids = new Set(investing.map((account) => account.id))
+    return {
+      accounts: investing.map(({ id, name, wrapper }) => ({ id, name, wrapper })),
+      holdings: holdings
+        .filter((holding) => ids.has(holding.accountId))
+        .map(({ id, name, symbol, accountId }) => ({ id, name, symbol, accountId })),
+    }
+  }
+
   /** The lines of an account, for a form's choice. */
   async holdingsOf(
     accountId: number

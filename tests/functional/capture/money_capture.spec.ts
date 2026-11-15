@@ -9,6 +9,7 @@ import Transaction from '#domains/budget/models/transaction'
 import Transfer from '#domains/budget/models/transfer'
 import AccountService from '#domains/budget/services/account_service'
 import MoneyView from '#views/money_view'
+import NetWorthView from '#views/net_worth_view'
 import { toIsoDate, today } from '#support/dates'
 import { Browser } from '#tests/helpers/browser'
 import type { MoneyOverview } from '#shared/types/budget'
@@ -62,7 +63,9 @@ test.group('Money | income and transfers', (group) => {
     const overview = await money.overview()
     assert.equal(overview.spentThisMonthCents, 0)
     assert.equal(overview.incomeThisMonthCents, 0)
-    assert.equal(overview.netWorthCents, 100_000)
+    const netWorth = await app.container.make(NetWorthView)
+    const worth = await netWorth.on()
+    assert.equal(worth.totalCents, 100_000, 'a transfer does not change the net worth')
     const spending = await money.monthlySpending()
     assert.equal(spending[spending.length - 1].cents, 0)
     assert.deepEqual(

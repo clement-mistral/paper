@@ -254,6 +254,8 @@ export type Newspaper = {
     spentCents: number
     budgetLeftCents: number | null
     incomeCents: number
+    /** Net worth today, and its change since the end of last month. */
+    netWorth: { cents: number; monthChangeCents: number | null } | null
     meters: Array<{ label: string; value: string }>
   }
   ephemeris: {

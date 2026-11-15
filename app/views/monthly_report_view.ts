@@ -17,6 +17,7 @@ import { CLAIM_STATUS_LABELS, METER_UNITS, PROJECT_STATUS_LABELS } from '#shared
 import type { ClaimStatus, MeterKind, ProjectStatus } from '#shared/types/maison'
 import type { Domain } from '#shared/types/domain'
 import type { MonthlyReport } from '#shared/types/report'
+import NetWorthView from '#views/net_worth_view'
 
 type Range = { start: string; end: string; next: string }
 
@@ -36,7 +37,8 @@ export default class MonthlyReportView {
     private equipmentMaintenances: EquipmentMaintenanceService,
     private bills: BillService,
     private subscriptions: SubscriptionService,
-    private contracts: ContractService
+    private contracts: ContractService,
+    private netWorth: NetWorthView
   ) {}
 
   async report(month: string, householdName: string | null): Promise<MonthlyReport> {
@@ -81,6 +83,7 @@ export default class MonthlyReportView {
     const previousStart = toIsoDate(first.minus({ months: 1 }))
     const previousEnd = toIsoDate(first.minus({ days: 1 }))
 
+    const worthDay = range.end < toIsoDate(today()) ? range.end : toIsoDate(today())
     const [totals, previous, byDomain, byEnvelope, top, worth, trend] = await Promise.all([
       inMonth()
         .select(
@@ -121,15 +124,7 @@ export default class MonthlyReportView {
         .select('label', 'occurred_on', 'amount_cents', 'domain')
         .orderBy('amount_cents', 'asc')
         .limit(5),
-      db
-        .from('accounts')
-        .select(
-          db.raw(
-            `(coalesce(sum(opening_balance_cents), 0) + coalesce((select sum(t.amount_cents) from transactions t where t.account_id is not null and t.occurred_on <= ?), 0))::int as worth`,
-            [range.end]
-          )
-        )
-        .firstOrFail(),
+      this.netWorth.on(worthDay),
       this.money.monthlySpending({}, 6, first),
     ])
 
@@ -143,7 +138,8 @@ export default class MonthlyReportView {
       previousSpentCents: num(previous.spent),
       incomeCents: num(totals.income),
       budgetedCents: envelopes.reduce((total, row) => total + num(row.monthly_budget_cents), 0),
-      netWorthCents: num(worth.worth),
+      netWorthCents: worth.totalCents,
+      netWorthChangeCents: worth.monthChangeCents,
       byDomain: (byDomain as Array<{ domain: Domain; cents: number }>).map((row) => ({
         domain: row.domain,
         cents: num(row.cents),

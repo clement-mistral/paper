@@ -53,10 +53,11 @@ export type TransactionRow = {
   kind: 'expense' | 'income' | 'transfer'
   /** Typed by hand (or a transfer): deletable from « Argent ». */
   deletable: boolean
+  /** Who recorded it (null: automatic, or before the household had members). */
+  createdById: number | null
 }
 
 export type MoneyOverview = {
-  netWorthCents: number
   spentThisMonthCents: number
   incomeThisMonthCents: number
   budgetedThisMonthCents: number
@@ -207,4 +208,83 @@ export type HoldingDetail = HoldingRow & {
   manualPrice: number | null
   manualPricedOn: string | null
   operations: OperationRow[]
+}
+
+/* -------------------------------------------------------------------------
+ * Bank statement imports (CSV, OFX).
+ * ---------------------------------------------------------------------- */
+
+/**
+ * - `new`: to record (an envelope is proposed for an expense);
+ * - `matched`: confirms a transaction typed by hand;
+ * - `duplicate`: already imported on this account;
+ * - `skipped` / `imported`: after confirmation.
+ */
+export type BankLineStatus = 'new' | 'matched' | 'duplicate' | 'skipped' | 'imported'
+
+export type BankImportLineRow = {
+  id: number
+  occurredOn: string
+  /** As the bank wrote it. */
+  label: string
+  /** What the transaction will be called (« Carrefour market »). */
+  displayLabel: string
+  amountCents: number
+  status: BankLineStatus
+  envelopeId: number | null
+  matched: { id: number; label: string; occurredOn: string } | null
+}
+
+export type BankImportSummary = {
+  id: number
+  fileName: string
+  format: 'csv' | 'ofx'
+  status: 'pending' | 'done'
+  createdAt: string
+  /** First and last day of the statement. */
+  from: string | null
+  to: string | null
+  counts: Record<BankLineStatus, number>
+}
+
+export type BankImportDetail = BankImportSummary & {
+  account: { id: number; name: string }
+  lines: BankImportLineRow[]
+}
+
+export type BankLineChoice = { id: number; include: boolean; envelopeId: number | null }
+
+/* -------------------------------------------------------------------------
+ * Net worth (« Patrimoine »).
+ * ---------------------------------------------------------------------- */
+
+export type NetWorthPartKey = 'current' | 'savings' | 'investments' | 'vehicles'
+
+export type NetWorth = {
+  /** The day valued, ISO. */
+  day: string
+  totalCents: number
+  /** Current accounts, savings, investments (lines at their last close), vehicles. */
+  parts: Array<{ key: NetWorthPartKey; label: string; cents: number }>
+  /** Against the end of the previous month (null without history). */
+  monthChangeCents: number | null
+}
+
+export type NetWorthHistory = NetWorth & {
+  /** End of each of the last 12 months, today for the current one; oldest first. */
+  history: Array<{ date: string; cents: number }>
+}
+
+/**
+ * A scheduled monthly contribution to an investment account.
+ */
+export type InvestmentPlanRow = {
+  id: number
+  accountId: number
+  accountName: string
+  holdingId: number | null
+  holdingName: string | null
+  amountCents: number
+  dayOfMonth: number
+  startsOn: string
 }

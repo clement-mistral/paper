@@ -56,7 +56,7 @@ function QuantityInput({ row }: { row: PantryRow }) {
             { preserveScroll: true }
           )
         }}
-        className="h-8 w-20 rounded-control border border-border bg-bg px-2 text-right text-sm tabular-nums text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none"
+        className="h-8 w-20 rounded-control border border-border bg-bg px-2 text-right text-sm tabular-nums text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none"
       />
       <span className="w-14 text-label text-muted">
         {row.quantity !== null && row.unit && row.unit !== 'piece' ? unitLabels[row.unit] : ''}

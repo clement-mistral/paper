@@ -1,14 +1,15 @@
 import { Link } from '@adonisjs/inertia/react'
 import { usePage } from '@inertiajs/react'
-import { CalendarCheck, Flame, Newspaper, ShoppingBasket } from 'lucide-react'
+import { CalendarCheck, Flame, Newspaper } from 'lucide-react'
 import { buttonClasses } from '~/components/ui/button'
 import AppShell from '~/layouts/app_shell'
 import AgendaItemRow from '~/components/domain/agenda_item_row'
 import EmptyState from '~/components/ui/empty_state'
 import Page from '~/components/ui/page'
 import Section from '~/components/ui/section'
+import StatTile from '~/components/ui/stat_tile'
 import { urlFor } from '~/client'
-import { formatLongDate } from '~/lib/format'
+import { formatAmount, formatLongDate } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
 import type { AgendaItem, TodayOverview } from '#shared/types/agenda'
 import type { InertiaProps } from '~/types'
@@ -37,15 +38,20 @@ function ReviewPrompt() {
   if (!yesterday && !routine.evening) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-card bg-callout px-4 py-3">
-      <Flame size={18} strokeWidth={ICON_STROKE} aria-hidden="true" className="shrink-0" />
+    <div className="flex flex-wrap items-center gap-4 rounded-card bg-warning-soft px-4 py-3">
+      <Flame
+        size={18}
+        strokeWidth={ICON_STROKE}
+        aria-hidden="true"
+        className="shrink-0 text-warning-bar"
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">
           {yesterday
             ? 'Le bilan d’hier est à compléter avant midi'
             : 'C’est l’heure du bilan du jour'}
         </p>
-        <p className="text-label text-muted">
+        <p className="text-label text-warning">
           {routine.streak > 0
             ? `Gardez votre série : ${routine.streak} jour${routine.streak > 1 ? 's' : ''} de suite.`
             : 'Deux minutes pour faire le point : argent, tâches, repas.'}
@@ -61,8 +67,13 @@ function ReviewPrompt() {
 export default function Today({
   overview,
   dinnerIdeas,
+  budgetLeftCents,
   routine,
-}: InertiaProps<{ overview: TodayOverview; dinnerIdeas: MealSuggestion[] }>) {
+}: InertiaProps<{
+  overview: TodayOverview
+  dinnerIdeas: MealSuggestion[]
+  budgetLeftCents: number | null
+}>) {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
 
@@ -79,22 +90,40 @@ export default function Today({
             <Newspaper size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
             {routine?.evening ? 'Journal de demain' : 'Journal du jour'}
           </Link>
-          {overview.shoppingCount > 0 && (
-            <Link
-              route="lists"
-              className="inline-flex h-9 items-center gap-2 rounded-control border border-border px-3 text-label hover:bg-hover"
-            >
-              <ShoppingBasket size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
-              {overview.shoppingCount} article{overview.shoppingCount > 1 ? 's' : ''} à acheter
-            </Link>
-          )}
         </>
       }
     >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatTile
+          tone={overview.overdue.length > 0 ? 'danger' : 'success'}
+          value={String(overview.overdue.length)}
+          label="en retard"
+          href={urlFor('lists')}
+        />
+        <StatTile
+          tone="accent"
+          value={String(overview.today.length)}
+          label="prévu aujourd’hui"
+          href={urlFor('agenda')}
+        />
+        <StatTile
+          tone="menu"
+          value={String(overview.shoppingCount)}
+          label={overview.shoppingCount > 1 ? 'articles à acheter' : 'article à acheter'}
+          href={urlFor('lists')}
+        />
+        <StatTile
+          tone="budget"
+          value={budgetLeftCents === null ? '—' : formatAmount(budgetLeftCents)}
+          label={budgetLeftCents === null ? 'pas de budget' : 'reste ce mois'}
+          href={urlFor('money')}
+        />
+      </div>
+
       <ReviewPrompt />
 
       {overview.overdue.length > 0 && (
-        <Section title="En retard">
+        <Section title="En retard" tone="danger">
           <Items items={overview.overdue} />
         </Section>
       )}
@@ -115,7 +144,7 @@ export default function Today({
       {dinnerIdeas.length > 0 && (
         <Section
           title="Idées pour ce soir"
-          action={{ label: 'Toutes les recettes', href: urlFor('recipes.index') }}
+          action={{ label: 'Prévoir la semaine', href: urlFor('meals.week') }}
         >
           <MealSuggestions suggestions={dinnerIdeas} compact />
         </Section>

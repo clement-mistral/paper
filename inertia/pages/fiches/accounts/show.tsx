@@ -1,5 +1,5 @@
 import { Link } from '@adonisjs/inertia/react'
-import { Pencil } from 'lucide-react'
+import { FileUp, Pencil } from 'lucide-react'
 import { urlFor } from '~/client'
 import AppShell from '~/layouts/app_shell'
 import LineChart from '~/components/charts/line_chart'
@@ -68,6 +68,14 @@ export default function AccountShow({
               Voir les lignes
             </Link>
           )}
+          <Link
+            route="bank_imports.create"
+            routeParams={{ id: account.id }}
+            className={buttonClasses('secondary')}
+          >
+            <FileUp size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
+            Importer un relevé
+          </Link>
           <Link
             route="accounts.edit"
             routeParams={{ id: account.id }}

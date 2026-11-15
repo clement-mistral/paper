@@ -32,7 +32,7 @@ function emptyRow(): Row {
 }
 
 const cell =
-  'h-9 min-w-0 rounded-control border border-border bg-bg px-2 text-sm text-ink focus:border-ink focus:outline-none'
+  'h-9 min-w-0 rounded-control border border-border bg-bg px-2 text-sm text-ink focus:border-accent focus:outline-none'
 
 /**
  * Ingredient rows. An unknown name creates the ingredient on save.
@@ -117,7 +117,7 @@ function IngredientRows({
                 value="true"
                 checked={row.isMain}
                 onChange={(event) => update(row.key, { isMain: event.target.checked })}
-                className="size-4 accent-ink"
+                className="size-4 accent-accent"
               />
               <span className="sm:sr-only">Principal</span>
             </label>

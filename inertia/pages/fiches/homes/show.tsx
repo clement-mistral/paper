@@ -71,7 +71,7 @@ function ChoreSection({
                     { preserveScroll: true }
                   )
                 }
-                className="size-4 cursor-pointer accent-ink"
+                className="size-4 cursor-pointer accent-accent"
               />
             ),
           },

@@ -261,6 +261,22 @@ export default class TransactionService {
   }
 
   /**
+   * Keeps the money of an item deleted elsewhere, without its link: the
+   * expenses stay in Argent as if typed by hand.
+   */
+  async detachSource(sourceType: string, sourceId: number, trx: TransactionClientContract) {
+    await Transaction.query({ client: trx })
+      .where({ sourceType, sourceId })
+      .update({ source_type: null, source_id: null })
+  }
+
+  /** Spent (positive cents) for one source item. */
+  async spentFor(sourceType: string, sourceId: number): Promise<number> {
+    const totals = await this.totalsForSources(sourceType, [sourceId])
+    return totals.get(sourceId) ?? 0
+  }
+
+  /**
    * Transactions produced by an item of another domain, newest first.
    */
   async forSource(sourceType: string, sourceId: number): Promise<Transaction[]> {

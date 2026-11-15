@@ -27,7 +27,7 @@ La navigation principale est transverse :
 - **Argent** — chaque euro, d'où qu'il vienne (un plein, une facture, des courses)
 - **Listes** — Courses, À faire, Placards ; remplies automatiquement par les autres domaines
 - **Fiches** — les objets du quotidien : Véhicules, Logement, Abonnements, Recettes, Placements (propriétés + éléments liés + « Mentionnée dans »)
-- **Bilan du jour** (`/bilan`) — chaque soir : argent du jour confirmé, tâches triées (fait / demain / plus tard / abandon), repas (cuisiné / autre / dehors → dépense), habitudes, humeur et note. Faisable jusqu'au lendemain midi ; la **série** de jours validés est le moteur de la routine (module `app/domains/routine`). Rappels par **notification Web Push** (Profil → Notifications) : le soir à l'heure choisie si le bilan n'est pas validé, et à 10 h si celui de la veille attend encore (module `app/domains/notifications`, VAPID + chiffrement RFC 8291 écrits avec `node:crypto`, sans dépendance ; clé `VAPID_PRIVATE_KEY` via `node ace push:keys`).
+- **Bilan du jour** (`/bilan`) — chaque soir : argent du jour confirmé, tâches triées (fait / demain / plus tard / abandon), repas (cuisiné / autre / dehors → dépense), habitudes, humeur et note. Faisable jusqu'au lendemain midi ; la **série** de jours validés est le moteur de la routine (module `app/domains/routine`). Rappels par **notification Web Push** (Profil → Notifications) : le soir à l'heure choisie si le bilan n'est pas validé, et à 10 h si celui de la veille attend encore. **Rappels d'échéances** (`DeadlineReminders`) : un point quotidien à l'heure choisie (factures, préavis de contrat, entretiens auto et maison, fins de garantie, tâches du jour sans heure ; J-n, veille, jour J, retard une fois), et une alerte 15 min avant une tâche qui a une heure ; chaque étape est journalisée dans `deadline_reminder_logs` pour n'être envoyée qu'une fois (module `app/domains/notifications`, VAPID + chiffrement RFC 8291 écrits avec `node:crypto`, sans dépendance ; clé `VAPID_PRIVATE_KEY` via `node ace push:keys`).
 - **Saisie universelle** (`Ctrl K`) — une phrase (« plein 38 L 67 € ») → aperçu des effets → enregistrement
 
 **Pas de liberté façon Notion** : les types de fiches, leurs champs et les vues sont définis dans le code. L'utilisateur remplit, Paper relie.
@@ -116,6 +116,7 @@ Les listeners doivent être **idempotents**. Ils sont déclarés dans `start/eve
 Implémenté à ce jour :
 
 - `menu:meal_planned` → Listes (courses, hors basiques) ;
+- `menu:meal_cancelled` → Listes (retire les articles du repas pas encore cochés ; ce qui est coché reste, c'est dans le stock) ;
 - `lists:shopping_checked` → Menu (stock), défait en décochant ;
 - `menu:recipe_changed`, `maison:bill_changed`, `maison:contract_changed` → Listes (tâches automatiques : facture à payer, recette à compléter, préavis de contrat).
 
@@ -125,7 +126,12 @@ Un repas marqué cuisiné décrémente le stock **dans la même transaction** (l
 
 ### 3.4 Auth
 
-Application mono-utilisateur/foyer : **guard session** Adonis (cookie, store Redis). Pas d'access tokens.
+Un **foyer**, plusieurs personnes : **guard session** Adonis (cookie, store Redis), pas d'access tokens. Les données sont communes au foyer, sauf ce qui est personnel : appareils de notification, réglages des rappels, bilan du jour (`daily_reviews.user_id`, unique par personne et par jour), habitudes et série.
+
+- **Inscription** : seulement tant qu'aucun compte n'existe (le premier compte crée le foyer). Ensuite, on rejoint le foyer par un **lien d'invitation** créé dans Profil → Foyer : usage unique, 7 jours, seul le SHA-256 du jeton est stocké (`household_invitations`), Paper n'envoie pas d'e-mail (`app/services/household_service.ts`).
+- **Retirer un membre** supprime son compte et ce qui lui est personnel ; ce qu'il a saisi reste, sans auteur. On ne peut pas se retirer soi-même.
+- **Qui a fait quoi** : `tasks.created_by_id / done_by_id`, `shopping_items.added_by_id / checked_by_id`, `transactions.created_by_id`, remplis via `currentUserId()` (`app/support/actor.ts`, async local storage activé dans `config/app.ts`) ; null hors requête (planificateur, listeners). Affiché (« coché par Léa ») seulement quand le foyer a plusieurs personnes (`useMembers`, prop partagée `members`).
+- Les services personnels prennent l'utilisateur en premier paramètre (`RoutineService.status(userId)`, `PushService.sendToUser`, `ReviewReminders.runFor`, `DeadlineReminders.runFor`).
 
 ---
 
@@ -152,7 +158,12 @@ Chaque élément affichable dans Agenda/Aujourd'hui expose un `domain` (`budget 
 
 ## 5. Design system
 
-**Ambiance** : minimaliste noir et blanc façon Notion. **La couleur ne sert qu'à indiquer le domaine** (icône, pastille, barre de progression, courbe). Boutons primaires **toujours noirs**.
+**Ambiance** : minimaliste façon Notion, fond blanc et texte encre. Deux familles de couleurs :
+
+- l'**accent** doré (`accent`) porte l'identité de l'app : boutons primaires, bouton « + », logo, focus, sélection, cases à cocher, liens de section, états vides, entrée active de la navigation ;
+- les **quatre couleurs de domaine** indiquent un domaine (icône, pastille, barre de progression, courbe), et colorent aussi les entrées de navigation qui en relèvent (Argent → Budget en vert émeraude, Véhicules → Auto, Logement → Maison, Recettes → Menu).
+
+Le Journal et le Compte rendu gardent leur mise en page « papier » noir et blanc.
 
 ### 5.1 Tokens Tailwind 4 (`inertia/css/app.css`)
 
@@ -170,9 +181,14 @@ Chaque élément affichable dans Agenda/Aujourd'hui expose un `domain` (`budget 
   --color-muted: #6b6b6b;
   --color-ink: #1f1f1f;
 
-  --color-budget: #c99a1a;
-  --color-budget-ink: #8a6410;
-  --color-budget-soft: #fbf3db;
+  --color-accent: #94690b;
+  --color-accent-ink: #6b4c08;
+  --color-accent-soft: #fbf3dc;
+  --color-accent-bright: #d4a72c;
+
+  --color-budget: #059669;
+  --color-budget-ink: #047857;
+  --color-budget-soft: #e3f5ec;
   --color-maison: #7c5ce0;
   --color-maison-ink: #5b3fc4;
   --color-maison-soft: #f1edfd;
@@ -206,15 +222,21 @@ body {
 - Fond blanc, filets fins `border`, **peu de cartes** : sections séparées par l'espace et des lignes.
 - Titres de page 36px/700, sections 16px/600, corps 14px/400, labels 13px `muted`.
 - Pastille de domaine : `text-xs font-medium px-1.5 py-0.5 rounded-tag` + `text-{domain}-ink bg-{domain}-soft`.
-- Barres de progression **3px**, couleur du domaine (ou `warning-bar` / `danger`).
+- Barres de progression **3px**, couleur du domaine (ou `warning-bar` / `danger`, `accent` par défaut).
+- `Section` accepte un `tone` (domaine, `accent`, `warning`, `danger`) qui affiche une pastille avant le titre (« En retard » en `danger`).
+- Toasts : filet gauche de 3px en `accent`, `success` ou `danger` selon le type.
+- `StatTile` (`components/ui/stat_tile.tsx`) : un chiffre sur fond pastel de sa couleur (`accent`, `danger`, `success`, `menu`, `budget`), cliquable vers sa page ; rangée de 4 en tête d'« Aujourd'hui ». Les cartes restent réservées à ces résumés et à l'index des Fiches (cartes groupées par domaine, icône sur fond `{domaine}-soft`).
+- Listes de jours (Agenda) : les jours vides consécutifs sont repliés en une ligne (« Du … au … : rien de prévu »).
+- Tableaux larges sous `sm` : une liste compacte plutôt qu'un défilement horizontal (transactions : libellé, puis date · enveloppe · compte, montant à droite) ; le domaine d'une transaction est un point de couleur, plus une pastille.
+- Boutons de décision d'une ligne (bilan : Fait, Cuisiné…) en `secondary`, jamais pleins : rien ne doit sembler déjà choisi.
 - Icônes : SVG inline en trait (stroke 1.8 dans les pages via lucide ; dans la navigation, icônes maison `components/icons/` à 1.6, 2 pour l'élément actif), jamais d'emoji.
 - Accessibilité : contraste ≥ 4.5:1 (le `muted` #6B6B6B passe sur blanc), vrais `<button>` / `<a>` / `<input>` + `<label>`, cibles ≥ 40px dans la navigation (56×52 dans le rail).
-- Navigation : rail blanc de 84px, icônes sans libellé visible (`aria-label` + `title` + `sr-only`), état actif par la couleur `ink` et le trait seulement (ni fond ni pastille), aucune couleur de domaine. Config dans `components/ui/nav_items.ts`.
+- Navigation : rail de 84px sur fond `sidebar`, icônes sans libellé visible (`aria-label` + `title` + `sr-only`). Chaque entrée a un `tone` (`accent` ou un domaine, cf. `navToneClasses`) : l'entrée active prend `{tone}-soft` en fond et `{tone}-ink` en trait (2), les autres sont `muted` et prennent la couleur au survol. Pastille « bilan à faire » en `warning-bar`. Config dans `components/ui/nav_items.ts`.
 - Responsive : sous `md`, le rail laisse place à une barre fixe en bas (Aujourd'hui, Agenda, +, Argent, Listes) et le contenu reçoit un `padding-bottom` équivalent ; tableaux larges dans un conteneur `overflow-x-auto`.
 
 ### 5.3 Composants `components/ui/`
 
-`Button` (primary noir / secondary bordé / ghost), `Input`, `Checkbox`, `DomainTag`, `StatusTag` (fait/planifié/à prévoir/en retard), `ProgressBar`, `Callout`, `Section` (titre + lien), `DataTable`, `PropertyList` (propriétés de fiche label/valeur), `NavRail` / `MobileNavBar`, `CommandPalette`.
+`Button` (primary accent / secondary bordé / ghost), `Input`, `Checkbox`, `DomainTag`, `StatusTag` (fait/planifié/à prévoir/en retard), `ProgressBar`, `Callout`, `Section` (titre + lien), `DataTable`, `PropertyList` (propriétés de fiche label/valeur), `NavRail` / `MobileNavBar`, `CommandPalette`.
 
 ### 5.4 Locale
 
@@ -225,6 +247,10 @@ Tout le formatage passe par `inertia/lib/format.ts` (et un équivalent serveur s
 - nombres : espace fine comme séparateur de milliers (`142 380 km`), virgule décimale (`38,2 L`)
 
 ---
+
+### 5.5 Recherche globale
+
+La palette Ctrl K cherche aussi dans les fiches pendant la frappe (`GET /recherche?q=`, read model `app/views/search_view.ts`) : noms et libellés sans accents, mot qui commence pareil (score 1) ou similarité `word_similarity` ≥ 0,5. Au plus 4 résultats par type de fiche et 12 en tout ; tâches terminées et annulées exclues. ↑ ↓ choisissent un résultat, Entrée l'ouvre ; sans résultat choisi, Entrée enregistre la saisie comme avant. Une nouvelle table à chercher = une entrée dans `SOURCES`.
 
 ## 6. Saisie universelle (sans LLM)
 
@@ -318,8 +344,12 @@ pnpm typecheck && pnpm lint
 6. Vues transverses **Aujourd'hui**, **Agenda**, **Listes** branchées sur tous les domaines.
 7. **V1** (fait) : entrées d'argent et virements, PWA installable, navigation mobile « Plus », déploiement Podman + sauvegardes (`deploy/README.md`), stock frigo/placards et suggestions de repas, import de recettes par URL, saisie universelle des entretiens, relevés et dépenses de travaux.
 8. **Journal du jour** (fait, `/journal`) : sources gratuites aux articles courts (sciences, économie, technologie par défaut, `app/domains/news/default_sources.ts`), récupérées chaque heure et gardées 7 jours ; choix quotidien des articles ; une A4 avec chapôs, journée Paper, météo (Open-Meteo), chiffres du foyer, éphéméride et citation, puis jusqu'à 2 pages de textes complets (schema.org `articleBody` ou `<article>`, jamais de contournement de paywall, ni directs ni vidéos). Titres et textes sont ceux des éditeurs, jamais réécrits. Page « Marchés » (indices, valeurs suivies réglables, cryptos) depuis le graphique public de Yahoo Finance, cours de la veille uniquement pour qu'une feuille s'imprime deux fois pareil ; « À surveiller » met en mots des indicateurs techniques (moyennes 50/200, RSI 14, plus haut annuel), jamais de conseil d'achat. Page Détente : sudoku et mots croisés tirés de la date (`app/domains/news/crossword.ts`, dictionnaire `crossword_words.ts`), solutions le lendemain.
-9. **Placements & patrimoine** (en cours) — étape 1 faite : fiche Placements (`/fiches/placements`). Un compte de type `investment`, ou sous une enveloppe autre que livret (`accounts.wrapper`), porte des lignes (`holdings`) et leurs opérations (`investment_operations` : achat, vente, dividende, frais, prix en euros payés). Quantité et prix de revient (moyen pondéré) sont recalculés depuis les opérations (`app/domains/budget/portfolio.ts`), jamais stockés. Chaque opération écrit son mouvement sur le compte dans la même transaction : achats et ventes en `source_type = 'investment_trade'`, exclus des dépenses et revenus par `NOT_TRANSFER_SQL` ; dividendes et frais sont de vrais revenus et dépenses. Les cours (Yahoo Finance, sans clé) sont gardés en base (`market_instruments`, `price_quotes`) par `QuoteService`, service public de Budget que lit aussi la page Marchés du journal ; conversion des devises par les taux `EURXXX=X`. Étapes suivantes : patrimoine réel dans Argent et le rapport, saisie universelle, portefeuille dans le journal, versements programmés et dates fiscales dans l'Agenda.
-10. Plus tard : planification de la semaine de repas, documents (stockage à choisir), wattmètre par circuit, PWA hors ligne, import bancaire.
+9. **Placements & patrimoine** (fait) — étape 1 : fiche Placements (`/fiches/placements`). Un compte de type `investment`, ou sous une enveloppe autre que livret (`accounts.wrapper`), porte des lignes (`holdings`) et leurs opérations (`investment_operations` : achat, vente, dividende, frais, prix en euros payés). Quantité et prix de revient (moyen pondéré) sont recalculés depuis les opérations (`app/domains/budget/portfolio.ts`), jamais stockés. Chaque opération écrit son mouvement sur le compte dans la même transaction : achats et ventes en `source_type = 'investment_trade'`, exclus des dépenses et revenus par `NOT_TRANSFER_SQL` ; dividendes et frais sont de vrais revenus et dépenses. Les cours (Yahoo Finance, sans clé) sont gardés en base (`market_instruments`, `price_quotes`) par `QuoteService`, service public de Budget que lit aussi la page Marchés du journal ; conversion des devises par les taux `EURXXX=X`. Étape 2 : **patrimoine réel** (`app/views/net_worth_view.ts`) = comptes courants + épargne + placements valorisés au cours du jour donné (`PortfolioService.overview(day)`) + valeur estimée des véhicules (connue seulement aujourd'hui, comptée telle quelle chaque jour) ; affiché dans Argent (répartition et courbe des fins de mois sur 12 mois, calculées à la volée sans instantané), le compte rendu (fin de mois et variation) et le journal. **Saisie universelle** : intent `investment` (« achat 10 CW8 à 512,30 € », « vendu 0,5 BTC 30 000 € », « dividende 12,40 € LVMH ») ; une ligne détenue reconnue (ticker ou nom) ou un ticker + une quantité donnent le score maximal, sinon « vendu le vélo » reste une entrée. **Versements programmés** (`investment_plans`, fiche du compte de placement) et **dates fiscales** (5 ans du PEA/PEA-PME, 8 ans de l'assurance-vie, depuis `accounts.opened_on` ; `app/domains/budget/milestones.ts`) dans l'Agenda et les rappels d'échéances ; l'achat d'un versement s'enregistre à la main, au prix payé.
+10. **Repas de la semaine** (fait, `/repas`) : lundi → dimanche, midi et soir ; chaque soir vide à partir d'aujourd'hui reçoit une proposition (suggestions §7 sans seuil minimal, chaque recette une fois, aucune déjà dans la semaine — `app/views/meal_week_view.ts`) ; « Garder » une à une ou toutes ; retirer un repas rend le stock s'il était cuisiné et nettoie les courses.
+11. **Import bancaire** (fait, fiche compte → « Importer un relevé ») : CSV (séparateur, en-tête et colonnes détectés : date, libellé, montant ou débit/crédit ; UTF-8 ou Windows-1252) et OFX 1.x/2 (FITID), lus sans dépendance (`app/domains/budget/import/`). Le relevé est mis en attente ligne à ligne (`bank_imports`, `bank_import_lines`) puis validé : *nouvelle* (enveloppe proposée par les alias puis les noms, à partir du marchand du libellé), *déjà saisie* (même montant, banque de 5 jours après à 2 jours avant la saisie, rapprochement un pour un), *déjà importée* (`transactions.bank_ref`, unique par compte). Valider crée les transactions (sans `source_type` : supprimables comme une saisie), marque les rapprochées et apprend l'enveloppe choisie à la main ; un import validé peut être annulé.
+12. **Hors ligne** (fait, `public/sw.js`) : fichiers de l'app (`/assets`, icônes) servis depuis le cache ; Aujourd'hui, Agenda, Listes, Repas et les recettes en réseau d'abord, dernière version gardée (page complète et réponse Inertia séparément, jamais les rechargements partiels) et resservie sans réseau ; le cache des pages est vidé à la connexion et à la déconnexion. La liste de courses se coche et s'enrichit hors ligne : actions gardées sur l'appareil (`shared/offline_queue.ts`, `inertia/lib/offline.ts`), envoyées dans l'ordre au retour du réseau ; « cocher » envoie un état (`checked`), pas une bascule, pour qu'un renvoi soit sans effet. Bandeau « Hors ligne » dans l'`AppShell`.
+13. **Projets** (fait, `/projets`, module `app/domains/projects`) : projets personnels avec notes, tâches (cases à cocher propres au projet, hors Agenda), liens et budget ; statut idée / en cours / en pause / terminé, tableau par statut. **Privés** : un projet n'est visible que de son propriétaire (`personal_projects.user_id`), sauf partagé avec le foyer (`shared`) ; un projet partagé est modifiable par tous, mais seul le propriétaire le partage, le départage ou le supprime ; un projet invisible répond 404. Ses dépenses sont de vraies transactions (`source_type = 'personal_project'`, compte par défaut), gardées dans Argent si le projet est supprimé. Entrée « Projets » dans le rail, dans la feuille « Plus » sur mobile.
+14. Plus tard : documents (un lien Proton Drive suffit), wattmètre par circuit.
 
 ---
 

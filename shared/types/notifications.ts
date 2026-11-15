@@ -11,6 +11,20 @@ export type ReviewReminderSettings = {
   morningEnabled: boolean
 }
 
+/**
+ * Reminders of deadlines: bills, contract notices, maintenances,
+ * warranties, the day's tasks.
+ */
+export type DeadlineReminderSettings = {
+  enabled: boolean
+  /** Local time `HH:MM` of the daily digest. */
+  sendTime: string
+  /** First reminder this many days before (then the day before, the day). */
+  leadDays: number
+  /** A notification 15 minutes before a task that has a time. */
+  taskAlerts: boolean
+}
+
 export type NotificationsPanel = {
   /** False when the server has no VAPID key: nothing can be sent. */
   configured: boolean
@@ -18,6 +32,7 @@ export type NotificationsPanel = {
   publicKey: string | null
   devices: PushDevice[]
   reminders: ReviewReminderSettings
+  deadlines: DeadlineReminderSettings
 }
 
 /**

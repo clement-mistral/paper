@@ -4,6 +4,7 @@ import { urlFor } from '@adonisjs/core/services/url_builder'
 import BillService from '#domains/maison/services/bill_service'
 import MaintenanceService from '#domains/auto/services/maintenance_service'
 import EquipmentMaintenanceService from '#domains/maison/services/equipment_maintenance_service'
+import InvestmentCalendarService from '#domains/budget/services/investment_calendar_service'
 import SubscriptionService from '#domains/maison/services/subscription_service'
 import MealPlanService from '#domains/menu/services/meal_plan_service'
 import ShoppingService from '#domains/lists/services/shopping_service'
@@ -32,7 +33,8 @@ export default class AgendaView {
     private subscriptions: SubscriptionService,
     private shopping: ShoppingService,
     private maintenances: MaintenanceService,
-    private equipmentMaintenances: EquipmentMaintenanceService
+    private equipmentMaintenances: EquipmentMaintenanceService,
+    private investments: InvestmentCalendarService
   ) {}
 
   /**
@@ -42,13 +44,24 @@ export default class AgendaView {
   async items(start: DateTime, end: DateTime): Promise<AgendaItem[]> {
     const from = toIsoDate(start)
     const to = toIsoDate(end)
-    const [tasks, meals, bills, debits, maintenances, equipmentMaintenances] = await Promise.all([
+    const [
+      tasks,
+      meals,
+      bills,
+      debits,
+      maintenances,
+      equipmentMaintenances,
+      contributions,
+      milestones,
+    ] = await Promise.all([
       this.tasks.between(from, to),
       this.meals.between(from, to),
       this.bills.unpaid(),
       this.subscriptions.occurrences(start, end),
       this.maintenances.planned(),
       this.equipmentMaintenances.planned(),
+      this.investments.occurrences(from, to),
+      this.investments.milestones(from, to),
     ])
 
     const items: AgendaItem[] = [
@@ -90,6 +103,32 @@ export default class AgendaView {
           (maintenance) => maintenance.dueOn && maintenance.dueOn >= from && maintenance.dueOn <= to
         )
         .map((maintenance) => this.equipmentMaintenance(maintenance)),
+      ...contributions.map(({ plan, date }) => ({
+        key: `investment_plan:${plan.id}:${date}`,
+        kind: 'investment_plan' as const,
+        domain: 'budget' as const,
+        title: `Versement ${plan.accountName}`,
+        detail: [formatAmount(plan.amountCents), plan.holdingName].filter(Boolean).join(' · '),
+        date,
+        time: null,
+        href: plan.holdingId
+          ? urlFor('portfolios.holdings.show', { id: plan.holdingId })
+          : urlFor('portfolios.show', { id: plan.accountId }),
+        taskId: null,
+        done: false,
+      })),
+      ...milestones.map((milestone) => ({
+        key: `milestone:${milestone.accountId}`,
+        kind: 'milestone' as const,
+        domain: 'budget' as const,
+        title: milestone.title,
+        detail: milestone.detail,
+        date: milestone.date,
+        time: null,
+        href: urlFor('portfolios.show', { id: milestone.accountId }),
+        taskId: null,
+        done: false,
+      })),
     ]
 
     return items.sort(

@@ -153,7 +153,15 @@ export default function Report({ report }: InertiaProps<{ report: MonthlyReport 
             note={money.budgetedCents > 0 ? `sur ${formatAmount(money.budgetedCents)}` : undefined}
           />
           <Figure label="Entrées" value={formatAmount(money.incomeCents)} />
-          <Figure label="Patrimoine en fin de mois" value={formatAmount(money.netWorthCents)} />
+          <Figure
+            label="Patrimoine en fin de mois"
+            value={formatAmount(money.netWorthCents)}
+            note={
+              money.netWorthChangeCents === null
+                ? undefined
+                : `${money.netWorthChangeCents >= 0 ? '+' : ''}${formatAmount(money.netWorthChangeCents)} sur le mois`
+            }
+          />
         </dl>
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 print:grid-cols-2">

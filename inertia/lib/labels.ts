@@ -10,7 +10,7 @@ export {
   METER_KIND_LABELS as meterKindLabels,
   OCCUPANCY_LABELS as occupancyLabels,
 } from '#shared/types/maison'
-import type { MealSlot, Unit } from '#shared/types/menu'
+import type { MealOutcome, MealSlot, Unit } from '#shared/types/menu'
 import type { Status } from '#shared/types/domain'
 
 export const unitLabels: Record<Unit, string> = {
@@ -44,6 +44,12 @@ export const frequencyLabels: Record<Frequency, string> = {
 export const slotLabels: Record<MealSlot, string> = {
   lunch: 'Midi',
   dinner: 'Soir',
+}
+
+export const mealOutcomeLabels: Record<MealOutcome, string> = {
+  cooked: 'Cuisiné',
+  other: 'Autre chose',
+  eaten_out: 'Mangé dehors',
 }
 
 export const MONTHS = [

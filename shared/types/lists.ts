@@ -8,6 +8,8 @@ export type ShoppingItemRow = {
   reasonDomain: Domain | null
   reason: string | null
   checked: boolean
+  /** Who checked it, when the household has several people. */
+  checkedById: number | null
 }
 
 export const RECURRENCES = ['daily', 'weekly', 'monthly', 'yearly'] as const
@@ -23,6 +25,8 @@ export type TaskRow = {
   recurrence: Recurrence | null
   recurrenceInterval: number
   done: boolean
+  /** Who did it. */
+  doneById: number | null
   overdue: boolean
   /** Created by another domain (a bill to pay…). */
   automatic: boolean

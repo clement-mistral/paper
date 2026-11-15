@@ -34,7 +34,7 @@ export default function Input({
         aria-describedby={describedBy}
         className={cn(
           'h-9 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70',
-          'transition-colors focus:border-ink focus:outline-none',
+          'transition-colors focus:border-accent focus:outline-none',
           error && 'border-danger'
         )}
         {...props}

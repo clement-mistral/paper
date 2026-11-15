@@ -6,16 +6,47 @@ import FichesIcon from '~/components/icons/fiches_icon'
 import HomeIcon from '~/components/icons/home_icon'
 import ListsIcon from '~/components/icons/lists_icon'
 import MoneyIcon from '~/components/icons/money_icon'
+import ProjectsIcon from '~/components/icons/projects_icon'
 import RecipeIcon from '~/components/icons/recipe_icon'
 import ReviewIcon from '~/components/icons/review_icon'
 import TodayIcon from '~/components/icons/today_icon'
 import VehicleIcon from '~/components/icons/vehicle_icon'
+
+/**
+ * Colour of an entry when active (and on hover). A fiche that belongs to a
+ * domain takes that domain's colour; the dimensions take the accent.
+ */
+export type NavTone = 'accent' | 'budget' | 'maison' | 'auto' | 'menu'
 
 export type NavItem = {
   label: string
   href: string
   icon: ComponentType<IconProps>
   match: (url: string) => boolean
+  tone: NavTone
+}
+
+/**
+ * Literal classes, for Tailwind to see them.
+ */
+export const navToneClasses: Record<NavTone, { active: string; hover: string; icon: string }> = {
+  accent: {
+    active: 'bg-accent-soft text-accent-ink',
+    hover: 'hover:text-accent-ink',
+    icon: 'text-accent',
+  },
+  budget: {
+    active: 'bg-budget-soft text-budget-ink',
+    hover: 'hover:text-budget-ink',
+    icon: 'text-budget',
+  },
+  maison: {
+    active: 'bg-maison-soft text-maison-ink',
+    hover: 'hover:text-maison-ink',
+    icon: 'text-maison',
+  },
+  auto: { active: 'bg-auto-soft text-auto-ink', hover: 'hover:text-auto-ink', icon: 'text-auto' },
+  menu: { active: 'bg-menu-soft text-menu-ink', hover: 'hover:text-menu-ink', icon: 'text-menu' },
 }
 
 function pathOf(url: string): string {
@@ -34,14 +65,20 @@ function section(href: string): (url: string) => boolean {
   }
 }
 
-function item(label: string, href: string, icon: ComponentType<IconProps>): NavItem {
-  return { label, href, icon, match: section(href) }
+function item(
+  label: string,
+  href: string,
+  icon: ComponentType<IconProps>,
+  tone: NavTone = 'accent'
+): NavItem {
+  return { label, href, icon, match: section(href), tone }
 }
 
 const todayHref = urlFor('today')
 
 /**
- * Navigation by dimension, never by domain.
+ * Navigation by dimension, never by domain. Argent takes Budget's colour,
+ * the pinned fiches their domain's.
  */
 export const primaryNav: NavItem[] = [
   {
@@ -49,10 +86,12 @@ export const primaryNav: NavItem[] = [
     href: todayHref,
     icon: TodayIcon,
     match: (url) => pathOf(url) === todayHref,
+    tone: 'accent',
   },
   item('Agenda', urlFor('agenda'), AgendaIcon),
-  item('Argent', urlFor('money'), MoneyIcon),
+  item('Argent', urlFor('money'), MoneyIcon, 'budget'),
   item('Listes', urlFor('lists'), ListsIcon),
+  item('Projets', urlFor('personal_projects.index'), ProjectsIcon),
 ]
 
 /**
@@ -64,10 +103,14 @@ export const reviewNav: NavItem = item('Bilan du jour', urlFor('reviews.current'
 /**
  * The most used fiches.
  */
+const recipes = item('Recettes', urlFor('recipes.index'), RecipeIcon, 'menu')
+const inMealWeek = section(urlFor('meals.week'))
+
 const pinnedFiches: NavItem[] = [
-  item('Véhicules', urlFor('vehicles.index'), VehicleIcon),
-  item('Logement', urlFor('homes.index'), HomeIcon),
-  item('Recettes', urlFor('recipes.index'), RecipeIcon),
+  item('Véhicules', urlFor('vehicles.index'), VehicleIcon, 'auto'),
+  item('Logement', urlFor('homes.index'), HomeIcon, 'maison'),
+  /** « Repas de la semaine » lives with the recipes. */
+  { ...recipes, match: (url) => recipes.match(url) || inMealWeek(url) },
 ]
 
 const fichesHref = urlFor('fiches.index')
@@ -84,17 +127,18 @@ export const ficheNav: NavItem[] = [
     href: fichesHref,
     icon: FichesIcon,
     match: (url) => inFiches(url) && !pinnedFiches.some((pinned) => pinned.match(url)),
+    tone: 'accent',
   },
 ]
 
 /**
  * Targets of the bottom bar on small screens, around the central « + ».
- * « Listes » moves into the « Plus » sheet with the rest.
+ * « Listes » and « Projets » move into the « Plus » sheet with the rest.
  */
-export const mobileNav: { start: NavItem[]; end: NavItem[]; inSheet: NavItem } = {
+export const mobileNav: { start: NavItem[]; end: NavItem[]; inSheet: NavItem[] } = {
   start: primaryNav.slice(0, 2),
   end: primaryNav.slice(2, 3),
-  inSheet: primaryNav[3],
+  inSheet: primaryNav.slice(3),
 }
 
 const profileHref = urlFor('profile.show')
@@ -107,7 +151,7 @@ const newspaperHref = urlFor('newspapers.current')
 export function inMoreSheet(url: string): boolean {
   const path = pathOf(url)
   return (
-    mobileNav.inSheet.match(url) ||
+    mobileNav.inSheet.some((entry) => entry.match(url)) ||
     reviewNav.match(url) ||
     ficheNav.some((fiche) => fiche.match(url)) ||
     inFiches(url) ||

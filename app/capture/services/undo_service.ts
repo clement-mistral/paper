@@ -8,6 +8,7 @@ import CaptureLog from '#capture/models/capture_log'
 import FuelService from '#domains/auto/services/fuel_service'
 import MaintenanceService from '#domains/auto/services/maintenance_service'
 import MeterService from '#domains/maison/services/meter_service'
+import PortfolioService from '#domains/budget/services/portfolio_service'
 import TransactionService from '#domains/budget/services/transaction_service'
 import ShoppingService from '#domains/lists/services/shopping_service'
 import TaskService from '#domains/lists/services/task_service'
@@ -32,7 +33,8 @@ export default class UndoService {
     private fuel: FuelService,
     private tasks: TaskService,
     private maintenances: MaintenanceService,
-    private meters: MeterService
+    private meters: MeterService,
+    private portfolio: PortfolioService
   ) {}
 
   async undo(logId: number): Promise<string> {
@@ -78,6 +80,8 @@ export default class UndoService {
         return this.maintenances.undoCompletion(ref.id, trx)
       case 'meter_reading':
         return this.meters.deleteReading(ref.id, trx)
+      case 'investment_operation':
+        return this.portfolio.deleteOperation(ref.id, trx)
     }
   }
 }

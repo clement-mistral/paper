@@ -1,6 +1,14 @@
 import { router } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { CalendarCheck, ChefHat, ReceiptText, Repeat, Wrench } from 'lucide-react'
+import {
+  CalendarCheck,
+  ChefHat,
+  Landmark,
+  PiggyBank,
+  ReceiptText,
+  Repeat,
+  Wrench,
+} from 'lucide-react'
 import { urlFor } from '~/client'
 import DomainTag from '~/components/ui/domain_tag'
 import { cn } from '~/lib/cn'
@@ -15,6 +23,8 @@ const icons = {
   subscription: Repeat,
   maintenance: Wrench,
   equipment_maintenance: Wrench,
+  investment_plan: PiggyBank,
+  milestone: Landmark,
 } as const
 
 /**
@@ -35,7 +45,7 @@ export default function AgendaItemRow({ item }: { item: AgendaItem }) {
           aria-label={`Fait : ${item.title}`}
           checked={item.done}
           onChange={toggle}
-          className="size-4 shrink-0 cursor-pointer accent-ink"
+          className="size-4 shrink-0 cursor-pointer accent-accent"
         />
       ) : (
         <Icon

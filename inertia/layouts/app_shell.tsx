@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import FlashToasts from '~/components/flash_toasts'
+import OfflineBanner from '~/components/offline_banner'
 import CommandPalette from '~/components/ui/command_palette'
 import NavRail, { MobileNavBar } from '~/components/ui/nav_rail'
 
@@ -27,6 +28,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <NavRail onAdd={openPalette} />
 
       <main className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 print:pb-0">
+        <OfflineBanner />
         {children}
       </main>
 

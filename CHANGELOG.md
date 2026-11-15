@@ -14,6 +14,84 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
+## [2.0.0] - 2026-11-11
+
+### Ajouté
+
+- Rappels d'échéances par notification (Profil → Notifications) : chaque
+  matin à l'heure choisie, un point sur les factures à payer, les préavis
+  de contrat, les entretiens (contrôle technique, vidange…), les fins de
+  garantie et les tâches du jour. Vous êtes prévenu quelques jours avant
+  (7 par défaut, réglable), la veille et le jour même ; une facture ou un
+  entretien en retard est signalé une fois. Plusieurs échéances arrivent
+  en une seule notification.
+- Une tâche qui a une heure (« appeler le plombier 14h ») envoie une
+  notification 15 minutes avant.
+- Recherche dans la palette Ctrl K : en tapant, vos fiches s'affichent
+  sous la saisie (recettes, véhicules, logements, équipements, contrats,
+  abonnements, factures, travaux, comptes, placements, tâches en cours et
+  dépenses), même avec une faute de frappe ou sans les accents. Flèches
+  haut et bas pour choisir, Entrée pour ouvrir.
+- Repas de la semaine (Recettes → Repas de la semaine, ou depuis
+  Aujourd'hui et les Courses) : du lundi au dimanche, midi et soir. Chaque
+  soir encore libre reçoit une proposition tirée de vos recettes et de ce
+  qu'il y a dans le frigo, jamais deux fois la même dans la semaine :
+  gardez-les une par une ou toutes d'un coup, ou choisissez une autre
+  recette. Les ingrédients vont aux courses ; retirer un repas enlève de
+  la liste ce qui n'a pas encore été acheté.
+- Plusieurs personnes dans le foyer (Profil → Foyer) : invitez quelqu'un
+  avec un lien à lui envoyer (il sert une fois et expire au bout de
+  7 jours). Tout le monde partage l'agenda, l'argent, les listes et les
+  fiches ; chacun a son bilan du jour, ses habitudes, sa série et ses
+  notifications. Ce qu'une personne trie dans son bilan (une tâche faite,
+  un repas) l'est aussi pour les autres.
+- Import des relevés bancaires (fiche d'un compte → « Importer un
+  relevé ») : CSV ou OFX, tels que votre banque les exporte. Avant tout
+  enregistrement, Paper montre ce qui est nouveau (avec une enveloppe
+  proposée), ce que vous aviez déjà saisi à la main (rapproché, pas
+  ajouté deux fois) et ce qui a déjà été importé. Vous cochez, choisissez
+  les enveloppes, validez ; l'enveloppe corrigée est retenue pour la
+  prochaine fois, et un import peut être annulé.
+- Patrimoine dans Argent : comptes, épargne, placements au dernier cours
+  et valeur estimée des véhicules, avec sa répartition, sa variation
+  depuis la fin du mois dernier et sa courbe sur 12 mois. Il figure aussi
+  dans le compte rendu du mois et dans le journal.
+- Placements dans la saisie universelle : « achat 10 CW8 à 512,30 € »,
+  « vendu 0,5 BTC 30 000 € », « dividende 12,40 € LVMH ».
+- Versements programmés (fiche d'un compte de placement) : un montant le
+  même jour chaque mois, rappelé dans l'Agenda et par notification.
+- L'Agenda annonce les 5 ans d'un PEA et les 8 ans d'une assurance-vie
+  (d'après la date d'ouverture du compte), quand leur fiscalité devient
+  plus douce.
+- Paper fonctionne hors ligne, dans l'application installée : Aujourd'hui,
+  l'Agenda, les Listes, les Repas et les recettes déjà ouvertes restent
+  consultables sans réseau (un bandeau le signale). Au magasin, la liste
+  de courses se coche et s'enrichit même sans réseau : tout est envoyé
+  dès que la connexion revient. Ces pages gardées sur l'appareil sont
+  effacées à la déconnexion.
+- Projets personnels (nouvelle entrée « Projets ») : pour chaque projet,
+  des notes, des tâches, des liens et un budget avec ses dépenses (qui
+  comptent aussi dans Argent). Un tableau les range par statut : idée, en
+  cours, en pause, terminé. Un projet n'est visible que par vous, sauf si
+  vous le partagez avec le foyer.
+- On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
+  par Tom » sur une tâche, « par Léa » sur une dépense.
+
+### Modifié
+
+- Paper prend des couleurs : un doré pour les boutons, le bouton
+  « + » et le logo, et la navigation montre la page ouverte dans sa
+  couleur (Argent en vert, Véhicules en bleu, Logement en violet, Recettes
+  en corail).
+- Aujourd'hui commence par quatre résumés en couleur (en retard, prévu
+  aujourd'hui, courses, reste du budget) ; l'Agenda replie les jours sans
+  rien de prévu ; les Fiches sont rangées par domaine, en cartes ; sur
+  téléphone, les transactions s'affichent en liste lisible ; la page des
+  repas propose de préparer la semaine suivante quand celle-ci se
+  termine ; l'application installée prend la couleur de Paper.
+- La création de compte n'est plus ouverte à tous : une fois le premier
+  compte créé, on ne rejoint le foyer que par invitation.
+
 ## [1.3.0] - 2026-11-11
 
 ### Ajouté

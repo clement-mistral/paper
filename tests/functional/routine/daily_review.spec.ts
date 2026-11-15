@@ -9,7 +9,18 @@ import Task from '#domains/lists/models/task'
 import TaskService from '#domains/lists/services/task_service'
 import DailyReview from '#domains/routine/models/daily_review'
 import RoutineService from '#domains/routine/services/routine_service'
+import User from '#models/user'
 import { today, toIsoDate } from '#support/dates'
+
+let emails = 0
+function member(name = 'Camille') {
+  emails++
+  return User.create({
+    fullName: name,
+    email: `review${emails}@paper.local`,
+    password: 'secret123',
+  })
+}
 
 test.group('Routine | daily review', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
@@ -17,23 +28,25 @@ test.group('Routine | daily review', (group) => {
   test('gathers the day and lists what blocks the validation', async ({ assert }) => {
     const capture = await app.container.make(CaptureService)
     const routine = await app.container.make(RoutineService)
+    const me = await member()
     await capture.commit({ text: 'café 3 €' })
     await capture.commit({ text: 'appeler le plombier aujourd’hui' })
     await capture.commit({ text: 'raclette ce soir' })
 
-    const review = await routine.review(toIsoDate(today()))
+    const review = await routine.review(me.id, toIsoDate(today()))
 
     assert.isTrue(review.open)
     assert.equal(review.spentCents, 300)
     assert.lengthOf(review.tasks.open, 1)
     assert.lengthOf(review.meals, 1)
     assert.deepEqual(review.pending, ['money', 'tasks', 'meals'])
-    await assert.rejects(() => routine.complete(toIsoDate(today())))
+    await assert.rejects(() => routine.complete(me.id, toIsoDate(today())))
   })
 
   test('completes the day once everything is reviewed', async ({ assert }) => {
     const capture = await app.container.make(CaptureService)
     const routine = await app.container.make(RoutineService)
+    const me = await member()
     const tasks = await app.container.make(TaskService)
     const envelopes = await app.container.make(EnvelopeService)
     const resto = await envelopes.create({ name: 'Resto' })
@@ -44,13 +57,13 @@ test.group('Routine | daily review', (group) => {
     await capture.commit({ text: 'raclette ce soir' })
     const [first, second] = await Task.query().orderBy('id')
 
-    await routine.confirmMoney(day)
+    await routine.confirmMoney(me.id, day)
     await tasks.postpone(first.id, 'tomorrow', day)
     await tasks.cancel(second.id)
-    const review = await routine.review(day)
-    await routine.mealOutcome(day, review.meals[0].id, 'eaten_out', 2450)
+    const review = await routine.review(me.id, day)
+    await routine.mealOutcome(me.id, day, review.meals[0].id, 'eaten_out', 2450)
 
-    const streak = await routine.complete(day)
+    const streak = await routine.complete(me.id, day)
 
     assert.equal(streak.current, 1)
     await first.refresh()
@@ -58,30 +71,32 @@ test.group('Routine | daily review', (group) => {
     const dinner = await Transaction.findByOrFail('source_type', 'meal_plan')
     assert.equal(dinner.amountCents, -2450)
     assert.equal(dinner.envelopeId, resto.id)
-    const after = await routine.review(day)
+    const after = await routine.review(me.id, day)
     assert.isTrue(after.completed)
     assert.isFalse(after.open)
-    await assert.rejects(() => routine.confirmMoney(day))
+    await assert.rejects(() => routine.confirmMoney(me.id, day))
   })
 
   test('changing a meal outcome replaces the restaurant expense', async ({ assert }) => {
     const capture = await app.container.make(CaptureService)
     const routine = await app.container.make(RoutineService)
+    const me = await member()
     const day = toIsoDate(today())
     await capture.commit({ text: 'raclette ce soir' })
-    const review = await routine.review(day)
+    const review = await routine.review(me.id, day)
     const [meal] = review.meals
 
-    await routine.mealOutcome(day, meal.id, 'eaten_out', 3000)
-    await routine.mealOutcome(day, meal.id, 'cooked')
+    await routine.mealOutcome(me.id, day, meal.id, 'eaten_out', 3000)
+    await routine.mealOutcome(me.id, day, meal.id, 'cooked')
 
     assert.lengthOf(await Transaction.query().where('source_type', 'meal_plan'), 0)
   })
 
   test('a day older than yesterday noon is locked', async ({ assert }) => {
     const routine = await app.container.make(RoutineService)
+    const me = await member()
     const old = toIsoDate(today().minus({ days: 2 }))
-    await assert.rejects(() => routine.confirmMoney(old))
+    await assert.rejects(() => routine.confirmMoney(me.id, old))
   })
 
   test('the forgotten expense is dated on the review day', async ({ assert }) => {
@@ -100,15 +115,53 @@ test.group('Routine | daily review', (group) => {
 
   test('the status asks for yesterday until noon when the streak runs', async ({ assert }) => {
     const routine = await app.container.make(RoutineService)
+    const me = await member()
     const twoDaysAgo = today().minus({ days: 2 })
-    await DailyReview.create({ day: twoDaysAgo, moneyConfirmed: true, completedAt: DateTime.now() })
+    await DailyReview.create({
+      userId: me.id,
+      day: twoDaysAgo,
+      moneyConfirmed: true,
+      completedAt: DateTime.now(),
+    })
 
-    const morning = await routine.status(today().set({ hour: 9 }))
+    const morning = await routine.status(me.id, today().set({ hour: 9 }))
     assert.equal(morning.due?.label, 'yesterday')
     assert.equal(morning.streak, 0)
 
-    const afternoon = await routine.status(today().set({ hour: 15 }))
+    const afternoon = await routine.status(me.id, today().set({ hour: 15 }))
     assert.equal(afternoon.due?.label, 'today')
     assert.isFalse(afternoon.evening)
+  })
+  test('each person has their own review; what is sorted is shared', async ({ assert }) => {
+    const capture = await app.container.make(CaptureService)
+    const routine = await app.container.make(RoutineService)
+    const tasks = await app.container.make(TaskService)
+    const camille = await member('Camille')
+    const lea = await member('Léa')
+    const day = toIsoDate(today())
+    await capture.commit({ text: 'appeler le plombier aujourd’hui' })
+    const [task] = await Task.query()
+
+    await routine.addHabit(camille.id, 'Lire')
+    await routine.confirmMoney(camille.id, day)
+    await tasks.complete(task.id)
+    await routine.complete(camille.id, day)
+
+    const forCamille = await routine.review(camille.id, day)
+    const forLea = await routine.review(lea.id, day)
+    assert.isTrue(forCamille.completed)
+    assert.isFalse(forLea.completed)
+    assert.deepEqual(forLea.pending, ['money'], 'the task is already done for Léa')
+    assert.lengthOf(forCamille.habits, 1)
+    assert.lengthOf(forLea.habits, 0)
+    const [leaStatus, camilleStatus] = await Promise.all([
+      routine.status(lea.id),
+      routine.status(camille.id),
+    ])
+    assert.equal(leaStatus.streak, 0)
+    assert.equal(camilleStatus.streak, 1)
+
+    const [habit] = await routine.habits(camille.id)
+    await assert.rejects(() => routine.toggleHabit(lea.id, day, habit.id))
   })
 })

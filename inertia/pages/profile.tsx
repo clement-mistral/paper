@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Form } from '@adonisjs/inertia/react'
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { urlFor } from '~/client'
 import AppShell from '~/layouts/app_shell'
@@ -12,15 +12,20 @@ import Page from '~/components/ui/page'
 import Section from '~/components/ui/section'
 import { formatDate } from '~/lib/format'
 import { disablePush, enablePush, needsInstall, pushState, type PushState } from '~/lib/push'
+import type { HouseholdPanel } from '#shared/types/household'
 import type { NotificationsPanel } from '#shared/types/notifications'
 import type { InertiaProps } from '~/types'
 
 export default function Profile({
   user,
   notifications,
-}: InertiaProps<{ notifications: NotificationsPanel }>) {
+  household,
+}: InertiaProps<{ notifications: NotificationsPanel; household: HouseholdPanel }>) {
   return (
-    <Page title="Profil" description="Vos informations de connexion et les rappels du bilan.">
+    <Page
+      title="Profil"
+      description="Vos informations de connexion, le foyer et vos notifications."
+    >
       <Section title="Informations">
         <Form route="profile.update" options={{ preserveScroll: true }}>
           {({ errors, processing }) => (
@@ -96,8 +101,140 @@ export default function Profile({
         </Form>
       </Section>
 
+      <Household panel={household} />
+
       <Notifications panel={notifications} />
     </Page>
+  )
+}
+
+/**
+ * The people who share this Paper, and the invitations to join it. A new
+ * invitation link is only shown once (just after creating it).
+ */
+function Household({ panel }: { panel: HouseholdPanel }) {
+  const { flash } = usePage()
+  const link = flash.invitation
+
+  async function copy(value: string) {
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.success('Lien copié')
+    } catch {
+      toast.error('Copie impossible : sélectionnez le lien à la main')
+    }
+  }
+
+  return (
+    <Section title="Foyer">
+      <div className="flex max-w-xl flex-col gap-5 pt-2">
+        <p className="text-sm text-ink">
+          Tout le foyer partage l’agenda, l’argent, les listes et les fiches. Le bilan du jour, les
+          habitudes et les notifications sont propres à chacun.
+        </p>
+
+        <ul className="divide-y divide-border border-y border-border">
+          {panel.members.map((member) => (
+            <li key={member.id} className="flex items-center gap-3 py-2.5">
+              <span
+                aria-hidden="true"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-accent-soft text-xs font-semibold text-accent-ink"
+              >
+                {member.initials}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm text-ink">
+                  {member.name}
+                  {member.isYou && <span className="text-label text-muted"> · vous</span>}
+                </span>
+                <span className="block truncate text-label text-muted">{member.email}</span>
+              </span>
+              {!member.isYou && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Retirer ${member.name} du foyer ? Son compte, son bilan et ses habitudes seront supprimés ; ce qu’il ou elle a saisi reste.`
+                      )
+                    ) {
+                      router.delete(urlFor('household.remove', { id: member.id }), {
+                        preserveScroll: true,
+                      })
+                    }
+                  }}
+                >
+                  Retirer
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        {link && (
+          <Callout title="Lien d’invitation">
+            <span className="flex flex-col gap-2">
+              <span>
+                Envoyez-le à la personne à inviter. Il sert une fois et expire dans 7 jours ;
+                copiez-le maintenant, il ne sera plus affiché.
+              </span>
+              <span className="flex flex-wrap items-center gap-2">
+                <input
+                  readOnly
+                  value={link}
+                  aria-label="Lien d’invitation"
+                  onFocus={(event) => event.target.select()}
+                  className="h-8 min-w-0 flex-1 rounded-control border border-border bg-bg px-2 text-label text-ink"
+                />
+                <Button size="sm" variant="secondary" onClick={() => copy(link)}>
+                  Copier
+                </Button>
+              </span>
+            </span>
+          </Callout>
+        )}
+
+        {panel.invitations.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <p className="text-label text-muted">Invitations en attente</p>
+            <ul className="divide-y divide-border border-y border-border">
+              {panel.invitations.map((invitation) => (
+                <li key={invitation.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-sm text-ink">
+                    Par {invitation.createdBy}
+                    <span className="text-label text-muted">
+                      {' '}
+                      · expire le {formatDate(invitation.expiresAt)}
+                    </span>
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      router.delete(urlFor('household.revoke', { id: invitation.id }), {
+                        preserveScroll: true,
+                      })
+                    }
+                  >
+                    Retirer
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div>
+          <Button
+            variant="secondary"
+            onClick={() => router.post(urlFor('household.invite'), {}, { preserveScroll: true })}
+          >
+            Inviter quelqu’un
+          </Button>
+        </div>
+      </div>
+    </Section>
   )
 }
 
@@ -109,8 +246,8 @@ const DEVICE_STATE: Record<PushState, string> = {
 }
 
 /**
- * The daily review reminders: this device's subscription, the other
- * devices, and when to remind.
+ * Notifications: this device's subscription, the other devices, the
+ * reminders of the daily review and of deadlines.
  */
 function Notifications({ panel }: { panel: NotificationsPanel }) {
   const [state, setState] = useState<PushState | null>(null)
@@ -148,13 +285,14 @@ function Notifications({ panel }: { panel: NotificationsPanel }) {
     )
   }
 
-  const { reminders } = panel
+  const { reminders, deadlines } = panel
   return (
     <Section title="Notifications">
       <div className="flex max-w-xl flex-col gap-6 pt-2">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-ink">
-            Un rappel le soir tant que le bilan du jour n’est pas validé.
+            Un rappel le soir tant que le bilan du jour n’est pas validé, et un point le matin sur
+            les échéances : factures, préavis, entretiens, garanties et tâches du jour.
           </p>
           {state === 'unsupported' && needsInstall() ? (
             <Callout title="Installez Paper sur l’écran d’accueil">
@@ -246,6 +384,62 @@ function Notifications({ panel }: { panel: NotificationsPanel }) {
                 name="morningEnabled"
                 value="true"
                 defaultChecked={reminders.morningEnabled}
+              />
+              <div>
+                <Button type="submit" variant="secondary" disabled={processing}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          )}
+        </Form>
+
+        <Form route="notifications.deadlines" options={{ preserveScroll: true }}>
+          {({ errors, processing }) => (
+            <div className="flex flex-col gap-4 border-t border-border pt-6">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-ink">Échéances</p>
+                <p className="text-label text-muted">
+                  Un rappel quelques jours avant, la veille et le jour même ; une facture ou un
+                  entretien en retard est signalé une fois. Plusieurs échéances le même jour
+                  arrivent en une seule notification.
+                </p>
+              </div>
+              <Checkbox
+                strike={false}
+                label="Rappels d’échéances"
+                name="enabled"
+                value="true"
+                defaultChecked={deadlines.enabled}
+              />
+              <div className="flex flex-wrap gap-4">
+                <Input
+                  className="max-w-40"
+                  label="Heure du point"
+                  name="sendTime"
+                  type="time"
+                  required
+                  defaultValue={deadlines.sendTime}
+                  error={errors.sendTime}
+                />
+                <Input
+                  className="max-w-40"
+                  label="Premier rappel (jours avant)"
+                  name="leadDays"
+                  type="number"
+                  min={2}
+                  max={60}
+                  required
+                  defaultValue={deadlines.leadDays}
+                  error={errors.leadDays}
+                />
+              </div>
+              <Checkbox
+                strike={false}
+                label="Prévenir 15 minutes avant une tâche qui a une heure"
+                name="taskAlerts"
+                value="true"
+                defaultChecked={deadlines.taskAlerts}
               />
               <div>
                 <Button type="submit" variant="secondary" disabled={processing}>

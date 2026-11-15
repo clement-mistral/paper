@@ -103,6 +103,29 @@ export default class MealPlanService {
     return trx ? run(trx) : db.transaction(run)
   }
 
+  /**
+   * Removes a planned meal from the week. A meal already cooked gives its
+   * ingredients back to the stock; `menu:meal_cancelled` lets Lists take
+   * what was not bought yet off the shopping list.
+   */
+  async cancel(id: number): Promise<MealPlanRow | null> {
+    return db.transaction(async (trx) => {
+      const meal = await MealPlan.query({ client: trx }).where('id', id).preload('recipe').first()
+      if (!meal) return null
+      if (meal.outcome === 'cooked') await this.pantry.revert({ type: 'meal_plan', id }, trx)
+      await meal.useTransaction(trx).delete()
+      trx.after('commit', () => emitter.emit('menu:meal_cancelled', { mealPlanId: id }))
+      return {
+        id: meal.id,
+        outcome: meal.outcome,
+        plannedOn: toIsoDate(meal.plannedOn),
+        slot: meal.slot,
+        servings: meal.servings,
+        recipe: { id: meal.recipe.id, name: meal.recipe.name },
+      }
+    })
+  }
+
   async delete(id: number, trx?: TransactionClientContract) {
     const meal = await MealPlan.find(id, { client: trx })
     if (!meal) return

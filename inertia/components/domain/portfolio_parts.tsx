@@ -41,7 +41,7 @@ export function Gain({ cents, className }: { cents: number | null; className?: s
 
 /**
  * Literal classes, for Tailwind to see them, in the allocation's order:
- * shades of Budget's gold, then of ink (domain colors mean domains).
+ * shades of Budget's green, then of ink (domain colors mean domains).
  */
 const SLICE_COLORS = [
   'bg-budget-ink',
@@ -54,46 +54,72 @@ const SLICE_COLORS = [
   'bg-ink/5',
 ]
 
-/** One bar split by class, and its legend with the amounts. */
-export function AllocationBar({ slices }: { slices: AllocationSlice[] }) {
-  const total = slices.reduce((sum, slice) => sum + slice.cents, 0)
+/**
+ * One bar split by class, and its legend with the amounts. Percentages
+ * are shares of what is positive; a negative part (an overdrawn account)
+ * is listed apart, in red, outside the bar.
+ */
+export function AllocationBar({
+  slices,
+  colorOf,
+}: {
+  slices: Array<Pick<AllocationSlice, 'label' | 'cents'> & { key: string }>
+  /** A class per slice; by default shades of Budget's green, then of ink. */
+  colorOf?: (key: string, index: number) => string
+}) {
+  const color = (key: string, index: number) =>
+    colorOf?.(key, index) ?? SLICE_COLORS[index % SLICE_COLORS.length]
+  const positive = slices.filter((slice) => slice.cents > 0)
+  const total = positive.reduce((sum, slice) => sum + slice.cents, 0)
   if (total <= 0) return null
+  const share = (cents: number) => `${Math.round((cents / total) * 100)} %`
   return (
     <div className="flex flex-col gap-3">
       <div
         role="img"
-        aria-label={`Répartition : ${slices
-          .map((slice) => `${slice.label} ${Math.round((slice.cents / total) * 100)} %`)
+        aria-label={`Répartition : ${positive
+          .map((slice) => `${slice.label} ${share(slice.cents)}`)
           .join(', ')}`}
-        className="flex h-3 w-full overflow-hidden rounded-full bg-callout"
+        className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full bg-callout"
       >
-        {slices.map((slice, index) => (
+        {positive.map((slice) => (
           <span
             key={slice.key}
-            className={cn('h-full', SLICE_COLORS[index % SLICE_COLORS.length])}
+            className={cn(
+              'h-full first:rounded-l-full last:rounded-r-full',
+              color(slice.key, slices.indexOf(slice))
+            )}
             style={{ width: `${(slice.cents / total) * 100}%` }}
           />
         ))}
       </div>
       <ul className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
-        {slices.map((slice, index) => (
-          <li key={slice.key} className="flex items-center gap-2 text-sm">
-            <span
-              aria-hidden="true"
-              className={cn(
-                'size-2.5 shrink-0 rounded-full',
-                SLICE_COLORS[index % SLICE_COLORS.length]
-              )}
-            />
-            <span className="min-w-0 flex-1 text-ink">{slice.label}</span>
-            <span className="text-muted tabular-nums">
-              {Math.round((slice.cents / total) * 100)} %
-            </span>
-            <span className="w-28 text-right text-ink tabular-nums">
-              {formatAmount(slice.cents)}
-            </span>
-          </li>
-        ))}
+        {slices.map((slice, index) => {
+          const negative = slice.cents < 0
+          return (
+            <li key={slice.key} className="flex items-center gap-2 text-sm">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'size-2.5 shrink-0 rounded-full',
+                  negative ? 'border border-danger' : color(slice.key, index)
+                )}
+              />
+              <span className="min-w-0 flex-1 text-ink">{slice.label}</span>
+              <span className="text-muted tabular-nums">
+                {negative ? 'à découvert' : share(slice.cents)}
+              </span>
+              <span
+                className={cn(
+                  'w-28 text-right tabular-nums',
+                  negative ? 'text-danger' : 'text-ink'
+                )}
+              >
+                {formatAmount(slice.cents)}
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

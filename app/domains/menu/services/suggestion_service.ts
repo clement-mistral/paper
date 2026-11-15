@@ -145,7 +145,12 @@ export default class SuggestionService {
     private ingredients: IngredientService
   ) {}
 
-  async suggest(limit = 5): Promise<MealSuggestion[]> {
+  /**
+   * The best recipes to cook now. `minScore: null` keeps every recipe
+   * (filling a week also needs recipes the stock does not cover).
+   */
+  async suggest(limit = 5, options: { minScore?: number | null } = {}): Promise<MealSuggestion[]> {
+    const minScore = options.minScore === undefined ? config.minScore : options.minScore
     const day = toIsoDate(today())
     const recentStart = toIsoDate(today().minus({ days: config.recentDays }))
     const [recipes, stock, substitutes, recent] = await Promise.all([
@@ -202,7 +207,7 @@ export default class SuggestionService {
           day
         )
       )
-      .filter((suggestion) => suggestion.score >= config.minScore)
+      .filter((suggestion) => minScore === null || suggestion.score >= minScore)
       .sort((a, b) => b.score - a.score || a.recipe.name.localeCompare(b.recipe.name, 'fr'))
       .slice(0, limit)
   }
