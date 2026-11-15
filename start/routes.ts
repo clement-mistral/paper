@@ -387,6 +387,9 @@ router
         router
           .put('rappels', [controllers.Notifications, 'updateReminders'])
           .as('notifications.reminders')
+        router
+          .put('echeances', [controllers.Notifications, 'updateDeadlines'])
+          .as('notifications.deadlines')
       })
       .prefix('profil/notifications')
       .where('id', router.matchers.number())

@@ -193,6 +193,7 @@ export type ScannedRoutes = {
     'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'notifications.test': { paramsTuple?: []; params?: {} }
     'notifications.reminders': { paramsTuple?: []; params?: {} }
+    'notifications.deadlines': { paramsTuple?: []; params?: {} }
     'changelog': { paramsTuple?: []; params?: {} }
     'design': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
@@ -480,6 +481,7 @@ export type ScannedRoutes = {
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.password': { paramsTuple?: []; params?: {} }
     'notifications.reminders': { paramsTuple?: []; params?: {} }
+    'notifications.deadlines': { paramsTuple?: []; params?: {} }
   }
 }
 declare module '@adonisjs/core/types/http' {

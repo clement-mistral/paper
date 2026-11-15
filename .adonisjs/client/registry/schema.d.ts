@@ -2465,6 +2465,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateReminders']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'notifications.deadlines': {
+    methods: ["PUT"]
+    pattern: '/profil/notifications/echeances'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/notifications/validators/deadline_reminders').deadlineRemindersValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/notifications/validators/deadline_reminders').deadlineRemindersValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'changelog': {
     methods: ["GET","HEAD"]
     pattern: '/nouveautes'

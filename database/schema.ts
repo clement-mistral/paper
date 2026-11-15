@@ -196,6 +196,38 @@ export class DailyReviewSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class DeadlineReminderLogSchema extends BaseModel {
+  static $columns = ['deadlineKey', 'id', 'sentOn', 'stage'] as const
+  $columns = DeadlineReminderLogSchema.$columns
+  @column()
+  declare deadlineKey: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare sentOn: DateTime
+  @column()
+  declare stage: string
+}
+
+export class DeadlineReminderSettingSchema extends BaseModel {
+  static $columns = ['createdAt', 'enabled', 'id', 'leadDays', 'sendTime', 'taskAlerts', 'updatedAt'] as const
+  $columns = DeadlineReminderSettingSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare enabled: boolean
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare leadDays: number
+  @column()
+  declare sendTime: string
+  @column()
+  declare taskAlerts: boolean
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ElectricalCircuitSchema extends BaseModel {
   static $columns = ['breakerAmps', 'createdAt', 'differential', 'homeId', 'id', 'label', 'notes', 'powerWatts', 'reference', 'rooms', 'sectionSqmm', 'updatedAt'] as const
   $columns = ElectricalCircuitSchema.$columns

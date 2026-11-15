@@ -33,6 +33,23 @@ export default class EquipmentService {
     return equipment.map((item) => this.toRow(item))
   }
 
+  /**
+   * Equipment whose warranty ends on or after `from`, for the deadline
+   * reminders.
+   */
+  async warrantiesEndingFrom(
+    from: string
+  ): Promise<Array<{ id: number; name: string; warrantyUntil: string }>> {
+    const equipment = await Equipment.query()
+      .where('warranty_until', '>=', from)
+      .orderBy('warranty_until')
+    return equipment.map((item) => ({
+      id: item.id,
+      name: item.name,
+      warrantyUntil: toIsoDate(item.warrantyUntil!),
+    }))
+  }
+
   async detail(id: number): Promise<EquipmentDetail> {
     const equipment = await Equipment.query()
       .where('id', id)

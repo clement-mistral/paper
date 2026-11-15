@@ -109,8 +109,8 @@ const DEVICE_STATE: Record<PushState, string> = {
 }
 
 /**
- * The daily review reminders: this device's subscription, the other
- * devices, and when to remind.
+ * Notifications: this device's subscription, the other devices, the
+ * reminders of the daily review and of deadlines.
  */
 function Notifications({ panel }: { panel: NotificationsPanel }) {
   const [state, setState] = useState<PushState | null>(null)
@@ -148,13 +148,14 @@ function Notifications({ panel }: { panel: NotificationsPanel }) {
     )
   }
 
-  const { reminders } = panel
+  const { reminders, deadlines } = panel
   return (
     <Section title="Notifications">
       <div className="flex max-w-xl flex-col gap-6 pt-2">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-ink">
-            Un rappel le soir tant que le bilan du jour n’est pas validé.
+            Un rappel le soir tant que le bilan du jour n’est pas validé, et un point le matin sur
+            les échéances : factures, préavis, entretiens, garanties et tâches du jour.
           </p>
           {state === 'unsupported' && needsInstall() ? (
             <Callout title="Installez Paper sur l’écran d’accueil">
@@ -246,6 +247,62 @@ function Notifications({ panel }: { panel: NotificationsPanel }) {
                 name="morningEnabled"
                 value="true"
                 defaultChecked={reminders.morningEnabled}
+              />
+              <div>
+                <Button type="submit" variant="secondary" disabled={processing}>
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          )}
+        </Form>
+
+        <Form route="notifications.deadlines" options={{ preserveScroll: true }}>
+          {({ errors, processing }) => (
+            <div className="flex flex-col gap-4 border-t border-border pt-6">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-ink">Échéances</p>
+                <p className="text-label text-muted">
+                  Un rappel quelques jours avant, la veille et le jour même ; une facture ou un
+                  entretien en retard est signalé une fois. Plusieurs échéances le même jour
+                  arrivent en une seule notification.
+                </p>
+              </div>
+              <Checkbox
+                strike={false}
+                label="Rappels d’échéances"
+                name="enabled"
+                value="true"
+                defaultChecked={deadlines.enabled}
+              />
+              <div className="flex flex-wrap gap-4">
+                <Input
+                  className="max-w-40"
+                  label="Heure du point"
+                  name="sendTime"
+                  type="time"
+                  required
+                  defaultValue={deadlines.sendTime}
+                  error={errors.sendTime}
+                />
+                <Input
+                  className="max-w-40"
+                  label="Premier rappel (jours avant)"
+                  name="leadDays"
+                  type="number"
+                  min={2}
+                  max={60}
+                  required
+                  defaultValue={deadlines.leadDays}
+                  error={errors.leadDays}
+                />
+              </div>
+              <Checkbox
+                strike={false}
+                label="Prévenir 15 minutes avant une tâche qui a une heure"
+                name="taskAlerts"
+                value="true"
+                defaultChecked={deadlines.taskAlerts}
               />
               <div>
                 <Button type="submit" variant="secondary" disabled={processing}>

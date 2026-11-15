@@ -16,6 +16,18 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
 ## [Non publié]
 
+### Ajouté
+
+- Rappels d'échéances par notification (Profil → Notifications) : chaque
+  matin à l'heure choisie, un point sur les factures à payer, les préavis
+  de contrat, les entretiens (contrôle technique, vidange…), les fins de
+  garantie et les tâches du jour. Vous êtes prévenu quelques jours avant
+  (7 par défaut, réglable), la veille et le jour même ; une facture ou un
+  entretien en retard est signalé une fois. Plusieurs échéances arrivent
+  en une seule notification.
+- Une tâche qui a une heure (« appeler le plombier 14h ») envoie une
+  notification 15 minutes avant.
+
 ### Modifié
 
 - Paper prend des couleurs : un bleu marine pour les boutons, le bouton

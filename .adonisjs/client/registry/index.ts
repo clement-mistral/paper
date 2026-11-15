@@ -1142,6 +1142,12 @@ const routes = {
     tokens: [[0,"profil"],[0,"notifications"],[0,"rappels"]],
     types: placeholder as Registry['notifications.reminders']['types'],
   },
+  'notifications.deadlines': {
+    methods: ["PUT"],
+    pattern: '/profil/notifications/echeances',
+    tokens: [[0,"profil"],[0,"notifications"],[0,"echeances"]],
+    types: placeholder as Registry['notifications.deadlines']['types'],
+  },
   'changelog': {
     methods: ["GET","HEAD"],
     pattern: '/nouveautes',

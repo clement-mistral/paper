@@ -1,12 +1,14 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import DeadlineReminders from '#domains/notifications/services/deadline_reminders'
 import PushService from '#domains/notifications/services/push_service'
+import { deadlineRemindersValidator } from '#domains/notifications/validators/deadline_reminders'
 import { subscribeValidator, unsubscribeValidator } from '#domains/notifications/validators/push'
 import ReviewReminders from '#domains/routine/services/review_reminders'
 import { remindersValidator } from '#domains/routine/validators/reminders'
 
 /**
- * Notifications of the daily review, managed from the profile. The
+ * Notifications (daily review, deadlines), managed from the profile. The
  * device (un)subscriptions are JSON calls made after the browser's
  * `pushManager` answered; the rest are Inertia forms.
  */
@@ -14,7 +16,8 @@ import { remindersValidator } from '#domains/routine/validators/reminders'
 export default class NotificationsController {
   constructor(
     private push: PushService,
-    private reminders: ReviewReminders
+    private reminders: ReviewReminders,
+    private deadlines: DeadlineReminders
   ) {}
 
   async subscribe({ request, response }: HttpContext) {
@@ -50,6 +53,18 @@ export default class NotificationsController {
       morningEnabled: input.morningEnabled ?? false,
     })
     session.flash('success', 'Rappels enregistrés')
+    return response.redirect().back()
+  }
+
+  async updateDeadlines({ request, response, session }: HttpContext) {
+    const input = await request.validateUsing(deadlineRemindersValidator)
+    await this.deadlines.saveSettings({
+      enabled: input.enabled ?? false,
+      sendTime: input.sendTime,
+      leadDays: input.leadDays,
+      taskAlerts: input.taskAlerts ?? false,
+    })
+    session.flash('success', 'Rappels d’échéances enregistrés')
     return response.redirect().back()
   }
 }

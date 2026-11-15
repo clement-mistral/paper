@@ -277,6 +277,7 @@ export interface ApiDefinition {
     }
     test: typeof routes['notifications.test']
     reminders: typeof routes['notifications.reminders']
+    deadlines: typeof routes['notifications.deadlines']
   }
   changelog: typeof routes['changelog']
   design: typeof routes['design']

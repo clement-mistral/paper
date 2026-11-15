@@ -5,6 +5,7 @@ import { errors } from '@vinejs/vine'
 import User from '#models/user'
 import { passwordValidator, profileValidator } from '#validators/user'
 import PushService from '#domains/notifications/services/push_service'
+import DeadlineReminders from '#domains/notifications/services/deadline_reminders'
 import ReviewReminders from '#domains/routine/services/review_reminders'
 import type { NotificationsPanel } from '#shared/types/notifications'
 
@@ -15,16 +16,22 @@ import type { NotificationsPanel } from '#shared/types/notifications'
 export default class ProfileController {
   constructor(
     private push: PushService,
-    private reminders: ReviewReminders
+    private reminders: ReviewReminders,
+    private deadlines: DeadlineReminders
   ) {}
 
   async show({ inertia }: HttpContext) {
-    const [devices, reminders] = await Promise.all([this.push.devices(), this.reminders.settings()])
+    const [devices, reminders, deadlines] = await Promise.all([
+      this.push.devices(),
+      this.reminders.settings(),
+      this.deadlines.settings(),
+    ])
     const notifications: NotificationsPanel = {
       configured: this.push.configured,
       publicKey: this.push.publicKey(),
       devices,
       reminders,
+      deadlines,
     }
     return inertia.render('profile', { notifications })
   }
