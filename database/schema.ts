@@ -34,6 +34,56 @@ export class AccountSchema extends BaseModel {
   declare wrapper: string | null
 }
 
+export class BankImportLineSchema extends BaseModel {
+  static $columns = ['amountCents', 'bankImportId', 'bankRef', 'envelopeId', 'id', 'label', 'matchedTransactionId', 'occurredOn', 'position', 'status', 'transactionId'] as const
+  $columns = BankImportLineSchema.$columns
+  @column()
+  declare amountCents: number
+  @column()
+  declare bankImportId: number
+  @column()
+  declare bankRef: string
+  @column()
+  declare envelopeId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare label: string
+  @column()
+  declare matchedTransactionId: number | null
+  @column.date()
+  declare occurredOn: DateTime
+  @column()
+  declare position: number
+  @column()
+  declare status: string
+  @column()
+  declare transactionId: number | null
+}
+
+export class BankImportSchema extends BaseModel {
+  static $columns = ['accountId', 'confirmedAt', 'createdAt', 'createdById', 'fileName', 'format', 'id', 'status', 'updatedAt'] as const
+  $columns = BankImportSchema.$columns
+  @column()
+  declare accountId: number
+  @column.dateTime()
+  declare confirmedAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdById: number | null
+  @column()
+  declare fileName: string
+  @column()
+  declare format: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class BillSchema extends BaseModel {
   static $columns = ['accountId', 'amountCents', 'captureText', 'createdAt', 'dueOn', 'envelopeId', 'id', 'notes', 'paidOn', 'provider', 'updatedAt'] as const
   $columns = BillSchema.$columns
@@ -1097,12 +1147,14 @@ export class TaskSchema extends BaseModel {
 }
 
 export class TransactionSchema extends BaseModel {
-  static $columns = ['accountId', 'amountCents', 'captureText', 'createdAt', 'createdById', 'domain', 'envelopeId', 'id', 'label', 'occurredOn', 'sourceId', 'sourceType', 'updatedAt'] as const
+  static $columns = ['accountId', 'amountCents', 'bankRef', 'captureText', 'createdAt', 'createdById', 'domain', 'envelopeId', 'id', 'label', 'occurredOn', 'sourceId', 'sourceType', 'updatedAt'] as const
   $columns = TransactionSchema.$columns
   @column()
   declare accountId: number | null
   @column()
   declare amountCents: number
+  @column()
+  declare bankRef: string | null
   @column()
   declare captureText: string | null
   @column.dateTime({ autoCreate: true })

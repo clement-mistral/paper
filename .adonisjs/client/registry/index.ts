@@ -434,6 +434,36 @@ const routes = {
     tokens: [[0,"fiches"],[0,"comptes"],[1,"id"]],
     types: placeholder as Registry['accounts.destroy']['types'],
   },
+  'bank_imports.create': {
+    methods: ["GET","HEAD"],
+    pattern: '/fiches/comptes/:id/import',
+    tokens: [[0,"fiches"],[0,"comptes"],[1,"id"],[0,"import"]],
+    types: placeholder as Registry['bank_imports.create']['types'],
+  },
+  'bank_imports.store': {
+    methods: ["POST"],
+    pattern: '/fiches/comptes/:id/import',
+    tokens: [[0,"fiches"],[0,"comptes"],[1,"id"],[0,"import"]],
+    types: placeholder as Registry['bank_imports.store']['types'],
+  },
+  'bank_imports.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/fiches/comptes/:id/imports/:importId',
+    tokens: [[0,"fiches"],[0,"comptes"],[1,"id"],[0,"imports"],[1,"importId"]],
+    types: placeholder as Registry['bank_imports.show']['types'],
+  },
+  'bank_imports.confirm': {
+    methods: ["POST"],
+    pattern: '/fiches/comptes/:id/imports/:importId/valider',
+    tokens: [[0,"fiches"],[0,"comptes"],[1,"id"],[0,"imports"],[1,"importId"],[0,"valider"]],
+    types: placeholder as Registry['bank_imports.confirm']['types'],
+  },
+  'bank_imports.destroy': {
+    methods: ["DELETE"],
+    pattern: '/fiches/comptes/:id/imports/:importId',
+    tokens: [[0,"fiches"],[0,"comptes"],[1,"id"],[0,"imports"],[1,"importId"]],
+    types: placeholder as Registry['bank_imports.destroy']['types'],
+  },
   'portfolios.index': {
     methods: ["GET","HEAD"],
     pattern: '/fiches/placements',

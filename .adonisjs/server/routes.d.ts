@@ -75,6 +75,11 @@ export type ScannedRoutes = {
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'bank_imports.confirm': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -235,6 +240,8 @@ export type ScannedRoutes = {
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -320,6 +327,8 @@ export type ScannedRoutes = {
     'accounts.create': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.create': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -404,6 +413,8 @@ export type ScannedRoutes = {
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.store': { paramsTuple?: []; params?: {} }
+    'bank_imports.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.confirm': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.store': { paramsTuple?: []; params?: {} }
     'recipes.import.store': { paramsTuple?: []; params?: {} }
@@ -447,6 +458,7 @@ export type ScannedRoutes = {
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -6,6 +6,7 @@
 export const controllers = {
   Accounts: () => import('#controllers/accounts_controller'),
   Agenda: () => import('#controllers/agenda_controller'),
+  BankImports: () => import('#controllers/bank_imports_controller'),
   Bills: () => import('#controllers/bills_controller'),
   Capture: () => import('#controllers/capture_controller'),
   Changelog: () => import('#controllers/changelog_controller'),

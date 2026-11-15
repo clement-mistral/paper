@@ -931,6 +931,71 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['destroy']>>>
     }
   }
+  'bank_imports.create': {
+    methods: ["GET","HEAD"]
+    pattern: '/fiches/comptes/:id/import'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['create']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['create']>>>
+    }
+  }
+  'bank_imports.store': {
+    methods: ["POST"]
+    pattern: '/fiches/comptes/:id/import'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['store']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['store']>>>
+    }
+  }
+  'bank_imports.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/fiches/comptes/:id/imports/:importId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; importId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['show']>>>
+    }
+  }
+  'bank_imports.confirm': {
+    methods: ["POST"]
+    pattern: '/fiches/comptes/:id/imports/:importId/valider'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/budget/validators/bank_import').bankLinesValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; importId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/budget/validators/bank_import').bankLinesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['confirm']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['confirm']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['confirm']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'bank_imports.destroy': {
+    methods: ["DELETE"]
+    pattern: '/fiches/comptes/:id/imports/:importId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; importId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/bank_imports_controller').default['destroy']>>>
+    }
+  }
   'portfolios.index': {
     methods: ["GET","HEAD"]
     pattern: '/fiches/placements'

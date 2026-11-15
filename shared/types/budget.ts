@@ -210,3 +210,47 @@ export type HoldingDetail = HoldingRow & {
   manualPricedOn: string | null
   operations: OperationRow[]
 }
+
+/* -------------------------------------------------------------------------
+ * Bank statement imports (CSV, OFX).
+ * ---------------------------------------------------------------------- */
+
+/**
+ * - `new`: to record (an envelope is proposed for an expense);
+ * - `matched`: confirms a transaction typed by hand;
+ * - `duplicate`: already imported on this account;
+ * - `skipped` / `imported`: after confirmation.
+ */
+export type BankLineStatus = 'new' | 'matched' | 'duplicate' | 'skipped' | 'imported'
+
+export type BankImportLineRow = {
+  id: number
+  occurredOn: string
+  /** As the bank wrote it. */
+  label: string
+  /** What the transaction will be called (« Carrefour market »). */
+  displayLabel: string
+  amountCents: number
+  status: BankLineStatus
+  envelopeId: number | null
+  matched: { id: number; label: string; occurredOn: string } | null
+}
+
+export type BankImportSummary = {
+  id: number
+  fileName: string
+  format: 'csv' | 'ofx'
+  status: 'pending' | 'done'
+  createdAt: string
+  /** First and last day of the statement. */
+  from: string | null
+  to: string | null
+  counts: Record<BankLineStatus, number>
+}
+
+export type BankImportDetail = BankImportSummary & {
+  account: { id: number; name: string }
+  lines: BankImportLineRow[]
+}
+
+export type BankLineChoice = { id: number; include: boolean; envelopeId: number | null }

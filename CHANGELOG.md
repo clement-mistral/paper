@@ -45,6 +45,13 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   fiches ; chacun a son bilan du jour, ses habitudes, sa série et ses
   notifications. Ce qu'une personne trie dans son bilan (une tâche faite,
   un repas) l'est aussi pour les autres.
+- Import des relevés bancaires (fiche d'un compte → « Importer un
+  relevé ») : CSV ou OFX, tels que votre banque les exporte. Avant tout
+  enregistrement, Paper montre ce qui est nouveau (avec une enveloppe
+  proposée), ce que vous aviez déjà saisi à la main (rapproché, pas
+  ajouté deux fois) et ce qui a déjà été importé. Vous cochez, choisissez
+  les enveloppes, validez ; l'enveloppe corrigée est retenue pour la
+  prochaine fois, et un import peut être annulé.
 - On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
   par Tom » sur une tâche, « par Léa » sur une dépense.
 

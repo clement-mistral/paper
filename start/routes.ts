@@ -159,7 +159,19 @@ router
         router.get(':id/modifier', [controllers.Accounts, 'edit'])
         router.put(':id', [controllers.Accounts, 'update'])
         router.delete(':id', [controllers.Accounts, 'destroy'])
+        router.get(':id/import', [controllers.BankImports, 'create']).as('bank_imports.create')
+        router.post(':id/import', [controllers.BankImports, 'store']).as('bank_imports.store')
+        router
+          .get(':id/imports/:importId', [controllers.BankImports, 'show'])
+          .as('bank_imports.show')
+        router
+          .post(':id/imports/:importId/valider', [controllers.BankImports, 'confirm'])
+          .as('bank_imports.confirm')
+        router
+          .delete(':id/imports/:importId', [controllers.BankImports, 'destroy'])
+          .as('bank_imports.destroy')
       })
+      .where('importId', router.matchers.number())
       .prefix('fiches/comptes')
       .where('id', router.matchers.number())
 

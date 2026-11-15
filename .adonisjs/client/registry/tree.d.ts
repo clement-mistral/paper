@@ -111,6 +111,13 @@ export interface ApiDefinition {
     update: typeof routes['accounts.update']
     destroy: typeof routes['accounts.destroy']
   }
+  bankImports: {
+    create: typeof routes['bank_imports.create']
+    store: typeof routes['bank_imports.store']
+    show: typeof routes['bank_imports.show']
+    confirm: typeof routes['bank_imports.confirm']
+    destroy: typeof routes['bank_imports.destroy']
+  }
   portfolios: {
     index: typeof routes['portfolios.index']
     show: typeof routes['portfolios.show']
