@@ -2,7 +2,12 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import PortfolioService from '#domains/budget/services/portfolio_service'
 import AccountService from '#domains/budget/services/account_service'
-import { holdingValidator, operationValidator } from '#domains/budget/validators/portfolio'
+import InvestmentCalendarService from '#domains/budget/services/investment_calendar_service'
+import {
+  holdingValidator,
+  operationValidator,
+  planValidator,
+} from '#domains/budget/validators/portfolio'
 import { formatAmount } from '#support/format'
 import { toIsoDate, today } from '#support/dates'
 
@@ -14,7 +19,8 @@ import { toIsoDate, today } from '#support/dates'
 export default class PortfoliosController {
   constructor(
     private portfolio: PortfolioService,
-    private accounts: AccountService
+    private accounts: AccountService,
+    private calendar: InvestmentCalendarService
   ) {}
 
   async index({ inertia }: HttpContext) {
@@ -29,17 +35,45 @@ export default class PortfoliosController {
     if (detail.type !== 'investment' && (detail.wrapper === null || detail.wrapper === 'livret')) {
       return response.redirect().toRoute('accounts.show', { id })
     }
-    const [account, operations, holdings] = await Promise.all([
+    const [account, operations, holdings, plans] = await Promise.all([
       this.portfolio.account(id),
       this.portfolio.operations({ accountId: id }),
       this.portfolio.holdingsOf(id),
+      this.calendar.plans(id),
     ])
     return inertia.render('fiches/placements/show', {
       account,
       operations,
       holdings,
+      plans,
       today: toIsoDate(today()),
     })
+  }
+
+  /**
+   * A scheduled monthly contribution (« versement programmé »).
+   */
+  async storePlan({ request, response, params, session }: HttpContext) {
+    const accountId = Number(params.id)
+    const { amount, dayOfMonth, holdingId } = await request.validateUsing(planValidator)
+    const holdings = await this.portfolio.holdingsOf(accountId)
+    await this.calendar.createPlan({
+      accountId,
+      holdingId: holdings.some((holding) => holding.id === holdingId) ? holdingId! : null,
+      amountCents: Math.round(amount * 100),
+      dayOfMonth,
+    })
+    session.flash(
+      'success',
+      `Versement de ${formatAmount(Math.round(amount * 100))} le ${dayOfMonth} de chaque mois`
+    )
+    return response.redirect().back()
+  }
+
+  async destroyPlan({ response, params, session }: HttpContext) {
+    await this.calendar.deletePlan(Number(params.id), Number(params.planId))
+    session.flash('success', 'Versement programmé supprimé')
+    return response.redirect().back()
   }
 
   async storeOperation({ request, response, params, session }: HttpContext) {

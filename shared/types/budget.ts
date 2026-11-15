@@ -58,7 +58,6 @@ export type TransactionRow = {
 }
 
 export type MoneyOverview = {
-  netWorthCents: number
   spentThisMonthCents: number
   incomeThisMonthCents: number
   budgetedThisMonthCents: number
@@ -254,3 +253,38 @@ export type BankImportDetail = BankImportSummary & {
 }
 
 export type BankLineChoice = { id: number; include: boolean; envelopeId: number | null }
+
+/* -------------------------------------------------------------------------
+ * Net worth (« Patrimoine »).
+ * ---------------------------------------------------------------------- */
+
+export type NetWorthPartKey = 'current' | 'savings' | 'investments' | 'vehicles'
+
+export type NetWorth = {
+  /** The day valued, ISO. */
+  day: string
+  totalCents: number
+  /** Current accounts, savings, investments (lines at their last close), vehicles. */
+  parts: Array<{ key: NetWorthPartKey; label: string; cents: number }>
+  /** Against the end of the previous month (null without history). */
+  monthChangeCents: number | null
+}
+
+export type NetWorthHistory = NetWorth & {
+  /** End of each of the last 12 months, today for the current one; oldest first. */
+  history: Array<{ date: string; cents: number }>
+}
+
+/**
+ * A scheduled monthly contribution to an investment account.
+ */
+export type InvestmentPlanRow = {
+  id: number
+  accountId: number
+  accountName: string
+  holdingId: number | null
+  holdingName: string | null
+  amountCents: number
+  dayOfMonth: number
+  startsOn: string
+}

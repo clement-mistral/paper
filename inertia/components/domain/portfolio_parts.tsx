@@ -55,7 +55,11 @@ const SLICE_COLORS = [
 ]
 
 /** One bar split by class, and its legend with the amounts. */
-export function AllocationBar({ slices }: { slices: AllocationSlice[] }) {
+export function AllocationBar({
+  slices,
+}: {
+  slices: Array<Pick<AllocationSlice, 'label' | 'cents'> & { key: string }>
+}) {
   const total = slices.reduce((sum, slice) => sum + slice.cents, 0)
   if (total <= 0) return null
   return (

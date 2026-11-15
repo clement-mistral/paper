@@ -21,6 +21,7 @@ import { HOME_ZONE, toIsoDate, today } from '#support/dates'
 import { formatDate, formatNumber } from '#support/format'
 import { shuffled } from '#support/seeded'
 import type { EditionItem, FullArticle, Newspaper } from '#shared/types/news'
+import NetWorthView from '#views/net_worth_view'
 
 const SLOT_LABELS = { lunch: 'Midi', dinner: 'Soir' } as const
 /** Recipes of the season suggested on the leisure page. */
@@ -144,7 +145,8 @@ export default class NewspaperView {
     private meters: MeterService,
     private school: SchoolHolidaysService,
     private recipes: RecipeService,
-    private market: MarketService
+    private market: MarketService,
+    private netWorth: NetWorthView
   ) {}
 
   async newspaper(day: string, userId: number): Promise<Newspaper> {
@@ -152,21 +154,33 @@ export default class NewspaperView {
     const isToday = day === toIsoDate(today())
     const settings = await this.news.settings()
 
-    const [sections, agenda, overview, meals, status, weather, meters, school, seasonal, markets] =
-      await Promise.all([
-        this.news.edition(day),
-        isToday ? this.agenda.today() : null,
-        this.money.overview(),
-        this.meals.between(day, day),
-        this.routine.status(userId),
-        settings.latitude !== null && settings.longitude !== null
-          ? this.weather.forecast(settings.latitude, settings.longitude, day)
-          : null,
-        this.meterLines(),
-        settings.schoolZone ? this.school.on(settings.schoolZone, day) : null,
-        this.recipes.inSeason(date.month),
-        this.market.markets(settings.marketSymbols, day),
-      ])
+    const [
+      sections,
+      agenda,
+      overview,
+      meals,
+      status,
+      weather,
+      meters,
+      school,
+      seasonal,
+      markets,
+      worth,
+    ] = await Promise.all([
+      this.news.edition(day),
+      isToday ? this.agenda.today() : null,
+      this.money.overview(),
+      this.meals.between(day, day),
+      this.routine.status(userId),
+      settings.latitude !== null && settings.longitude !== null
+        ? this.weather.forecast(settings.latitude, settings.longitude, day)
+        : null,
+      this.meterLines(),
+      settings.schoolZone ? this.school.on(settings.schoolZone, day) : null,
+      this.recipes.inSeason(date.month),
+      this.market.markets(settings.marketSymbols, day),
+      this.netWorth.on(isToday ? day : toIsoDate(today())),
+    ])
     const items = agenda ? agenda.today : await this.agenda.items(date, date)
     const layout = layoutFullText(sections.flatMap((section) => section.items))
     const lastText = layout.pages.at(-1)?.number ?? 1
@@ -206,6 +220,10 @@ export default class NewspaperView {
             ? overview.budgetedThisMonthCents - overview.spentThisMonthCents
             : null,
         incomeCents: overview.incomeThisMonthCents,
+        netWorth:
+          worth.totalCents === 0
+            ? null
+            : { cents: worth.totalCents, monthChangeCents: worth.monthChangeCents },
         meters,
       },
       ephemeris: {

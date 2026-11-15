@@ -1035,6 +1035,32 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storeOperation']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'portfolios.plans.store': {
+    methods: ["POST"]
+    pattern: '/fiches/placements/:id/versements'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/budget/validators/portfolio').planValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/budget/validators/portfolio').planValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storePlan']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storePlan']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['storePlan']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'portfolios.plans.destroy': {
+    methods: ["DELETE"]
+    pattern: '/fiches/placements/:id/versements/:planId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; planId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyPlan']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyPlan']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/portfolios_controller').default['destroyPlan']>>>
+    }
+  }
   'portfolios.operations.destroy': {
     methods: ["DELETE"]
     pattern: '/fiches/placements/operations/:id'

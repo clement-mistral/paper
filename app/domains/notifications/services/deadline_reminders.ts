@@ -11,6 +11,7 @@ import EquipmentService from '#domains/maison/services/equipment_service'
 import EquipmentMaintenanceService from '#domains/maison/services/equipment_maintenance_service'
 import MaintenanceService from '#domains/auto/services/maintenance_service'
 import TaskService from '#domains/lists/services/task_service'
+import InvestmentCalendarService from '#domains/budget/services/investment_calendar_service'
 import { formatAmount, formatDate, formatKm } from '#support/format'
 import { fromIsoDate, now, toIsoDate } from '#support/dates'
 import type { DeadlineReminderSettings, PushMessage } from '#shared/types/notifications'
@@ -186,7 +187,8 @@ export default class DeadlineReminders {
     private equipment: EquipmentService,
     private equipmentMaintenances: EquipmentMaintenanceService,
     private maintenances: MaintenanceService,
-    private tasks: TaskService
+    private tasks: TaskService,
+    private investments: InvestmentCalendarService
   ) {}
 
   async settings(userId: number): Promise<DeadlineReminderSettings> {
@@ -212,15 +214,26 @@ export default class DeadlineReminders {
    */
   async deadlines(day: DateTime): Promise<Deadline[]> {
     const from = toIsoDate(day.minus({ days: LATE_WINDOW_DAYS }))
-    const [bills, contracts, warranties, maintenances, equipmentMaintenances, tasks] =
-      await Promise.all([
-        this.bills.unpaid(),
-        this.contracts.withNotice(),
-        this.equipment.warrantiesEndingFrom(from),
-        this.maintenances.planned(),
-        this.equipmentMaintenances.planned(),
-        this.tasks.between(toIsoDate(day), toIsoDate(day)),
-      ])
+    const horizon = toIsoDate(day.plus({ days: 60 }))
+    const [
+      bills,
+      contracts,
+      warranties,
+      maintenances,
+      equipmentMaintenances,
+      tasks,
+      contributions,
+      milestones,
+    ] = await Promise.all([
+      this.bills.unpaid(),
+      this.contracts.withNotice(),
+      this.equipment.warrantiesEndingFrom(from),
+      this.maintenances.planned(),
+      this.equipmentMaintenances.planned(),
+      this.tasks.between(toIsoDate(day), toIsoDate(day)),
+      this.investments.occurrences(toIsoDate(day), toIsoDate(day)),
+      this.investments.milestones(from, horizon),
+    ])
 
     return [
       ...bills.map((bill) => ({
@@ -270,6 +283,26 @@ export default class DeadlineReminders {
           href: urlFor('equipment_maintenances.completion', { id: maintenance.id }),
           canBeLate: true,
         })),
+      ...milestones.map((milestone) => ({
+        key: `milestone:${milestone.accountId}`,
+        date: milestone.date,
+        title: milestone.title,
+        detail: milestone.detail,
+        href: urlFor('portfolios.show', { id: milestone.accountId }),
+        canBeLate: false,
+      })),
+      /** A contribution is reminded on its day, to record the purchase. */
+      ...contributions.map(({ plan, date }) => ({
+        key: `investment_plan:${plan.id}`,
+        date,
+        title: `Versement ${plan.accountName}`,
+        detail: [formatAmount(plan.amountCents), plan.holdingName].filter(Boolean).join(' · '),
+        href: plan.holdingId
+          ? urlFor('portfolios.holdings.show', { id: plan.holdingId })
+          : urlFor('portfolios.show', { id: plan.accountId }),
+        canBeLate: false,
+        dayOnly: true,
+      })),
       /**
        * Automatic tasks (a bill to pay, a notice to give) are already
        * reminded through their source; timed tasks get their own alert.

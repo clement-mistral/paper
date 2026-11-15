@@ -83,6 +83,8 @@ export type ScannedRoutes = {
     'portfolios.index': { paramsTuple?: []; params?: {} }
     'portfolios.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'planId': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -416,6 +418,7 @@ export type ScannedRoutes = {
     'bank_imports.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'bank_imports.confirm': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
     'portfolios.operations.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'portfolios.plans.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.store': { paramsTuple?: []; params?: {} }
     'recipes.import.store': { paramsTuple?: []; params?: {} }
     'recipes.plan': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -459,6 +462,7 @@ export type ScannedRoutes = {
     'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
+    'portfolios.plans.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'planId': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

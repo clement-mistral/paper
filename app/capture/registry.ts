@@ -4,6 +4,7 @@ import BillIntent from '#capture/intents/bill_intent'
 import ExpenseIntent from '#capture/intents/expense_intent'
 import FuelIntent from '#capture/intents/fuel_intent'
 import IncomeIntent from '#capture/intents/income_intent'
+import InvestmentIntent from '#capture/intents/investment_intent'
 import MaintenanceIntent from '#capture/intents/maintenance_intent'
 import MeterReadingIntent from '#capture/intents/meter_reading_intent'
 import ProjectExpenseIntent from '#capture/intents/project_expense_intent'
@@ -29,6 +30,7 @@ const INTENTS = [
   MaintenanceIntent,
   MeterReadingIntent,
   ProjectExpenseIntent,
+  InvestmentIntent,
 ]
 
 export async function loadIntents(): Promise<CaptureIntent[]> {

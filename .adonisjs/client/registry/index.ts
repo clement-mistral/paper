@@ -482,6 +482,18 @@ const routes = {
     tokens: [[0,"fiches"],[0,"placements"],[1,"id"],[0,"operations"]],
     types: placeholder as Registry['portfolios.operations.store']['types'],
   },
+  'portfolios.plans.store': {
+    methods: ["POST"],
+    pattern: '/fiches/placements/:id/versements',
+    tokens: [[0,"fiches"],[0,"placements"],[1,"id"],[0,"versements"]],
+    types: placeholder as Registry['portfolios.plans.store']['types'],
+  },
+  'portfolios.plans.destroy': {
+    methods: ["DELETE"],
+    pattern: '/fiches/placements/:id/versements/:planId',
+    tokens: [[0,"fiches"],[0,"placements"],[1,"id"],[0,"versements"],[1,"planId"]],
+    types: placeholder as Registry['portfolios.plans.destroy']['types'],
+  },
   'portfolios.operations.destroy': {
     methods: ["DELETE"],
     pattern: '/fiches/placements/operations/:id',

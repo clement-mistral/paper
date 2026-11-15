@@ -27,6 +27,7 @@ import {
   type OperationKind,
   type OperationRow,
   type PortfolioAccount,
+  type InvestmentPlanRow,
 } from '#shared/types/budget'
 import type { InertiaProps } from '~/types'
 
@@ -250,15 +251,107 @@ function OperationsTable({ operations }: { operations: OperationRow[] }) {
   )
 }
 
+/**
+ * Monthly contributions: shown in the Agenda and reminded on their day;
+ * the purchase is then recorded below, at the price paid.
+ */
+function Plans({
+  account,
+  holdings,
+  plans,
+}: {
+  account: PortfolioAccount
+  holdings: Array<{ id: number; name: string }>
+  plans: InvestmentPlanRow[]
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      {plans.length > 0 && (
+        <ul className="divide-y divide-border border-y border-border">
+          {plans.map((plan) => (
+            <li key={plan.id} className="flex items-center justify-between gap-3 py-2">
+              <span className="text-sm text-ink">
+                {formatAmount(plan.amountCents)} le {plan.dayOfMonth} de chaque mois
+                {plan.holdingName && (
+                  <span className="text-label text-muted"> · {plan.holdingName}</span>
+                )}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  router.delete(
+                    urlFor('portfolios.plans.destroy', { id: account.id, planId: plan.id }),
+                    { preserveScroll: true }
+                  )
+                }
+              >
+                Supprimer
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Form
+        route="portfolios.plans.store"
+        routeParams={{ id: account.id }}
+        options={{ preserveScroll: true }}
+        resetOnSuccess
+      >
+        {({ errors, processing }) => (
+          <div className="flex flex-wrap items-end gap-3">
+            <Input
+              className="w-32"
+              label="Montant (€)"
+              name="amount"
+              type="number"
+              step="0.01"
+              min="1"
+              required
+              error={errors.amount}
+            />
+            <Input
+              className="w-28"
+              label="Jour du mois"
+              name="dayOfMonth"
+              type="number"
+              min="1"
+              max="28"
+              defaultValue="5"
+              required
+              error={errors.dayOfMonth}
+            />
+            {holdings.length > 0 && (
+              <Select className="w-52" label="Ligne (facultatif)" name="holdingId" defaultValue="">
+                <option value="">Toutes</option>
+                {holdings.map((holding) => (
+                  <option key={holding.id} value={holding.id}>
+                    {holding.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+            <Button type="submit" variant="secondary" disabled={processing}>
+              Programmer
+            </Button>
+          </div>
+        )}
+      </Form>
+    </div>
+  )
+}
+
 export default function PortfolioShow({
   account,
   operations,
   holdings,
+  plans,
   today,
 }: InertiaProps<{
   account: PortfolioAccount
   operations: OperationRow[]
   holdings: Array<{ id: number; name: string; symbol: string | null }>
+  plans: InvestmentPlanRow[]
   today: string
 }>) {
   return (
@@ -316,6 +409,10 @@ export default function PortfolioShow({
             Enregistrez un premier achat ci-dessous : la ligne est créée avec lui.
           </EmptyState>
         )}
+      </Section>
+
+      <Section title="Versements programmés">
+        <Plans account={account} holdings={holdings} plans={plans} />
       </Section>
 
       <Section title="Nouvelle opération">

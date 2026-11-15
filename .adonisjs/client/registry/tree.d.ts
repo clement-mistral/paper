@@ -125,6 +125,10 @@ export interface ApiDefinition {
       store: typeof routes['portfolios.operations.store']
       destroy: typeof routes['portfolios.operations.destroy']
     }
+    plans: {
+      store: typeof routes['portfolios.plans.store']
+      destroy: typeof routes['portfolios.plans.destroy']
+    }
     holdings: {
       show: typeof routes['portfolios.holdings.show']
       update: typeof routes['portfolios.holdings.update']

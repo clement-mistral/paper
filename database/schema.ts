@@ -581,6 +581,27 @@ export class InvestmentOperationSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class InvestmentPlanSchema extends BaseModel {
+  static $columns = ['accountId', 'amountCents', 'createdAt', 'dayOfMonth', 'holdingId', 'id', 'startsOn', 'updatedAt'] as const
+  $columns = InvestmentPlanSchema.$columns
+  @column()
+  declare accountId: number
+  @column()
+  declare amountCents: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare dayOfMonth: number
+  @column()
+  declare holdingId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.date()
+  declare startsOn: DateTime
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class MaintenanceSchema extends BaseModel {
   static $columns = ['accountId', 'costCents', 'createdAt', 'doneOn', 'dueOdometerKm', 'dueOn', 'envelopeId', 'garage', 'id', 'intervalKm', 'intervalMonths', 'kind', 'label', 'notes', 'odometerKm', 'updatedAt', 'vehicleId'] as const
   $columns = MaintenanceSchema.$columns

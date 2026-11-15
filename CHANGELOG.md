@@ -52,6 +52,17 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   ajouté deux fois) et ce qui a déjà été importé. Vous cochez, choisissez
   les enveloppes, validez ; l'enveloppe corrigée est retenue pour la
   prochaine fois, et un import peut être annulé.
+- Patrimoine dans Argent : comptes, épargne, placements au dernier cours
+  et valeur estimée des véhicules, avec sa répartition, sa variation
+  depuis la fin du mois dernier et sa courbe sur 12 mois. Il figure aussi
+  dans le compte rendu du mois et dans le journal.
+- Placements dans la saisie universelle : « achat 10 CW8 à 512,30 € »,
+  « vendu 0,5 BTC 30 000 € », « dividende 12,40 € LVMH ».
+- Versements programmés (fiche d'un compte de placement) : un montant le
+  même jour chaque mois, rappelé dans l'Agenda et par notification.
+- L'Agenda annonce les 5 ans d'un PEA et les 8 ans d'une assurance-vie
+  (d'après la date d'ouverture du compte), quand leur fiscalité devient
+  plus douce.
 - On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
   par Tom » sur une tâche, « par Léa » sur une dépense.
 

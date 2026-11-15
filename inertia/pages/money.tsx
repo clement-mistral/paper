@@ -4,6 +4,8 @@ import AppShell from '~/layouts/app_shell'
 import { buttonClasses } from '~/components/ui/button'
 import { ICON_STROKE } from '~/lib/icons'
 import ColumnChart from '~/components/charts/column_chart'
+import LineChart from '~/components/charts/line_chart'
+import { AllocationBar } from '~/components/domain/portfolio_parts'
 import EnvelopeProgress from '~/components/domain/envelope_progress'
 import TransactionTable from '~/components/domain/transaction_table'
 import EmptyState from '~/components/ui/empty_state'
@@ -11,13 +13,18 @@ import Page from '~/components/ui/page'
 import Section from '~/components/ui/section'
 import { urlFor } from '~/client'
 import { formatAmount, formatAxisAmount, formatMonthLong, formatMonthShort } from '~/lib/format'
-import type { MoneyOverview } from '#shared/types/budget'
+import type { MoneyOverview, NetWorthHistory } from '#shared/types/budget'
 import type { InertiaProps } from '~/types'
 
-export default function Money({ overview }: InertiaProps<{ overview: MoneyOverview }>) {
+const signed = (cents: number) => `${cents >= 0 ? '+' : ''}${formatAmount(cents)}`
+
+export default function Money({
+  overview,
+  netWorth,
+}: InertiaProps<{ overview: MoneyOverview; netWorth: NetWorthHistory }>) {
   const left = overview.budgetedThisMonthCents - overview.spentThisMonthCents
   const summary = [
-    { label: 'Patrimoine', value: formatAmount(overview.netWorthCents) },
+    { label: 'Patrimoine', value: formatAmount(netWorth.totalCents) },
     { label: 'Dépensé ce mois', value: formatAmount(overview.spentThisMonthCents) },
     { label: 'Entré ce mois', value: formatAmount(overview.incomeThisMonthCents) },
     {
@@ -55,6 +62,38 @@ export default function Money({ overview }: InertiaProps<{ overview: MoneyOvervi
           </div>
         ))}
       </dl>
+
+      <Section
+        title="Patrimoine"
+        tone="budget"
+        action={{ label: 'Placements', href: urlFor('portfolios.index') }}
+      >
+        <p className="text-sm text-muted">
+          {netWorth.monthChangeCents === null
+            ? 'Comptes, épargne, placements au dernier cours et valeur estimée des véhicules.'
+            : `${signed(netWorth.monthChangeCents)} depuis la fin du mois dernier · comptes, épargne, placements au dernier cours et véhicules.`}
+        </p>
+        <AllocationBar slices={netWorth.parts} />
+        {netWorth.history.length >= 2 && (
+          <LineChart
+            title="Patrimoine sur 12 mois"
+            domain="budget"
+            data={netWorth.history.map((point, index) => ({
+              key: point.date,
+              date: point.date,
+              value: point.cents,
+              detail:
+                index === netWorth.history.length - 1
+                  ? 'Aujourd’hui'
+                  : `Fin ${formatMonthLong(point.date.slice(0, 7)).toLowerCase()}`,
+            }))}
+            format={formatAmount}
+            formatAxis={formatAxisAmount}
+            formatTick={(date) => formatMonthShort(date.slice(0, 7))}
+            tableHeader={['Fin de mois', 'Patrimoine']}
+          />
+        )}
+      </Section>
 
       <Section title="Dépenses par mois">
         <ColumnChart

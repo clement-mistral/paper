@@ -183,6 +183,13 @@ router
           .post(':id/operations', [controllers.Portfolios, 'storeOperation'])
           .as('portfolios.operations.store')
         router
+          .post(':id/versements', [controllers.Portfolios, 'storePlan'])
+          .as('portfolios.plans.store')
+        router
+          .delete(':id/versements/:planId', [controllers.Portfolios, 'destroyPlan'])
+          .where('planId', router.matchers.number())
+          .as('portfolios.plans.destroy')
+        router
           .delete('operations/:id', [controllers.Portfolios, 'destroyOperation'])
           .as('portfolios.operations.destroy')
         router.get('lignes/:id', [controllers.Portfolios, 'holding']).as('portfolios.holdings.show')

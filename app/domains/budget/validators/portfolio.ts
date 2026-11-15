@@ -26,3 +26,9 @@ export const holdingValidator = vine.create({
   manualPrice: decimal().optional(),
   notes: vine.string().trim().maxLength(2000).optional(),
 })
+
+export const planValidator = vine.create({
+  amount: vine.number().positive().max(1_000_000),
+  dayOfMonth: vine.number().withoutDecimals().range([1, 28]),
+  holdingId: vine.number().withoutDecimals().optional(),
+})

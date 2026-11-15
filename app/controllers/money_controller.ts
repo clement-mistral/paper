@@ -6,17 +6,23 @@ import { incomeFormValidator, transferFormValidator } from '#domains/budget/vali
 import BudgetOptionsView from '#views/budget_options_view'
 import MoneyView from '#views/money_view'
 import { formatAmount } from '#support/format'
+import NetWorthView from '#views/net_worth_view'
 
 @inject()
 export default class MoneyController {
   constructor(
     private money: MoneyView,
     private transactions: TransactionService,
-    private budget: BudgetOptionsView
+    private budget: BudgetOptionsView,
+    private netWorth: NetWorthView
   ) {}
 
   async index({ inertia }: HttpContext) {
-    return inertia.render('money', { overview: await this.money.overview() })
+    const [overview, netWorth] = await Promise.all([
+      this.money.overview(),
+      this.netWorth.withHistory(),
+    ])
+    return inertia.render('money', { overview, netWorth })
   }
 
   async incomeForm({ inertia }: HttpContext) {
