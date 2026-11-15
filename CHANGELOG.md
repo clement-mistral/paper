@@ -32,6 +32,13 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   abonnements, factures, travaux, comptes, placements, tâches en cours et
   dépenses), même avec une faute de frappe ou sans les accents. Flèches
   haut et bas pour choisir, Entrée pour ouvrir.
+- Repas de la semaine (Recettes → Repas de la semaine, ou depuis
+  Aujourd'hui et les Courses) : du lundi au dimanche, midi et soir. Chaque
+  soir encore libre reçoit une proposition tirée de vos recettes et de ce
+  qu'il y a dans le frigo, jamais deux fois la même dans la semaine :
+  gardez-les une par une ou toutes d'un coup, ou choisissez une autre
+  recette. Les ingrédients vont aux courses ; retirer un repas enlève de
+  la liste ce qui n'a pas encore été acheté.
 
 ### Modifié
 

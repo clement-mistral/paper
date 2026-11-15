@@ -101,10 +101,14 @@ export const reviewNav: NavItem = item('Bilan du jour', urlFor('reviews.current'
 /**
  * The most used fiches.
  */
+const recipes = item('Recettes', urlFor('recipes.index'), RecipeIcon, 'menu')
+const inMealWeek = section(urlFor('meals.week'))
+
 const pinnedFiches: NavItem[] = [
   item('Véhicules', urlFor('vehicles.index'), VehicleIcon, 'auto'),
   item('Logement', urlFor('homes.index'), HomeIcon, 'maison'),
-  item('Recettes', urlFor('recipes.index'), RecipeIcon, 'menu'),
+  /** « Repas de la semaine » lives with the recipes. */
+  { ...recipes, match: (url) => recipes.match(url) || inMealWeek(url) },
 ]
 
 const fichesHref = urlFor('fiches.index')

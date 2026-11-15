@@ -710,6 +710,58 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'meals.week': {
+    methods: ["GET","HEAD"]
+    pattern: '/repas'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#domains/menu/validators/week').weekQueryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'meals.store': {
+    methods: ["POST"]
+    pattern: '/repas'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/menu/validators/week').weekMealValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/menu/validators/week').weekMealValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'meals.store_many': {
+    methods: ["POST"]
+    pattern: '/repas/propositions'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/menu/validators/week').weekMealsValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/menu/validators/week').weekMealsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['storeMany']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['storeMany']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['storeMany']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'meals.destroy': {
+    methods: ["DELETE"]
+    pattern: '/repas/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/meals_controller').default['destroy']>>>
+    }
+  }
   'capture.preview': {
     methods: ["POST"]
     pattern: '/capture/preview'

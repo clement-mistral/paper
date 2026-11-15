@@ -332,6 +332,30 @@ const routes = {
     tokens: [[0,"recherche"]],
     types: placeholder as Registry['search']['types'],
   },
+  'meals.week': {
+    methods: ["GET","HEAD"],
+    pattern: '/repas',
+    tokens: [[0,"repas"]],
+    types: placeholder as Registry['meals.week']['types'],
+  },
+  'meals.store': {
+    methods: ["POST"],
+    pattern: '/repas',
+    tokens: [[0,"repas"]],
+    types: placeholder as Registry['meals.store']['types'],
+  },
+  'meals.store_many': {
+    methods: ["POST"],
+    pattern: '/repas/propositions',
+    tokens: [[0,"repas"],[0,"propositions"]],
+    types: placeholder as Registry['meals.store_many']['types'],
+  },
+  'meals.destroy': {
+    methods: ["DELETE"],
+    pattern: '/repas/:id',
+    tokens: [[0,"repas"],[1,"id"]],
+    types: placeholder as Registry['meals.destroy']['types'],
+  },
   'capture.preview': {
     methods: ["POST"],
     pattern: '/capture/preview',

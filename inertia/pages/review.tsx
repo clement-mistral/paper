@@ -14,7 +14,7 @@ import ProgressBar from '~/components/ui/progress_bar'
 import { cn } from '~/lib/cn'
 import { formatAmount, formatLongDate, todayIso } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
-import { slotLabels } from '~/lib/labels'
+import { mealOutcomeLabels, slotLabels } from '~/lib/labels'
 import type { MealOutcome, MealPlanRow } from '#shared/types/menu'
 import type { DailyReview, Mood, ReviewSection, Streak } from '#shared/types/routine'
 import type { InertiaProps } from '~/types'
@@ -27,11 +27,7 @@ const MOOD_LABELS: Record<Mood, string> = {
   5: 'Excellente',
 }
 
-const OUTCOME_LABELS: Record<MealOutcome, string> = {
-  cooked: 'Cuisiné',
-  other: 'Autre chose',
-  eaten_out: 'Mangé dehors',
-}
+const OUTCOME_LABELS = mealOutcomeLabels
 
 const SECTION_LABELS: Record<ReviewSection, string> = {
   money: 'confirmer l’argent du jour',

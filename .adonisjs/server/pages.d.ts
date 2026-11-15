@@ -63,6 +63,7 @@ declare module '@adonisjs/inertia/types' {
     'fiches/vehicles/index': ExtractProps<(typeof import('../../inertia/pages/fiches/vehicles/index.tsx'))['default']>
     'fiches/vehicles/show': ExtractProps<(typeof import('../../inertia/pages/fiches/vehicles/show.tsx'))['default']>
     'lists': ExtractProps<(typeof import('../../inertia/pages/lists.tsx'))['default']>
+    'meals/week': ExtractProps<(typeof import('../../inertia/pages/meals/week.tsx'))['default']>
     'money': ExtractProps<(typeof import('../../inertia/pages/money.tsx'))['default']>
     'money/income': ExtractProps<(typeof import('../../inertia/pages/money/income.tsx'))['default']>
     'money/transfer': ExtractProps<(typeof import('../../inertia/pages/money/transfer.tsx'))['default']>

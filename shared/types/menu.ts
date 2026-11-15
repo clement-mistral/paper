@@ -75,6 +75,35 @@ export type MealPlanRow = {
   recipe: { id: number; name: string }
 }
 
+/**
+ * A recipe proposed for an empty slot of the week, with why.
+ */
+export type MealProposal = {
+  recipe: { id: number; name: string; servings: number }
+  reasons: string[]
+}
+
+/**
+ * « Repas de la semaine »: seven days from Monday, lunch and dinner.
+ */
+export type MealWeek = {
+  /** Monday, `YYYY-MM-DD`. */
+  start: string
+  previous: string
+  next: string
+  isCurrent: boolean
+  days: Array<{
+    date: string
+    /** Before today: shown, but nothing is proposed or added. */
+    past: boolean
+    meals: Record<MealSlot, MealPlanRow[]>
+    /** Only for the empty dinners from today on. */
+    proposal: MealProposal | null
+  }>
+  recipes: Array<{ id: number; name: string; servings: number }>
+  shoppingCount: number
+}
+
 /* -------------------------------------------------------------------------
  * Stock (frigo, placards, congélateur) and meal suggestions.
  * ---------------------------------------------------------------------- */

@@ -58,6 +58,10 @@ export type ScannedRoutes = {
     'habits.store': { paramsTuple?: []; params?: {} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'meals.week': { paramsTuple?: []; params?: {} }
+    'meals.store': { paramsTuple?: []; params?: {} }
+    'meals.store_many': { paramsTuple?: []; params?: {} }
+    'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'capture.preview': { paramsTuple?: []; params?: {} }
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -219,6 +223,7 @@ export type ScannedRoutes = {
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }
@@ -302,6 +307,7 @@ export type ScannedRoutes = {
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }
@@ -384,6 +390,8 @@ export type ScannedRoutes = {
     'reviews.habit': { paramsTuple: [ParamValue,ParamValue]; params: {'day': ParamValue,'id': ParamValue} }
     'reviews.complete': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'habits.store': { paramsTuple?: []; params?: {} }
+    'meals.store': { paramsTuple?: []; params?: {} }
+    'meals.store_many': { paramsTuple?: []; params?: {} }
     'capture.preview': { paramsTuple?: []; params?: {} }
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -428,6 +436,7 @@ export type ScannedRoutes = {
     'tasks.items.destroy': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
     'newspapers.sources.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.operations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

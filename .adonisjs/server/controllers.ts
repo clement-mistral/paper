@@ -21,6 +21,7 @@ export const controllers = {
   Ingredients: () => import('#controllers/ingredients_controller'),
   Lists: () => import('#controllers/lists_controller'),
   Maintenances: () => import('#controllers/maintenances_controller'),
+  Meals: () => import('#controllers/meals_controller'),
   Meters: () => import('#controllers/meters_controller'),
   Money: () => import('#controllers/money_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),

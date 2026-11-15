@@ -130,6 +130,15 @@ router
       .where('id', router.matchers.number())
 
     router.get('recherche', [controllers.Search, 'index']).as('search')
+    router
+      .group(() => {
+        router.get('/', [controllers.Meals, 'index']).as('meals.week')
+        router.post('/', [controllers.Meals, 'store']).as('meals.store')
+        router.post('propositions', [controllers.Meals, 'storeMany']).as('meals.store_many')
+        router.delete(':id', [controllers.Meals, 'destroy']).as('meals.destroy')
+      })
+      .prefix('repas')
+      .where('id', router.matchers.number())
     router.post('capture/preview', [controllers.Capture, 'preview'])
     router.post('capture/commit', [controllers.Capture, 'commit'])
     router

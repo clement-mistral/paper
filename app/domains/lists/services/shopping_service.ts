@@ -102,6 +102,14 @@ export default class ShoppingService {
     await ShoppingItem.query({ client: trx }).where({ sourceType, sourceId }).delete()
   }
 
+  /**
+   * Removes what another domain added and was not bought yet (a meal
+   * taken off the week): what is checked stays, it is in the stock.
+   */
+  async removeOpenForSource(sourceType: string, sourceId: number) {
+    await ShoppingItem.query().where({ sourceType, sourceId }).whereNull('checked_at').delete()
+  }
+
   async removeMany(ids: number[], trx: TransactionClientContract) {
     await ShoppingItem.query({ client: trx }).whereIn('id', ids).delete()
   }

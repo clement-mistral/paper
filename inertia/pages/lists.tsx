@@ -29,7 +29,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
   const hasChecked = items.some((item) => item.checked)
 
   return (
-    <Section title="Courses">
+    <Section title="Courses" action={{ label: 'Repas de la semaine', href: urlFor('meals.week') }}>
       <Form
         route="shopping.store"
         options={{ preserveScroll: true }}

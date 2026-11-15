@@ -120,7 +120,7 @@ export default function Today({
       {dinnerIdeas.length > 0 && (
         <Section
           title="Idées pour ce soir"
-          action={{ label: 'Toutes les recettes', href: urlFor('recipes.index') }}
+          action={{ label: 'Prévoir la semaine', href: urlFor('meals.week') }}
         >
           <MealSuggestions suggestions={dinnerIdeas} compact />
         </Section>
