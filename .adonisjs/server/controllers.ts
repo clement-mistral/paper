@@ -33,6 +33,7 @@ export const controllers = {
   Recipes: () => import('#controllers/recipes_controller'),
   Reports: () => import('#controllers/reports_controller'),
   Reviews: () => import('#controllers/reviews_controller'),
+  Search: () => import('#controllers/search_controller'),
   Session: () => import('#controllers/session_controller'),
   Subscriptions: () => import('#controllers/subscriptions_controller'),
   Tasks: () => import('#controllers/tasks_controller'),

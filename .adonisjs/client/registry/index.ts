@@ -326,6 +326,12 @@ const routes = {
     tokens: [[0,"habitudes"],[1,"id"]],
     types: placeholder as Registry['habits.archive']['types'],
   },
+  'search': {
+    methods: ["GET","HEAD"],
+    pattern: '/recherche',
+    tokens: [[0,"recherche"]],
+    types: placeholder as Registry['search']['types'],
+  },
   'capture.preview': {
     methods: ["POST"],
     pattern: '/capture/preview',

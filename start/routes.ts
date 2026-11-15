@@ -129,6 +129,7 @@ router
       .as('habits.archive')
       .where('id', router.matchers.number())
 
+    router.get('recherche', [controllers.Search, 'index']).as('search')
     router.post('capture/preview', [controllers.Capture, 'preview'])
     router.post('capture/commit', [controllers.Capture, 'commit'])
     router

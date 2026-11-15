@@ -24,3 +24,22 @@ export async function postJson<T>(url: string, body: unknown, signal?: AbortSign
   }
   return (await response.json()) as T
 }
+
+/**
+ * JSON GET for the same kind of endpoints (global search).
+ */
+export async function getJson<T>(
+  url: string,
+  query: Record<string, string>,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetch(`${url}?${new URLSearchParams(query)}`, {
+    headers: { Accept: 'application/json' },
+    credentials: 'same-origin',
+    signal,
+  })
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`)
+  }
+  return (await response.json()) as T
+}

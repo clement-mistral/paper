@@ -697,6 +697,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/reviews_controller').default['archiveHabit']>>>
     }
   }
+  'search': {
+    methods: ["GET","HEAD"]
+    pattern: '/recherche'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/search').searchValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'capture.preview': {
     methods: ["POST"]
     pattern: '/capture/preview'

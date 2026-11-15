@@ -57,6 +57,7 @@ export type ScannedRoutes = {
     'reviews.complete': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'habits.store': { paramsTuple?: []; params?: {} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
     'capture.preview': { paramsTuple?: []; params?: {} }
     'capture.commit': { paramsTuple?: []; params?: {} }
     'capture.undo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -217,6 +218,7 @@ export type ScannedRoutes = {
     'reports.show': { paramsTuple: [ParamValue]; params: {'month': ParamValue} }
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }
@@ -299,6 +301,7 @@ export type ScannedRoutes = {
     'reports.show': { paramsTuple: [ParamValue]; params: {'month': ParamValue} }
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.create': { paramsTuple?: []; params?: {} }

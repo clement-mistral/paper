@@ -27,6 +27,11 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   en une seule notification.
 - Une tâche qui a une heure (« appeler le plombier 14h ») envoie une
   notification 15 minutes avant.
+- Recherche dans la palette Ctrl K : en tapant, vos fiches s'affichent
+  sous la saisie (recettes, véhicules, logements, équipements, contrats,
+  abonnements, factures, travaux, comptes, placements, tâches en cours et
+  dépenses), même avec une faute de frappe ou sans les accents. Flèches
+  haut et bas pour choisir, Entrée pour ouvrir.
 
 ### Modifié
 

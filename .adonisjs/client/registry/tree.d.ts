@@ -83,6 +83,7 @@ export interface ApiDefinition {
     store: typeof routes['habits.store']
     archive: typeof routes['habits.archive']
   }
+  search: typeof routes['search']
   capture: {
     preview: typeof routes['capture.preview']
     commit: typeof routes['capture.commit']

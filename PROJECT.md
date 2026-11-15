@@ -238,6 +238,10 @@ Tout le formatage passe par `inertia/lib/format.ts` (et un équivalent serveur s
 
 ---
 
+### 5.5 Recherche globale
+
+La palette Ctrl K cherche aussi dans les fiches pendant la frappe (`GET /recherche?q=`, read model `app/views/search_view.ts`) : noms et libellés sans accents, mot qui commence pareil (score 1) ou similarité `word_similarity` ≥ 0,5. Au plus 4 résultats par type de fiche et 12 en tout ; tâches terminées et annulées exclues. ↑ ↓ choisissent un résultat, Entrée l'ouvre ; sans résultat choisi, Entrée enregistre la saisie comme avant. Une nouvelle table à chercher = une entrée dans `SOURCES`.
+
 ## 6. Saisie universelle (sans LLM)
 
 Pipeline : **comprendre → proposer un plan → exécuter après confirmation**. Rien n'est écrit sans validation.
