@@ -19,6 +19,9 @@ router
 
     router.get('login', [controllers.Session, 'create'])
     router.post('login', [controllers.Session, 'store'])
+
+    router.get('invitation/:token', [controllers.Invitations, 'show']).as('invitations.show')
+    router.post('invitation/:token', [controllers.Invitations, 'accept']).as('invitations.accept')
   })
   .use(middleware.guest())
 
@@ -402,6 +405,15 @@ router
           .as('notifications.deadlines')
       })
       .prefix('profil/notifications')
+      .where('id', router.matchers.number())
+
+    router
+      .group(() => {
+        router.post('invitations', [controllers.Household, 'invite']).as('household.invite')
+        router.delete('invitations/:id', [controllers.Household, 'revoke']).as('household.revoke')
+        router.delete('membres/:id', [controllers.Household, 'remove']).as('household.remove')
+      })
+      .prefix('profil/foyer')
       .where('id', router.matchers.number())
 
     router.get('nouveautes', [controllers.Changelog, 'index']).as('changelog')

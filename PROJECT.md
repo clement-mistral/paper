@@ -126,7 +126,12 @@ Un repas marqué cuisiné décrémente le stock **dans la même transaction** (l
 
 ### 3.4 Auth
 
-Application mono-utilisateur/foyer : **guard session** Adonis (cookie, store Redis). Pas d'access tokens.
+Un **foyer**, plusieurs personnes : **guard session** Adonis (cookie, store Redis), pas d'access tokens. Les données sont communes au foyer, sauf ce qui est personnel : appareils de notification, réglages des rappels, bilan du jour (`daily_reviews.user_id`, unique par personne et par jour), habitudes et série.
+
+- **Inscription** : seulement tant qu'aucun compte n'existe (le premier compte crée le foyer). Ensuite, on rejoint le foyer par un **lien d'invitation** créé dans Profil → Foyer : usage unique, 7 jours, seul le SHA-256 du jeton est stocké (`household_invitations`), Paper n'envoie pas d'e-mail (`app/services/household_service.ts`).
+- **Retirer un membre** supprime son compte et ce qui lui est personnel ; ce qu'il a saisi reste, sans auteur. On ne peut pas se retirer soi-même.
+- **Qui a fait quoi** : `tasks.created_by_id / done_by_id`, `shopping_items.added_by_id / checked_by_id`, `transactions.created_by_id`, remplis via `currentUserId()` (`app/support/actor.ts`, async local storage activé dans `config/app.ts`) ; null hors requête (planificateur, listeners). Affiché (« coché par Léa ») seulement quand le foyer a plusieurs personnes (`useMembers`, prop partagée `members`).
+- Les services personnels prennent l'utilisateur en premier paramètre (`RoutineService.status(userId)`, `PushService.sendToUser`, `ReviewReminders.runFor`, `DeadlineReminders.runFor`).
 
 ---
 

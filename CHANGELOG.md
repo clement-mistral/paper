@@ -39,6 +39,14 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   gardez-les une par une ou toutes d'un coup, ou choisissez une autre
   recette. Les ingrédients vont aux courses ; retirer un repas enlève de
   la liste ce qui n'a pas encore été acheté.
+- Plusieurs personnes dans le foyer (Profil → Foyer) : invitez quelqu'un
+  avec un lien à lui envoyer (il sert une fois et expire au bout de
+  7 jours). Tout le monde partage l'agenda, l'argent, les listes et les
+  fiches ; chacun a son bilan du jour, ses habitudes, sa série et ses
+  notifications. Ce qu'une personne trie dans son bilan (une tâche faite,
+  un repas) l'est aussi pour les autres.
+- On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
+  par Tom » sur une tâche, « par Léa » sur une dépense.
 
 ### Modifié
 
@@ -46,6 +54,8 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   « + » et le logo, et la navigation montre la page ouverte dans sa
   couleur (Argent en or, Véhicules en bleu, Logement en violet, Recettes
   en corail).
+- La création de compte n'est plus ouverte à tous : une fois le premier
+  compte créé, on ne rejoint le foyer que par invitation.
 
 ## [1.3.0] - 2026-11-11
 

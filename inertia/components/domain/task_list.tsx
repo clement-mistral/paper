@@ -10,6 +10,7 @@ import Section from '~/components/ui/section'
 import { cn } from '~/lib/cn'
 import { formatShortDay, todayIso } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
+import { useMembers } from '~/lib/members'
 import type { TaskRow } from '#shared/types/lists'
 
 function due(task: TaskRow): string | null {
@@ -25,6 +26,7 @@ function due(task: TaskRow): string | null {
  */
 export default function TaskList({ tasks }: { tasks: TaskRow[] }) {
   const [title, setTitle] = useState('')
+  const { by } = useMembers()
 
   return (
     <Section title="À faire">
@@ -89,6 +91,11 @@ export default function TaskList({ tasks }: { tasks: TaskRow[] }) {
                 )}
               >
                 <span className="text-sm">{task.title}</span>
+                {task.done && by(task.doneById) && (
+                  <span className="text-label text-muted no-underline">
+                    fait par {by(task.doneById)}
+                  </span>
+                )}
                 {task.itemCount > 0 && (
                   <span className="text-label text-muted">
                     {task.itemDoneCount}/{task.itemCount}

@@ -11,6 +11,10 @@ export interface ApiDefinition {
     store: typeof routes['session.store']
     destroy: typeof routes['session.destroy']
   }
+  invitations: {
+    show: typeof routes['invitations.show']
+    accept: typeof routes['invitations.accept']
+  }
   today: typeof routes['today']
   agenda: typeof routes['agenda']
   money: typeof routes['money'] & {
@@ -285,6 +289,11 @@ export interface ApiDefinition {
     test: typeof routes['notifications.test']
     reminders: typeof routes['notifications.reminders']
     deadlines: typeof routes['notifications.deadlines']
+  }
+  household: {
+    invite: typeof routes['household.invite']
+    revoke: typeof routes['household.revoke']
+    remove: typeof routes['household.remove']
   }
   changelog: typeof routes['changelog']
   design: typeof routes['design']

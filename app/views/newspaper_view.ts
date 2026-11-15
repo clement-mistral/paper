@@ -147,7 +147,7 @@ export default class NewspaperView {
     private market: MarketService
   ) {}
 
-  async newspaper(day: string): Promise<Newspaper> {
+  async newspaper(day: string, userId: number): Promise<Newspaper> {
     const date = DateTime.fromISO(day, { zone: HOME_ZONE }).startOf('day')
     const isToday = day === toIsoDate(today())
     const settings = await this.news.settings()
@@ -158,7 +158,7 @@ export default class NewspaperView {
         isToday ? this.agenda.today() : null,
         this.money.overview(),
         this.meals.between(day, day),
-        this.routine.status(),
+        this.routine.status(userId),
         settings.latitude !== null && settings.longitude !== null
           ? this.weather.forecast(settings.latitude, settings.longitude, day)
           : null,

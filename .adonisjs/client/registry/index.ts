@@ -32,6 +32,18 @@ const routes = {
     tokens: [[0,"login"]],
     types: placeholder as Registry['session.store']['types'],
   },
+  'invitations.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/invitation/:token',
+    tokens: [[0,"invitation"],[1,"token"]],
+    types: placeholder as Registry['invitations.show']['types'],
+  },
+  'invitations.accept': {
+    methods: ["POST"],
+    pattern: '/invitation/:token',
+    tokens: [[0,"invitation"],[1,"token"]],
+    types: placeholder as Registry['invitations.accept']['types'],
+  },
   'today': {
     methods: ["GET","HEAD"],
     pattern: '/',
@@ -1177,6 +1189,24 @@ const routes = {
     pattern: '/profil/notifications/echeances',
     tokens: [[0,"profil"],[0,"notifications"],[0,"echeances"]],
     types: placeholder as Registry['notifications.deadlines']['types'],
+  },
+  'household.invite': {
+    methods: ["POST"],
+    pattern: '/profil/foyer/invitations',
+    tokens: [[0,"profil"],[0,"foyer"],[0,"invitations"]],
+    types: placeholder as Registry['household.invite']['types'],
+  },
+  'household.revoke': {
+    methods: ["DELETE"],
+    pattern: '/profil/foyer/invitations/:id',
+    tokens: [[0,"profil"],[0,"foyer"],[0,"invitations"],[1,"id"]],
+    types: placeholder as Registry['household.revoke']['types'],
+  },
+  'household.remove': {
+    methods: ["DELETE"],
+    pattern: '/profil/foyer/membres/:id',
+    tokens: [[0,"profil"],[0,"foyer"],[0,"membres"],[1,"id"]],
+    types: placeholder as Registry['household.remove']['types'],
   },
   'changelog': {
     methods: ["GET","HEAD"],

@@ -1,5 +1,6 @@
 import { type DateTime } from 'luxon'
 import { inject } from '@adonisjs/core'
+import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import { urlFor } from '@adonisjs/core/services/url_builder'
 import DeadlineReminderSetting from '#domains/notifications/models/deadline_reminder_setting'
@@ -188,8 +189,8 @@ export default class DeadlineReminders {
     private tasks: TaskService
   ) {}
 
-  async settings(): Promise<DeadlineReminderSettings> {
-    const row = await DeadlineReminderSetting.query().orderBy('id').first()
+  async settings(userId: number): Promise<DeadlineReminderSettings> {
+    const row = await DeadlineReminderSetting.findBy('user_id', userId)
     if (!row) return { ...DEFAULTS }
     return {
       enabled: row.enabled,
@@ -199,8 +200,8 @@ export default class DeadlineReminders {
     }
   }
 
-  async saveSettings(input: DeadlineReminderSettings) {
-    const row = await this.row()
+  async saveSettings(userId: number, input: DeadlineReminderSettings) {
+    const row = await this.row(userId)
     row.merge(input)
     await row.save()
   }
@@ -288,20 +289,32 @@ export default class DeadlineReminders {
   }
 
   /**
-   * Sends what is due at `at`: the digest of deadlines (once the chosen
-   * time has come) and the alerts of timed tasks. Idempotent: each stage
-   * is recorded before sending, and a concurrent run records nothing.
-   * Returns how many notifications were sent.
+   * Every person of the household, each with their own settings and
+   * devices. Returns how many notifications were sent.
    */
   async run(at: DateTime = now()): Promise<number> {
     if (!this.push.configured) return 0
-    const settings = await this.settings()
-    if (!settings.enabled) return 0
-
     await db
       .from('deadline_reminder_logs')
       .where('sent_on', '<', toIsoDate(at.minus({ days: LOG_RETENTION_DAYS })))
       .delete()
+
+    const users = await User.query().select('id').orderBy('id')
+    let sent = 0
+    for (const user of users) sent += await this.runFor(user.id, at)
+    return sent
+  }
+
+  /**
+   * Sends a person what is due at `at`: the digest of deadlines (once the
+   * chosen time has come) and the alerts of timed tasks. Idempotent: each
+   * stage is recorded, per person, before sending, and a concurrent run
+   * records nothing. Returns how many notifications were sent.
+   */
+  async runFor(userId: number, at: DateTime = now()): Promise<number> {
+    if (!this.push.configured) return 0
+    const settings = await this.settings(userId)
+    if (!settings.enabled) return 0
 
     let sent = 0
 
@@ -310,11 +323,12 @@ export default class DeadlineReminders {
       for (const task of tasks) {
         if (task.done || !task.dueOn || !task.dueTime) continue
         if (!taskAlertDue(task.dueOn, task.dueTime, at)) continue
-        const claimed = await this.claim(at, [
+        const claimed = await this.claim(userId, at, [
           { key: `task:${task.id}:${task.dueOn}`, stage: 'time' },
         ])
         if (claimed.size === 0) continue
-        await this.push.sendToAll(
+        await this.push.sendToUser(
+          userId,
           {
             title: task.title,
             body: `Prévu à ${task.dueTime}`,
@@ -334,12 +348,13 @@ export default class DeadlineReminders {
         .filter((item): item is DueDeadline => item !== null)
       const keyOf = (item: DueDeadline) => `${item.deadline.key}:${item.deadline.date ?? 'km'}`
       const claimed = await this.claim(
+        userId,
         at,
         due.map((item) => ({ key: keyOf(item), stage: item.stage }))
       )
       const fresh = due.filter((item) => claimed.has(`${keyOf(item)}|${item.stage}`))
       if (fresh.length > 0) {
-        await this.push.sendToAll(digestMessage(fresh, urlFor('agenda')), {
+        await this.push.sendToUser(userId, digestMessage(fresh, urlFor('agenda')), {
           ttl: 12 * 3600,
         })
         sent++
@@ -350,10 +365,11 @@ export default class DeadlineReminders {
   }
 
   /**
-   * Records the stages about to be sent and returns those that were not
-   * already (`key|stage`).
+   * Records the stages about to be sent to a person and returns those that
+   * were not already (`key|stage`). The person is part of the logged key.
    */
   private async claim(
+    userId: number,
     at: DateTime,
     entries: Array<{ key: string; stage: string }>
   ): Promise<Set<string>> {
@@ -362,7 +378,7 @@ export default class DeadlineReminders {
       .table('deadline_reminder_logs')
       .insert(
         entries.map((entry) => ({
-          deadline_key: entry.key,
+          deadline_key: `u${userId}:${entry.key}`,
           stage: entry.stage,
           sent_on: toIsoDate(at),
         }))
@@ -370,11 +386,12 @@ export default class DeadlineReminders {
       .onConflict(['deadline_key', 'stage'])
       .ignore()
       .returning(['deadline_key', 'stage'])
-    return new Set(rows.map((row) => `${row.deadline_key}|${row.stage}`))
+    const prefix = `u${userId}:`
+    return new Set(rows.map((row) => `${row.deadline_key.slice(prefix.length)}|${row.stage}`))
   }
 
-  private async row(): Promise<DeadlineReminderSetting> {
-    const existing = await DeadlineReminderSetting.query().orderBy('id').first()
-    return existing ?? DeadlineReminderSetting.create({ ...DEFAULTS })
+  private async row(userId: number): Promise<DeadlineReminderSetting> {
+    const existing = await DeadlineReminderSetting.findBy('user_id', userId)
+    return existing ?? DeadlineReminderSetting.create({ ...DEFAULTS, userId })
   }
 }

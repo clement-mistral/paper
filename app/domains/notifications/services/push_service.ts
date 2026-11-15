@@ -27,8 +27,12 @@ export default class PushService {
     return privateKey ? vapidPublicKey(privateKey) : null
   }
 
-  async devices(): Promise<PushDevice[]> {
-    const rows = await PushSubscription.query().orderBy('created_at')
+  /**
+   * A person's devices: each device belongs to whoever enabled
+   * notifications on it.
+   */
+  async devices(userId: number): Promise<PushDevice[]> {
+    const rows = await PushSubscription.query().where('user_id', userId).orderBy('created_at')
     return rows.map((row) => ({
       id: row.id,
       label: row.label,
@@ -39,7 +43,7 @@ export default class PushService {
   /**
    * Idempotent: subscribing the same browser again updates its keys.
    */
-  async subscribe(input: SubscriptionInput, userAgent: string | undefined) {
+  async subscribe(userId: number, input: SubscriptionInput, userAgent: string | undefined) {
     // Push services are public: never make the server post to its own network.
     const host = new URL(input.endpoint).hostname.replace(/^\[|\]$/g, '')
     if (host === 'localhost' || (isIP(host) && isPrivateAddress(host))) {
@@ -47,7 +51,7 @@ export default class PushService {
     }
     await PushSubscription.updateOrCreate(
       { endpoint: input.endpoint },
-      { p256Dh: input.keys.p256dh, auth: input.keys.auth, label: deviceLabel(userAgent) }
+      { userId, p256Dh: input.keys.p256dh, auth: input.keys.auth, label: deviceLabel(userAgent) }
     )
   }
 
@@ -55,19 +59,23 @@ export default class PushService {
     await PushSubscription.query().where('endpoint', endpoint).delete()
   }
 
-  async remove(id: number) {
-    await PushSubscription.query().where('id', id).delete()
+  async remove(userId: number, id: number) {
+    await PushSubscription.query().where({ id, userId }).delete()
   }
 
   /**
-   * Sends to every device. Returns how many accepted the message.
+   * Sends to every device of a person. Returns how many accepted it.
    */
-  async sendToAll(message: PushMessage, options: PushOptions = {}): Promise<number> {
+  async sendToUser(
+    userId: number,
+    message: PushMessage,
+    options: PushOptions = {}
+  ): Promise<number> {
     const privateKey = env.get('VAPID_PRIVATE_KEY')?.release()
     if (!privateKey) return 0
     const vapid = { privateKey, subject: env.get('VAPID_SUBJECT') || env.get('APP_URL') }
 
-    const subscriptions = await PushSubscription.all()
+    const subscriptions = await PushSubscription.query().where('user_id', userId)
     const payload = JSON.stringify(message)
     const results = await Promise.all(
       subscriptions.map(async (subscription) => {

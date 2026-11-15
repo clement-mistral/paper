@@ -13,6 +13,7 @@ import Section from '~/components/ui/section'
 import { cn } from '~/lib/cn'
 import { formatDecimal } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
+import { useMembers } from '~/lib/members'
 import type { ShoppingItemRow, TaskRow } from '#shared/types/lists'
 import type { PantryRow } from '#shared/types/menu'
 import PantrySection from '~/components/domain/pantry_section'
@@ -25,6 +26,7 @@ function quantity(item: ShoppingItemRow): string | null {
 }
 
 function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
+  const { by } = useMembers()
   const [label, setLabel] = useState('')
   const hasChecked = items.some((item) => item.checked)
 
@@ -95,6 +97,9 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
                 <span className="text-sm">{item.label}</span>
                 {quantity(item) && <span className="text-label text-muted">{quantity(item)}</span>}
                 {item.reason && <span className="text-xs text-muted">{item.reason}</span>}
+                {item.checked && by(item.checkedById) && (
+                  <span className="text-xs text-muted">coché par {by(item.checkedById)}</span>
+                )}
               </label>
               {item.reasonDomain && <DomainTag domain={item.reasonDomain} />}
               <button

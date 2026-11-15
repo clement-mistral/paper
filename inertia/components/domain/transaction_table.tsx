@@ -8,6 +8,7 @@ import DomainTag from '~/components/ui/domain_tag'
 import EmptyState from '~/components/ui/empty_state'
 import { formatDate } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
+import { useMembers } from '~/lib/members'
 import type { TransactionRow } from '#shared/types/budget'
 
 /**
@@ -24,6 +25,11 @@ export default function TransactionTable({
   /** Offer to delete what was typed by hand (and transfers). */
   allowDelete?: boolean
 }) {
+  const { by } = useMembers()
+  const author = (row: TransactionRow) =>
+    by(row.createdById) && (
+      <span className="ml-2 text-label text-muted">par {by(row.createdById)}</span>
+    )
   const columns = [
     {
       key: 'date',
@@ -46,9 +52,13 @@ export default function TransactionTable({
             />
             {row.label}
             <span className="sr-only">(virement)</span>
+            {author(row)}
           </span>
         ) : (
-          row.label
+          <span>
+            {row.label}
+            {author(row)}
+          </span>
         ),
     },
     {

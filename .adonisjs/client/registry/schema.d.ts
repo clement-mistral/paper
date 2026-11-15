@@ -60,6 +60,32 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/session_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'invitations.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/invitation/:token'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { token: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['show']>>>
+    }
+  }
+  'invitations.accept': {
+    methods: ["POST"]
+    pattern: '/invitation/:token'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').invitationValidator)>>
+      paramsTuple: [ParamValue]
+      params: { token: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').invitationValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['accept']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['accept']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/invitations_controller').default['accept']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'today': {
     methods: ["GET","HEAD"]
     pattern: '/'
@@ -2541,6 +2567,45 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>> | { status: 422; response: { errors: SimpleError[] } }
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['updateDeadlines']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'household.invite': {
+    methods: ["POST"]
+    pattern: '/profil/foyer/invitations'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/household_controller').default['invite']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/household_controller').default['invite']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/household_controller').default['invite']>>>
+    }
+  }
+  'household.revoke': {
+    methods: ["DELETE"]
+    pattern: '/profil/foyer/invitations/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/household_controller').default['revoke']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/household_controller').default['revoke']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/household_controller').default['revoke']>>>
+    }
+  }
+  'household.remove': {
+    methods: ["DELETE"]
+    pattern: '/profil/foyer/membres/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/household_controller').default['remove']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/household_controller').default['remove']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/household_controller').default['remove']>>>
     }
   }
   'changelog': {

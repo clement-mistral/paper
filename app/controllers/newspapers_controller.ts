@@ -60,10 +60,10 @@ export default class NewspapersController {
       .toRoute('newspapers.show', { day: toIsoDate(today().plus({ days: 1 })) })
   }
 
-  async show({ inertia, params }: HttpContext) {
+  async show({ inertia, params, auth }: HttpContext) {
     await this.firstVisit()
     return inertia.render('newspaper/show', {
-      newspaper: await this.view.newspaper(String(params.day)),
+      newspaper: await this.view.newspaper(String(params.day), auth.getUserOrFail().id),
       today: toIsoDate(today()),
     })
   }

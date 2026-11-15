@@ -6,6 +6,7 @@ import User from '#models/user'
 import { passwordValidator, profileValidator } from '#validators/user'
 import PushService from '#domains/notifications/services/push_service'
 import DeadlineReminders from '#domains/notifications/services/deadline_reminders'
+import HouseholdService from '#services/household_service'
 import ReviewReminders from '#domains/routine/services/review_reminders'
 import type { NotificationsPanel } from '#shared/types/notifications'
 
@@ -17,14 +18,17 @@ export default class ProfileController {
   constructor(
     private push: PushService,
     private reminders: ReviewReminders,
-    private deadlines: DeadlineReminders
+    private deadlines: DeadlineReminders,
+    private household: HouseholdService
   ) {}
 
-  async show({ inertia }: HttpContext) {
-    const [devices, reminders, deadlines] = await Promise.all([
-      this.push.devices(),
-      this.reminders.settings(),
-      this.deadlines.settings(),
+  async show({ inertia, auth }: HttpContext) {
+    const userId = auth.getUserOrFail().id
+    const [devices, reminders, deadlines, household] = await Promise.all([
+      this.push.devices(userId),
+      this.reminders.settings(userId),
+      this.deadlines.settings(userId),
+      this.household.panel(userId),
     ])
     const notifications: NotificationsPanel = {
       configured: this.push.configured,
@@ -33,7 +37,7 @@ export default class ProfileController {
       reminders,
       deadlines,
     }
-    return inertia.render('profile', { notifications })
+    return inertia.render('profile', { notifications, household })
   }
 
   async update({ request, response, auth, session }: HttpContext) {

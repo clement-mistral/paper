@@ -20,9 +20,9 @@ export default class NotificationsController {
     private deadlines: DeadlineReminders
   ) {}
 
-  async subscribe({ request, response }: HttpContext) {
+  async subscribe({ request, response, auth }: HttpContext) {
     const input = await request.validateUsing(subscribeValidator)
-    await this.push.subscribe(input, request.header('user-agent'))
+    await this.push.subscribe(auth.getUserOrFail().id, input, request.header('user-agent'))
     return response.json({ ok: true })
   }
 
@@ -32,22 +32,22 @@ export default class NotificationsController {
     return response.json({ ok: true })
   }
 
-  async destroyDevice({ params, response, session }: HttpContext) {
-    await this.push.remove(Number(params.id))
+  async destroyDevice({ params, response, session, auth }: HttpContext) {
+    await this.push.remove(auth.getUserOrFail().id, Number(params.id))
     session.flash('success', 'Appareil retiré')
     return response.redirect().back()
   }
 
-  async test({ response, session }: HttpContext) {
-    const sent = await this.reminders.test()
+  async test({ response, session, auth }: HttpContext) {
+    const sent = await this.reminders.test(auth.getUserOrFail().id)
     if (sent > 0) session.flash('success', 'Notification envoyée')
     else session.flash('error', 'Aucun appareil n’a reçu la notification')
     return response.redirect().back()
   }
 
-  async updateReminders({ request, response, session }: HttpContext) {
+  async updateReminders({ request, response, session, auth }: HttpContext) {
     const input = await request.validateUsing(remindersValidator)
-    await this.reminders.saveSettings({
+    await this.reminders.saveSettings(auth.getUserOrFail().id, {
       eveningEnabled: input.eveningEnabled ?? false,
       eveningTime: input.eveningTime,
       morningEnabled: input.morningEnabled ?? false,
@@ -56,9 +56,9 @@ export default class NotificationsController {
     return response.redirect().back()
   }
 
-  async updateDeadlines({ request, response, session }: HttpContext) {
+  async updateDeadlines({ request, response, session, auth }: HttpContext) {
     const input = await request.validateUsing(deadlineRemindersValidator)
-    await this.deadlines.saveSettings({
+    await this.deadlines.saveSettings(auth.getUserOrFail().id, {
       enabled: input.enabled ?? false,
       sendTime: input.sendTime,
       leadDays: input.leadDays,

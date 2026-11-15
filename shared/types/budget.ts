@@ -53,6 +53,8 @@ export type TransactionRow = {
   kind: 'expense' | 'income' | 'transfer'
   /** Typed by hand (or a transfer): deletable from « Argent ». */
   deletable: boolean
+  /** Who recorded it (null: automatic, or before the household had members). */
+  createdById: number | null
 }
 
 export type MoneyOverview = {

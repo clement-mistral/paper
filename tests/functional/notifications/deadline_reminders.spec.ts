@@ -17,7 +17,7 @@ class FakePush extends PushService {
   get configured() {
     return true
   }
-  async sendToAll(message: PushMessage) {
+  async sendToUser(_userId: number, message: PushMessage) {
     this.sent.push(message)
     return 1
   }
@@ -50,7 +50,8 @@ test.group('Notifications | deadline reminders', (group) => {
     })
 
     const reminders = await app.container.make(DeadlineReminders)
-    assert.equal(await reminders.run(day.set({ hour: 8, minute: 55 })), 0)
+    const me = await User.create({ email: 'digest@paper.local', password: 'secret123' })
+    assert.equal(await reminders.runFor(me.id, day.set({ hour: 8, minute: 55 })), 0)
     assert.equal(await reminders.run(day.set({ hour: 9, minute: 5 })), 1)
     assert.equal(await reminders.run(day.set({ hour: 9, minute: 10 })), 0)
     assert.lengthOf(fake.sent, 1)
@@ -92,7 +93,8 @@ test.group('Notifications | deadline reminders', (group) => {
     const tasks = await app.container.make(TaskService)
     await tasks.create({ title: 'Sortir les poubelles', dueOn: toIsoDate(today()) })
     const reminders = await app.container.make(DeadlineReminders)
-    await reminders.saveSettings({
+    const me = await User.create({ email: 'off@paper.local', password: 'secret123' })
+    await reminders.saveSettings(me.id, {
       enabled: false,
       sendTime: '09:00',
       leadDays: 7,

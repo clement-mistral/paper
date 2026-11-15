@@ -30,7 +30,7 @@ export const http = defineConfig({
    * Enabling async local storage will let you access HTTP context
    * from anywhere inside your application.
    */
-  useAsyncLocalStorage: false,
+  useAsyncLocalStorage: true,
 
   router: {
     matcher: 'tree',

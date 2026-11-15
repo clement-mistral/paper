@@ -213,6 +213,7 @@ export default class MoneyView {
             ? 'expense'
             : 'income',
       deletable: row.sourceType === null || row.sourceType === TRANSFER_SOURCE,
+      createdById: row.createdById,
     }
   }
 }

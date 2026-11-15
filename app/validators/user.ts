@@ -21,6 +21,12 @@ export const signupValidator = vine.create({
 })
 
 /**
+ * Joining the household through an invitation link: same fields as the
+ * signup.
+ */
+export const invitationValidator = signupValidator
+
+/**
  * Validator to use before validating user credentials
  * during login
  */

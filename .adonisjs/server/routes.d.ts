@@ -8,6 +8,8 @@ export type ScannedRoutes = {
     'new_account.store': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'invitations.accept': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -199,6 +201,9 @@ export type ScannedRoutes = {
     'notifications.test': { paramsTuple?: []; params?: {} }
     'notifications.reminders': { paramsTuple?: []; params?: {} }
     'notifications.deadlines': { paramsTuple?: []; params?: {} }
+    'household.invite': { paramsTuple?: []; params?: {} }
+    'household.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'changelog': { paramsTuple?: []; params?: {} }
     'design': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
@@ -206,6 +211,7 @@ export type ScannedRoutes = {
   GET: {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -290,6 +296,7 @@ export type ScannedRoutes = {
   HEAD: {
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
+    'invitations.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'today': { paramsTuple?: []; params?: {} }
     'agenda': { paramsTuple?: []; params?: {} }
     'money': { paramsTuple?: []; params?: {} }
@@ -374,6 +381,7 @@ export type ScannedRoutes = {
   POST: {
     'new_account.store': { paramsTuple?: []; params?: {} }
     'session.store': { paramsTuple?: []; params?: {} }
+    'invitations.accept': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'money.income.store': { paramsTuple?: []; params?: {} }
     'money.transfer.store': { paramsTuple?: []; params?: {} }
     'shopping.store': { paramsTuple?: []; params?: {} }
@@ -425,6 +433,7 @@ export type ScannedRoutes = {
     'notifications.subscribe': { paramsTuple?: []; params?: {} }
     'notifications.unsubscribe': { paramsTuple?: []; params?: {} }
     'notifications.test': { paramsTuple?: []; params?: {} }
+    'household.invite': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
   }
   DELETE: {
@@ -459,6 +468,8 @@ export type ScannedRoutes = {
     'meters.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meters.readings.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'notifications.devices.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'household.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
     'shopping.toggle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

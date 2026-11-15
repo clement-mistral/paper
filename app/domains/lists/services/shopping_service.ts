@@ -5,6 +5,7 @@ import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import ShoppingItem from '#domains/lists/models/shopping_item'
 import type { Domain } from '#shared/types/domain'
 import type { ShoppingItemRow } from '#shared/types/lists'
+import { currentUserId } from '#support/actor'
 
 export type ShoppingItemInput = {
   label: string
@@ -38,6 +39,7 @@ export default class ShoppingService {
       reasonDomain: item.reasonDomain,
       reason: item.reason,
       checked: item.checkedAt !== null,
+      checkedById: item.checkedAt === null ? null : item.checkedById,
     }))
   }
 
@@ -121,6 +123,7 @@ export default class ShoppingService {
   async toggle(id: number) {
     const item = await ShoppingItem.findOrFail(id)
     item.checkedAt = item.checkedAt ? null : DateTime.now()
+    item.checkedById = item.checkedAt ? currentUserId() : null
     await item.save()
     await emitter.emit('lists:shopping_checked', {
       itemId: item.id,

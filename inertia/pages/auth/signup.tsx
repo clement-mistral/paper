@@ -9,7 +9,9 @@ export default function Signup() {
     <>
       <Head title="Créer un compte" />
       <h1 className="text-2xl font-bold text-ink">Créer un compte</h1>
-      <p className="mt-1 text-sm text-muted">Un compte pour tout le foyer.</p>
+      <p className="mt-1 text-sm text-muted">
+        Ce premier compte crée le foyer ; vous inviterez ensuite les autres depuis votre profil.
+      </p>
 
       <Form route="new_account.store">
         {({ errors, processing }) => (
