@@ -43,3 +43,26 @@ export async function getJson<T>(
   }
   return (await response.json()) as T
 }
+
+/**
+ * Replays a form action (an offline queue entry) without following the
+ * redirect back: returns the status and type for `settled()`.
+ */
+export async function sendAction(
+  method: 'POST' | 'PATCH',
+  url: string,
+  body: unknown
+): Promise<{ status: number; type: string }> {
+  const response = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/html',
+      'X-XSRF-TOKEN': xsrfToken(),
+    },
+    body: JSON.stringify(body),
+    credentials: 'same-origin',
+    redirect: 'manual',
+  })
+  return { status: response.status, type: response.type }
+}

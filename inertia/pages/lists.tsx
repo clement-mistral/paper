@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import { router } from '@inertiajs/react'
-import { Form } from '@adonisjs/inertia/react'
-import { ShoppingBasket, X } from 'lucide-react'
+import { CloudOff, ShoppingBasket, X } from 'lucide-react'
 import { urlFor } from '~/client'
 import AppShell from '~/layouts/app_shell'
 import TaskList from '~/components/domain/task_list'
@@ -14,6 +13,8 @@ import { cn } from '~/lib/cn'
 import { formatDecimal } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
 import { useMembers } from '~/lib/members'
+import { cancelAdd, isOffline, queueAction, useOfflineQueue } from '~/lib/offline'
+import { checkedOverrides, pendingAdds } from '#shared/offline_queue'
 import type { ShoppingItemRow, TaskRow } from '#shared/types/lists'
 import type { PantryRow } from '#shared/types/menu'
 import PantrySection from '~/components/domain/pantry_section'
@@ -25,41 +26,102 @@ function quantity(item: ShoppingItemRow): string | null {
   return `${formatDecimal(item.quantity)}${unit}`
 }
 
+/**
+ * The shopping list also works offline (in the shop): checks and new
+ * items are kept on the device and sent when the network is back.
+ */
 function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
   const { by } = useMembers()
   const [label, setLabel] = useState('')
-  const hasChecked = items.some((item) => item.checked)
+  const [processing, setProcessing] = useState(false)
+  const queue = useOfflineQueue()
+  const overrides = checkedOverrides(queue)
+  const waiting = pendingAdds(queue)
+  const shown = items.map((item) => ({
+    ...item,
+    checked: overrides.get(item.id) ?? item.checked,
+    queued: overrides.has(item.id),
+  }))
+  const hasChecked = shown.some((item) => item.checked)
+
+  const add = (event: FormEvent) => {
+    event.preventDefault()
+    const value = label.trim()
+    if (value === '') return
+    if (isOffline()) {
+      queueAction({ kind: 'shopping.add', key: `${Date.now()}-${value}`, label: value })
+      setLabel('')
+      return
+    }
+    router.post(
+      urlFor('shopping.store'),
+      { label: value },
+      {
+        preserveScroll: true,
+        onStart: () => setProcessing(true),
+        onFinish: () => setProcessing(false),
+        onSuccess: () => setLabel(''),
+      }
+    )
+  }
+
+  const check = (item: ShoppingItemRow, checked: boolean) => {
+    if (isOffline()) {
+      queueAction({ kind: 'shopping.check', itemId: item.id, checked })
+      return
+    }
+    router.patch(urlFor('shopping.toggle', { id: item.id }), { checked }, { preserveScroll: true })
+  }
 
   return (
     <Section title="Courses" action={{ label: 'Repas de la semaine', href: urlFor('meals.week') }}>
-      <Form
-        route="shopping.store"
-        options={{ preserveScroll: true }}
-        onSuccess={() => setLabel('')}
-        className="flex gap-2"
-      >
-        {({ processing }) => (
-          <>
-            <label htmlFor="shopping-label" className="sr-only">
-              Ajouter un article
-            </label>
-            <input
-              id="shopping-label"
-              name="label"
-              value={label}
-              onChange={(event) => setLabel(event.target.value)}
-              placeholder="Ajouter un article…"
-              autoComplete="off"
-              className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none"
-            />
-            <Button type="submit" variant="secondary" disabled={processing || label.trim() === ''}>
-              Ajouter
-            </Button>
-          </>
-        )}
-      </Form>
+      <form onSubmit={add} className="flex gap-2">
+        <label htmlFor="shopping-label" className="sr-only">
+          Ajouter un article
+        </label>
+        <input
+          id="shopping-label"
+          name="label"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          placeholder="Ajouter un article…"
+          autoComplete="off"
+          className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none"
+        />
+        <Button type="submit" variant="secondary" disabled={processing || label.trim() === ''}>
+          Ajouter
+        </Button>
+      </form>
 
-      {items.length === 0 ? (
+      {waiting.length > 0 && (
+        <ul className="flex flex-col" aria-label="Articles en attente d’envoi">
+          {waiting.map((pending) => (
+            <li
+              key={pending.key}
+              className="flex min-h-10 items-center gap-3 border-b border-border py-1"
+            >
+              <CloudOff
+                size={15}
+                strokeWidth={ICON_STROKE}
+                aria-hidden="true"
+                className="shrink-0 text-warning-bar"
+              />
+              <span className="flex-1 text-sm text-ink">{pending.label}</span>
+              <span className="text-xs text-muted">en attente</span>
+              <button
+                type="button"
+                aria-label={`Ne pas ajouter ${pending.label}`}
+                onClick={() => cancelAdd(pending.key)}
+                className="grid size-8 place-items-center rounded-control text-muted hover:bg-hover hover:text-ink"
+              >
+                <X size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {shown.length === 0 && waiting.length === 0 ? (
         <EmptyState
           icon={<ShoppingBasket size={20} strokeWidth={ICON_STROKE} />}
           title="Liste vide"
@@ -69,7 +131,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
         </EmptyState>
       ) : (
         <ul className="flex flex-col">
-          {items.map((item) => (
+          {shown.map((item) => (
             <li
               key={item.id}
               className="group flex min-h-10 items-center gap-3 border-b border-border py-1"
@@ -78,13 +140,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
                 id={`shopping-${item.id}`}
                 type="checkbox"
                 checked={item.checked}
-                onChange={() =>
-                  router.patch(
-                    urlFor('shopping.toggle', { id: item.id }),
-                    {},
-                    { preserveScroll: true }
-                  )
-                }
+                onChange={(event) => check(item, event.target.checked)}
                 className="size-4 shrink-0 cursor-pointer accent-accent"
               />
               <label
@@ -100,6 +156,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
                 {item.checked && by(item.checkedById) && (
                   <span className="text-xs text-muted">coché par {by(item.checkedById)}</span>
                 )}
+                {item.queued && <span className="text-xs text-warning">en attente</span>}
               </label>
               {item.reasonDomain && <DomainTag domain={item.reasonDomain} />}
               <button

@@ -63,6 +63,12 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 - L'Agenda annonce les 5 ans d'un PEA et les 8 ans d'une assurance-vie
   (d'après la date d'ouverture du compte), quand leur fiscalité devient
   plus douce.
+- Paper fonctionne hors ligne, dans l'application installée : Aujourd'hui,
+  l'Agenda, les Listes, les Repas et les recettes déjà ouvertes restent
+  consultables sans réseau (un bandeau le signale). Au magasin, la liste
+  de courses se coche et s'enrichit même sans réseau : tout est envoyé
+  dès que la connexion revient. Ces pages gardées sur l'appareil sont
+  effacées à la déconnexion.
 - On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
   par Tom » sur une tâche, « par Léa » sur une dépense.
 

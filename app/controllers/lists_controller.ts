@@ -4,7 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import ShoppingService from '#domains/lists/services/shopping_service'
 import TaskService from '#domains/lists/services/task_service'
 import PantryService from '#domains/menu/services/pantry_service'
-import { shoppingItemValidator } from '#domains/lists/validators/shopping'
+import { shoppingCheckValidator, shoppingItemValidator } from '#domains/lists/validators/shopping'
 
 @inject()
 export default class ListsController {
@@ -29,8 +29,10 @@ export default class ListsController {
     return response.redirect().back()
   }
 
-  async toggle({ params, response }: HttpContext) {
-    await this.shopping.toggle(Number(params.id))
+  async toggle({ params, request, response }: HttpContext) {
+    const { checked } = await request.validateUsing(shoppingCheckValidator)
+    if (checked === undefined) await this.shopping.toggle(Number(params.id))
+    else await this.shopping.setChecked(Number(params.id), checked)
     return response.redirect().back()
   }
 

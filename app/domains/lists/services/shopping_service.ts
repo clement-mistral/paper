@@ -122,7 +122,17 @@ export default class ShoppingService {
    */
   async toggle(id: number) {
     const item = await ShoppingItem.findOrFail(id)
-    item.checkedAt = item.checkedAt ? null : DateTime.now()
+    await this.setChecked(id, item.checkedAt === null)
+  }
+
+  /**
+   * Sets the state explicitly: replaying it (an action queued offline) is
+   * harmless, and nothing happens when the item is already in that state.
+   */
+  async setChecked(id: number, checked: boolean) {
+    const item = await ShoppingItem.findOrFail(id)
+    if ((item.checkedAt !== null) === checked) return
+    item.checkedAt = checked ? DateTime.now() : null
     item.checkedById = item.checkedAt ? currentUserId() : null
     await item.save()
     await emitter.emit('lists:shopping_checked', {
