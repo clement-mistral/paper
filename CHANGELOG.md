@@ -14,7 +14,7 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
-## [Non publié]
+## [2.0.0] - 2026-11-11
 
 ### Ajouté
 
@@ -69,15 +69,26 @@ Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
   de courses se coche et s'enrichit même sans réseau : tout est envoyé
   dès que la connexion revient. Ces pages gardées sur l'appareil sont
   effacées à la déconnexion.
+- Projets personnels (nouvelle entrée « Projets ») : pour chaque projet,
+  des notes, des tâches, des liens et un budget avec ses dépenses (qui
+  comptent aussi dans Argent). Un tableau les range par statut : idée, en
+  cours, en pause, terminé. Un projet n'est visible que par vous, sauf si
+  vous le partagez avec le foyer.
 - On voit qui a fait quoi : « coché par Léa » dans les courses, « fait
   par Tom » sur une tâche, « par Léa » sur une dépense.
 
 ### Modifié
 
-- Paper prend des couleurs : un bleu marine pour les boutons, le bouton
+- Paper prend des couleurs : un doré pour les boutons, le bouton
   « + » et le logo, et la navigation montre la page ouverte dans sa
-  couleur (Argent en or, Véhicules en bleu, Logement en violet, Recettes
+  couleur (Argent en vert, Véhicules en bleu, Logement en violet, Recettes
   en corail).
+- Aujourd'hui commence par quatre résumés en couleur (en retard, prévu
+  aujourd'hui, courses, reste du budget) ; l'Agenda replie les jours sans
+  rien de prévu ; les Fiches sont rangées par domaine, en cartes ; sur
+  téléphone, les transactions s'affichent en liste lisible ; la page des
+  repas propose de préparer la semaine suivante quand celle-ci se
+  termine ; l'application installée prend la couleur de Paper.
 - La création de compte n'est plus ouverte à tous : une fois le premier
   compte créé, on ne rejoint le foyer que par invitation.
 

@@ -6,6 +6,7 @@ import FichesIcon from '~/components/icons/fiches_icon'
 import HomeIcon from '~/components/icons/home_icon'
 import ListsIcon from '~/components/icons/lists_icon'
 import MoneyIcon from '~/components/icons/money_icon'
+import ProjectsIcon from '~/components/icons/projects_icon'
 import RecipeIcon from '~/components/icons/recipe_icon'
 import ReviewIcon from '~/components/icons/review_icon'
 import TodayIcon from '~/components/icons/today_icon'
@@ -90,6 +91,7 @@ export const primaryNav: NavItem[] = [
   item('Agenda', urlFor('agenda'), AgendaIcon),
   item('Argent', urlFor('money'), MoneyIcon, 'budget'),
   item('Listes', urlFor('lists'), ListsIcon),
+  item('Projets', urlFor('personal_projects.index'), ProjectsIcon),
 ]
 
 /**
@@ -131,12 +133,12 @@ export const ficheNav: NavItem[] = [
 
 /**
  * Targets of the bottom bar on small screens, around the central « + ».
- * « Listes » moves into the « Plus » sheet with the rest.
+ * « Listes » and « Projets » move into the « Plus » sheet with the rest.
  */
-export const mobileNav: { start: NavItem[]; end: NavItem[]; inSheet: NavItem } = {
+export const mobileNav: { start: NavItem[]; end: NavItem[]; inSheet: NavItem[] } = {
   start: primaryNav.slice(0, 2),
   end: primaryNav.slice(2, 3),
-  inSheet: primaryNav[3],
+  inSheet: primaryNav.slice(3),
 }
 
 const profileHref = urlFor('profile.show')
@@ -149,7 +151,7 @@ const newspaperHref = urlFor('newspapers.current')
 export function inMoreSheet(url: string): boolean {
   const path = pathOf(url)
   return (
-    mobileNav.inSheet.match(url) ||
+    mobileNav.inSheet.some((entry) => entry.match(url)) ||
     reviewNav.match(url) ||
     ficheNav.some((fiche) => fiche.match(url)) ||
     inFiches(url) ||

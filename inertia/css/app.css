@@ -1,6 +1,6 @@
 /* ==========================================================================
    Paper — design tokens (Tailwind v4, CSS-first).
-   Notion-like, mostly white. A blue accent carries the app's identity
+   Notion-like, mostly white. A gold accent carries the app's identity
    (primary actions, focus, selection, logo); the four domain colours
    signal a domain.
    ========================================================================== */
@@ -20,14 +20,14 @@
   --color-ink: #1f1f1f;
 
   /* Accent: the app's own colour (primary buttons, focus, selection). */
-  --color-accent: #1e40af;
-  --color-accent-ink: #172554;
-  --color-accent-soft: #e6ebf7;
-  --color-accent-bright: #2563eb;
+  --color-accent: #94690b;
+  --color-accent-ink: #6b4c08;
+  --color-accent-soft: #fbf3dc;
+  --color-accent-bright: #d4a72c;
 
-  --color-budget: #c99a1a;
-  --color-budget-ink: #8a6410;
-  --color-budget-soft: #fbf3db;
+  --color-budget: #059669;
+  --color-budget-ink: #047857;
+  --color-budget-soft: #e3f5ec;
   --color-maison: #7c5ce0;
   --color-maison-ink: #5b3fc4;
   --color-maison-soft: #f1edfd;

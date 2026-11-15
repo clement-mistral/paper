@@ -92,6 +92,24 @@ export default function Week({ week }: InertiaProps<{ week: MealWeek }>) {
         </>
       }
     >
+      {week.isCurrent && week.days.filter((day) => !day.past).length <= 2 && (
+        <Link
+          href={weekUrl(week.next)}
+          className="group flex items-center gap-3 rounded-card bg-menu-soft px-4 py-3 text-sm text-menu-ink hover:ring-1 hover:ring-menu/30"
+        >
+          <Sparkles size={16} strokeWidth={ICON_STROKE} aria-hidden="true" className="shrink-0" />
+          <span className="flex-1">
+            La semaine se termine : préparez la suivante, des idées vous attendent.
+          </span>
+          <ChevronRight
+            size={16}
+            strokeWidth={ICON_STROKE}
+            aria-hidden="true"
+            className="shrink-0 transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
+      )}
+
       {week.recipes.length === 0 ? (
         <p className="text-sm text-muted">
           Aucune recette pour l’instant.{' '}

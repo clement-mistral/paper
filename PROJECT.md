@@ -160,8 +160,8 @@ Chaque élément affichable dans Agenda/Aujourd'hui expose un `domain` (`budget 
 
 **Ambiance** : minimaliste façon Notion, fond blanc et texte encre. Deux familles de couleurs :
 
-- l'**accent** bleu marine (`accent`) porte l'identité de l'app : boutons primaires, bouton « + », logo, focus, sélection, cases à cocher, liens de section, états vides, entrée active de la navigation ;
-- les **quatre couleurs de domaine** indiquent un domaine (icône, pastille, barre de progression, courbe), et colorent aussi les entrées de navigation qui en relèvent (Argent → Budget, Véhicules → Auto, Logement → Maison, Recettes → Menu).
+- l'**accent** doré (`accent`) porte l'identité de l'app : boutons primaires, bouton « + », logo, focus, sélection, cases à cocher, liens de section, états vides, entrée active de la navigation ;
+- les **quatre couleurs de domaine** indiquent un domaine (icône, pastille, barre de progression, courbe), et colorent aussi les entrées de navigation qui en relèvent (Argent → Budget en vert émeraude, Véhicules → Auto, Logement → Maison, Recettes → Menu).
 
 Le Journal et le Compte rendu gardent leur mise en page « papier » noir et blanc.
 
@@ -181,14 +181,14 @@ Le Journal et le Compte rendu gardent leur mise en page « papier » noir et bla
   --color-muted: #6b6b6b;
   --color-ink: #1f1f1f;
 
-  --color-accent: #1e40af;
-  --color-accent-ink: #172554;
-  --color-accent-soft: #e6ebf7;
-  --color-accent-bright: #2563eb;
+  --color-accent: #94690b;
+  --color-accent-ink: #6b4c08;
+  --color-accent-soft: #fbf3dc;
+  --color-accent-bright: #d4a72c;
 
-  --color-budget: #c99a1a;
-  --color-budget-ink: #8a6410;
-  --color-budget-soft: #fbf3db;
+  --color-budget: #059669;
+  --color-budget-ink: #047857;
+  --color-budget-soft: #e3f5ec;
   --color-maison: #7c5ce0;
   --color-maison-ink: #5b3fc4;
   --color-maison-soft: #f1edfd;
@@ -225,6 +225,10 @@ body {
 - Barres de progression **3px**, couleur du domaine (ou `warning-bar` / `danger`, `accent` par défaut).
 - `Section` accepte un `tone` (domaine, `accent`, `warning`, `danger`) qui affiche une pastille avant le titre (« En retard » en `danger`).
 - Toasts : filet gauche de 3px en `accent`, `success` ou `danger` selon le type.
+- `StatTile` (`components/ui/stat_tile.tsx`) : un chiffre sur fond pastel de sa couleur (`accent`, `danger`, `success`, `menu`, `budget`), cliquable vers sa page ; rangée de 4 en tête d'« Aujourd'hui ». Les cartes restent réservées à ces résumés et à l'index des Fiches (cartes groupées par domaine, icône sur fond `{domaine}-soft`).
+- Listes de jours (Agenda) : les jours vides consécutifs sont repliés en une ligne (« Du … au … : rien de prévu »).
+- Tableaux larges sous `sm` : une liste compacte plutôt qu'un défilement horizontal (transactions : libellé, puis date · enveloppe · compte, montant à droite) ; le domaine d'une transaction est un point de couleur, plus une pastille.
+- Boutons de décision d'une ligne (bilan : Fait, Cuisiné…) en `secondary`, jamais pleins : rien ne doit sembler déjà choisi.
 - Icônes : SVG inline en trait (stroke 1.8 dans les pages via lucide ; dans la navigation, icônes maison `components/icons/` à 1.6, 2 pour l'élément actif), jamais d'emoji.
 - Accessibilité : contraste ≥ 4.5:1 (le `muted` #6B6B6B passe sur blanc), vrais `<button>` / `<a>` / `<input>` + `<label>`, cibles ≥ 40px dans la navigation (56×52 dans le rail).
 - Navigation : rail de 84px sur fond `sidebar`, icônes sans libellé visible (`aria-label` + `title` + `sr-only`). Chaque entrée a un `tone` (`accent` ou un domaine, cf. `navToneClasses`) : l'entrée active prend `{tone}-soft` en fond et `{tone}-ink` en trait (2), les autres sont `muted` et prennent la couleur au survol. Pastille « bilan à faire » en `warning-bar`. Config dans `components/ui/nav_items.ts`.
@@ -344,7 +348,8 @@ pnpm typecheck && pnpm lint
 10. **Repas de la semaine** (fait, `/repas`) : lundi → dimanche, midi et soir ; chaque soir vide à partir d'aujourd'hui reçoit une proposition (suggestions §7 sans seuil minimal, chaque recette une fois, aucune déjà dans la semaine — `app/views/meal_week_view.ts`) ; « Garder » une à une ou toutes ; retirer un repas rend le stock s'il était cuisiné et nettoie les courses.
 11. **Import bancaire** (fait, fiche compte → « Importer un relevé ») : CSV (séparateur, en-tête et colonnes détectés : date, libellé, montant ou débit/crédit ; UTF-8 ou Windows-1252) et OFX 1.x/2 (FITID), lus sans dépendance (`app/domains/budget/import/`). Le relevé est mis en attente ligne à ligne (`bank_imports`, `bank_import_lines`) puis validé : *nouvelle* (enveloppe proposée par les alias puis les noms, à partir du marchand du libellé), *déjà saisie* (même montant, banque de 5 jours après à 2 jours avant la saisie, rapprochement un pour un), *déjà importée* (`transactions.bank_ref`, unique par compte). Valider crée les transactions (sans `source_type` : supprimables comme une saisie), marque les rapprochées et apprend l'enveloppe choisie à la main ; un import validé peut être annulé.
 12. **Hors ligne** (fait, `public/sw.js`) : fichiers de l'app (`/assets`, icônes) servis depuis le cache ; Aujourd'hui, Agenda, Listes, Repas et les recettes en réseau d'abord, dernière version gardée (page complète et réponse Inertia séparément, jamais les rechargements partiels) et resservie sans réseau ; le cache des pages est vidé à la connexion et à la déconnexion. La liste de courses se coche et s'enrichit hors ligne : actions gardées sur l'appareil (`shared/offline_queue.ts`, `inertia/lib/offline.ts`), envoyées dans l'ordre au retour du réseau ; « cocher » envoie un état (`checked`), pas une bascule, pour qu'un renvoi soit sans effet. Bandeau « Hors ligne » dans l'`AppShell`.
-13. Plus tard : documents (un lien Proton Drive suffit), wattmètre par circuit.
+13. **Projets** (fait, `/projets`, module `app/domains/projects`) : projets personnels avec notes, tâches (cases à cocher propres au projet, hors Agenda), liens et budget ; statut idée / en cours / en pause / terminé, tableau par statut. **Privés** : un projet n'est visible que de son propriétaire (`personal_projects.user_id`), sauf partagé avec le foyer (`shared`) ; un projet partagé est modifiable par tous, mais seul le propriétaire le partage, le départage ou le supprime ; un projet invisible répond 404. Ses dépenses sont de vraies transactions (`source_type = 'personal_project'`, compte par défaut), gardées dans Argent si le projet est supprimé. Entrée « Projets » dans le rail, dans la feuille « Plus » sur mobile.
+14. Plus tard : documents (un lien Proton Drive suffit), wattmètre par circuit.
 
 ---
 

@@ -74,6 +74,8 @@ declare module '@adonisjs/inertia/types' {
     'newspaper/show': ExtractProps<(typeof import('../../inertia/pages/newspaper/show.tsx'))['default']>
     'newspaper/sources': ExtractProps<(typeof import('../../inertia/pages/newspaper/sources.tsx'))['default']>
     'profile': ExtractProps<(typeof import('../../inertia/pages/profile.tsx'))['default']>
+    'projects/index': ExtractProps<(typeof import('../../inertia/pages/projects/index.tsx'))['default']>
+    'projects/show': ExtractProps<(typeof import('../../inertia/pages/projects/show.tsx'))['default']>
     'report': ExtractProps<(typeof import('../../inertia/pages/report.tsx'))['default']>
     'review': ExtractProps<(typeof import('../../inertia/pages/review.tsx'))['default']>
     'tasks/show': ExtractProps<(typeof import('../../inertia/pages/tasks/show.tsx'))['default']>

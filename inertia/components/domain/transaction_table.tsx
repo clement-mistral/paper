@@ -4,8 +4,9 @@ import { router } from '@inertiajs/react'
 import { urlFor } from '~/client'
 import AmountCell from '~/components/domain/amount_cell'
 import DataTable from '~/components/ui/data_table'
-import DomainTag from '~/components/ui/domain_tag'
 import EmptyState from '~/components/ui/empty_state'
+import { cn } from '~/lib/cn'
+import { domainMeta } from '~/lib/domains'
 import { formatDate } from '~/lib/format'
 import { ICON_STROKE } from '~/lib/icons'
 import { useMembers } from '~/lib/members'
@@ -43,7 +44,7 @@ export default function TransactionTable({
       header: 'Libellé',
       cell: (row: TransactionRow) =>
         row.kind === 'transfer' ? (
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-2">
             <ArrowLeftRight
               size={14}
               strokeWidth={ICON_STROKE}
@@ -55,16 +56,14 @@ export default function TransactionTable({
             {author(row)}
           </span>
         ) : (
-          <span>
-            {row.label}
-            {author(row)}
+          <span className="inline-flex items-center gap-2">
+            <DomainDot domain={row.domain} />
+            <span>
+              {row.label}
+              {author(row)}
+            </span>
           </span>
         ),
-    },
-    {
-      key: 'domain',
-      header: 'Domaine',
-      cell: (row: TransactionRow) => <DomainTag domain={row.domain} />,
     },
     {
       key: 'envelope',
@@ -118,17 +117,7 @@ export default function TransactionTable({
                   type="button"
                   aria-label={`Supprimer « ${row.label} »`}
                   title={row.kind === 'transfer' ? 'Supprimer le virement' : 'Supprimer'}
-                  onClick={() => {
-                    const question =
-                      row.kind === 'transfer'
-                        ? 'Supprimer ce virement (les deux comptes) ?'
-                        : `Supprimer « ${row.label} » ?`
-                    if (window.confirm(question)) {
-                      router.delete(urlFor('money.transactions.destroy', { id: row.id }), {
-                        preserveScroll: true,
-                      })
-                    }
-                  }}
+                  onClick={() => confirmDelete(row)}
                   className="inline-grid size-8 place-items-center rounded-control text-muted hover:bg-hover hover:text-danger"
                 >
                   <Trash2 size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
@@ -139,20 +128,92 @@ export default function TransactionTable({
       : []),
   ].filter((column) => !hide.includes(column.key as 'envelope' | 'account' | 'domain'))
 
+  const empty = (
+    <EmptyState icon={<Receipt size={20} strokeWidth={ICON_STROKE} />} title="Aucune transaction">
+      Saisissez une dépense avec Ctrl K, par exemple « café 4,50 € ».
+    </EmptyState>
+  )
+
   return (
-    <DataTable
-      caption="Transactions"
-      rows={transactions}
-      rowKey={(row) => row.id}
-      columns={columns}
-      empty={
-        <EmptyState
-          icon={<Receipt size={20} strokeWidth={ICON_STROKE} />}
-          title="Aucune transaction"
-        >
-          Saisissez une dépense avec Ctrl K, par exemple « café 4,50 € ».
-        </EmptyState>
-      }
-    />
+    <>
+      {/* Small screens: one line per transaction, no horizontal scroll. */}
+      <div className="sm:hidden">
+        {transactions.length === 0 ? (
+          empty
+        ) : (
+          <ul className="flex flex-col">
+            {transactions.map((row) => (
+              <li key={row.id} className="flex items-center gap-3 border-b border-border py-2.5">
+                {row.kind === 'transfer' ? (
+                  <ArrowLeftRight
+                    size={14}
+                    strokeWidth={ICON_STROKE}
+                    aria-label="Virement"
+                    className="shrink-0 text-muted"
+                  />
+                ) : (
+                  <DomainDot domain={row.domain} />
+                )}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm text-ink">{row.label}</span>
+                  <span className="truncate text-label text-muted">
+                    {[
+                      formatDate(row.occurredOn),
+                      hide.includes('envelope') ? null : row.envelope?.name,
+                      hide.includes('account') ? null : row.account?.name,
+                      by(row.createdById) ? `par ${by(row.createdById)}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </span>
+                <AmountCell cents={row.amountCents} neutral={row.kind === 'transfer'} />
+                {allowDelete && row.deletable && (
+                  <button
+                    type="button"
+                    aria-label={`Supprimer « ${row.label} »`}
+                    onClick={() => confirmDelete(row)}
+                    className="-mr-2 grid size-9 shrink-0 place-items-center rounded-control text-muted hover:bg-hover hover:text-danger"
+                  >
+                    <Trash2 size={15} strokeWidth={ICON_STROKE} aria-hidden="true" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="hidden sm:block">
+        <DataTable
+          caption="Transactions"
+          rows={transactions}
+          rowKey={(row) => row.id}
+          columns={columns}
+          empty={empty}
+        />
+      </div>
+    </>
+  )
+}
+
+function confirmDelete(row: TransactionRow) {
+  const question =
+    row.kind === 'transfer'
+      ? 'Supprimer ce virement (les deux comptes) ?'
+      : `Supprimer « ${row.label} » ?`
+  if (window.confirm(question)) {
+    router.delete(urlFor('money.transactions.destroy', { id: row.id }), { preserveScroll: true })
+  }
+}
+
+/** The domain of a transaction, as a coloured dot (its name for screen readers). */
+function DomainDot({ domain }: { domain: TransactionRow['domain'] }) {
+  return (
+    <span
+      title={domainMeta[domain].label}
+      className={cn('size-2 shrink-0 rounded-full', domainMeta[domain].bar)}
+    >
+      <span className="sr-only">{domainMeta[domain].label}</span>
+    </span>
   )
 }

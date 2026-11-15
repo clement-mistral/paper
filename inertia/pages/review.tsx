@@ -168,7 +168,13 @@ function Tasks({ review }: { review: DailyReview }) {
             </span>
             {review.open && (
               <span className="flex flex-wrap gap-1">
-                <Button size="sm" onClick={() => act(task.id, 'done')}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="text-success hover:border-success/40 hover:bg-success-soft"
+                  onClick={() => act(task.id, 'done')}
+                >
+                  <Check size={14} strokeWidth={2.2} aria-hidden="true" />
                   Fait
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => act(task.id, 'tomorrow')}>
@@ -267,7 +273,13 @@ function MealRow({ day, meal, open }: { day: string; meal: MealPlanRow; open: bo
       ) : (
         open && (
           <span className="flex flex-wrap gap-1">
-            <Button size="sm" onClick={() => set('cooked')}>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="text-success hover:border-success/40 hover:bg-success-soft"
+              onClick={() => set('cooked')}
+            >
+              <Check size={14} strokeWidth={2.2} aria-hidden="true" />
               Cuisiné
             </Button>
             <Button size="sm" variant="secondary" onClick={() => set('other')}>

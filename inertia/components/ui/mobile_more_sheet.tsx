@@ -33,11 +33,12 @@ function SheetLink({ item, url, detail }: { item: NavItem; url: string; detail?:
 export default function MobileMoreSheet({
   open,
   onClose,
-  lists,
+  items,
 }: {
   open: boolean
   onClose: () => void
-  lists: NavItem
+  /** The dimensions the bottom bar has no room for (Listes, Projets). */
+  items: NavItem[]
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const { url, props } = usePage()
@@ -90,7 +91,9 @@ export default function MobileMoreSheet({
         </div>
 
         <nav aria-label="Plus" className="flex flex-col">
-          <SheetLink item={lists} url={url} />
+          {items.map((entry) => (
+            <SheetLink key={entry.href} item={entry} url={url} />
+          ))}
           {routine && <SheetLink item={reviewNav} url={url} detail={reviewDetail} />}
           <p className="px-3 pt-3 pb-1 text-label text-muted">Fiches</p>
           {ficheNav.map((item) => (

@@ -867,6 +867,82 @@ export class PantryMovementSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class PersonalProjectLinkSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'personalProjectId', 'title', 'updatedAt', 'url'] as const
+  $columns = PersonalProjectLinkSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column()
+  declare title: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare url: string
+}
+
+export class PersonalProjectNoteSchema extends BaseModel {
+  static $columns = ['body', 'createdAt', 'createdById', 'id', 'personalProjectId', 'updatedAt'] as const
+  $columns = PersonalProjectNoteSchema.$columns
+  @column()
+  declare body: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare createdById: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PersonalProjectTaskSchema extends BaseModel {
+  static $columns = ['createdAt', 'doneAt', 'id', 'personalProjectId', 'position', 'title', 'updatedAt'] as const
+  $columns = PersonalProjectTaskSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare doneAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare personalProjectId: number
+  @column()
+  declare position: number
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PersonalProjectSchema extends BaseModel {
+  static $columns = ['budgetCents', 'createdAt', 'description', 'id', 'shared', 'status', 'title', 'updatedAt', 'userId'] as const
+  $columns = PersonalProjectSchema.$columns
+  @column()
+  declare budgetCents: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare shared: boolean
+  @column()
+  declare status: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class PriceQuoteSchema extends BaseModel {
   static $columns = ['close', 'day', 'symbol'] as const
   $columns = PriceQuoteSchema.$columns

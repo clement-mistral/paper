@@ -60,6 +60,21 @@ export type ScannedRoutes = {
     'habits.store': { paramsTuple?: []; params?: {} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.update': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.notes.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.tasks.toggle': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.links.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.links.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.expenses.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.expenses.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'meals.week': { paramsTuple?: []; params?: {} }
     'meals.store': { paramsTuple?: []; params?: {} }
     'meals.store_many': { paramsTuple?: []; params?: {} }
@@ -236,6 +251,8 @@ export type ScannedRoutes = {
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
@@ -323,6 +340,8 @@ export type ScannedRoutes = {
     'reviews.current': { paramsTuple?: []; params?: {} }
     'reviews.show': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'search': { paramsTuple?: []; params?: {} }
+    'personal_projects.index': { paramsTuple?: []; params?: {} }
+    'personal_projects.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meals.week': { paramsTuple?: []; params?: {} }
     'fiches.index': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
@@ -409,6 +428,11 @@ export type ScannedRoutes = {
     'reviews.habit': { paramsTuple: [ParamValue,ParamValue]; params: {'day': ParamValue,'id': ParamValue} }
     'reviews.complete': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'habits.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.store': { paramsTuple?: []; params?: {} }
+    'personal_projects.notes.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.tasks.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.links.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.expenses.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'meals.store': { paramsTuple?: []; params?: {} }
     'meals.store_many': { paramsTuple?: []; params?: {} }
     'capture.preview': { paramsTuple?: []; params?: {} }
@@ -459,6 +483,11 @@ export type ScannedRoutes = {
     'tasks.items.destroy': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
     'newspapers.sources.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'habits.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.tasks.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.links.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
+    'personal_projects.expenses.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'meals.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'bank_imports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'importId': ParamValue} }
@@ -492,6 +521,7 @@ export type ScannedRoutes = {
     'pantry.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tasks.toggle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tasks.items.toggle': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
+    'personal_projects.tasks.toggle': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'projects.items.toggle': { paramsTuple: [ParamValue]; params: {'itemId': ParamValue} }
   }
   PUT: {
@@ -500,6 +530,8 @@ export type ScannedRoutes = {
     'newspapers.settings': { paramsTuple?: []; params?: {} }
     'newspapers.choice.save': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
     'reviews.journal': { paramsTuple: [ParamValue]; params: {'day': ParamValue} }
+    'personal_projects.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'personal_projects.notes.update': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'itemId': ParamValue} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolios.holdings.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'envelopes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

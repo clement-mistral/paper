@@ -31,6 +31,7 @@ export const controllers = {
   Newspapers: () => import('#controllers/newspapers_controller'),
   Notifications: () => import('#controllers/notifications_controller'),
   Pantry: () => import('#controllers/pantry_controller'),
+  PersonalProjects: () => import('#controllers/personal_projects_controller'),
   Portfolios: () => import('#controllers/portfolios_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Projects: () => import('#controllers/projects_controller'),

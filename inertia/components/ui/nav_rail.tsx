@@ -180,7 +180,7 @@ export default function NavRail({ onAdd }: { onAdd: () => void }) {
         aria-label="Paper, aujourd’hui"
         title="Paper"
         className={cn(
-          'mb-[14px] grid size-10 place-items-center rounded-[10px] bg-linear-to-br from-accent-bright to-accent-ink text-[18px] font-bold text-bg shadow-sm',
+          'mb-[14px] grid size-10 place-items-center rounded-[10px] border-2 border-accent text-[18px] font-bold text-accent transition-colors hover:bg-accent-soft',
           FOCUS_RING
         )}
       >
@@ -321,7 +321,7 @@ export function MobileNavBar({ onAdd }: { onAdd: () => void }) {
       <MobileMoreSheet
         open={moreOpen}
         onClose={() => setMoreOpen(false)}
-        lists={mobileNav.inSheet}
+        items={mobileNav.inSheet}
       />
     </>
   )

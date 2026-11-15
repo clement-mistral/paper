@@ -220,13 +220,13 @@ export interface Registry {
     methods: ["PATCH"]
     pattern: '/listes/courses/:id/cocher'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#domains/lists/validators/shopping').shoppingCheckValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/lists/validators/shopping').shoppingCheckValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/lists_controller').default['toggle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lists_controller').default['toggle']>>>
-      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lists_controller').default['toggle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/lists_controller').default['toggle']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/lists_controller').default['toggle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'shopping.destroy': {
@@ -734,6 +734,201 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/projets'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['index']>>>
+    }
+  }
+  'personal_projects.store': {
+    methods: ["POST"]
+    pattern: '/projets'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectCreateValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectCreateValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/projets/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['show']>>>
+    }
+  }
+  'personal_projects.update': {
+    methods: ["PUT"]
+    pattern: '/projets/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectUpdateValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectUpdateValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.destroy': {
+    methods: ["DELETE"]
+    pattern: '/projets/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroy']>>>
+    }
+  }
+  'personal_projects.notes.store': {
+    methods: ["POST"]
+    pattern: '/projets/:id/notes'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectNoteValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectNoteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeNote']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeNote']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeNote']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.notes.update': {
+    methods: ["PUT"]
+    pattern: '/projets/:id/notes/:itemId'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectNoteValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectNoteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['updateNote']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['updateNote']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['updateNote']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.notes.destroy': {
+    methods: ["DELETE"]
+    pattern: '/projets/:id/notes/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyNote']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyNote']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyNote']>>>
+    }
+  }
+  'personal_projects.tasks.store': {
+    methods: ["POST"]
+    pattern: '/projets/:id/taches'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectTaskValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectTaskValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeTask']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeTask']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeTask']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.tasks.toggle': {
+    methods: ["PATCH"]
+    pattern: '/projets/:id/taches/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['toggleTask']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['toggleTask']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['toggleTask']>>>
+    }
+  }
+  'personal_projects.tasks.destroy': {
+    methods: ["DELETE"]
+    pattern: '/projets/:id/taches/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyTask']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyTask']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyTask']>>>
+    }
+  }
+  'personal_projects.links.store': {
+    methods: ["POST"]
+    pattern: '/projets/:id/liens'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectLinkValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectLinkValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeLink']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeLink']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeLink']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.links.destroy': {
+    methods: ["DELETE"]
+    pattern: '/projets/:id/liens/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyLink']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyLink']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyLink']>>>
+    }
+  }
+  'personal_projects.expenses.store': {
+    methods: ["POST"]
+    pattern: '/projets/:id/depenses'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#domains/projects/validators/project').projectExpenseValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#domains/projects/validators/project').projectExpenseValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeExpense']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeExpense']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['storeExpense']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'personal_projects.expenses.destroy': {
+    methods: ["DELETE"]
+    pattern: '/projets/:id/depenses/:itemId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; itemId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyExpense']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyExpense']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/personal_projects_controller').default['destroyExpense']>>>
     }
   }
   'meals.week': {

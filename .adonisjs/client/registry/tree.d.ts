@@ -88,6 +88,31 @@ export interface ApiDefinition {
     archive: typeof routes['habits.archive']
   }
   search: typeof routes['search']
+  personalProjects: {
+    index: typeof routes['personal_projects.index']
+    store: typeof routes['personal_projects.store']
+    show: typeof routes['personal_projects.show']
+    update: typeof routes['personal_projects.update']
+    destroy: typeof routes['personal_projects.destroy']
+    notes: {
+      store: typeof routes['personal_projects.notes.store']
+      update: typeof routes['personal_projects.notes.update']
+      destroy: typeof routes['personal_projects.notes.destroy']
+    }
+    tasks: {
+      store: typeof routes['personal_projects.tasks.store']
+      toggle: typeof routes['personal_projects.tasks.toggle']
+      destroy: typeof routes['personal_projects.tasks.destroy']
+    }
+    links: {
+      store: typeof routes['personal_projects.links.store']
+      destroy: typeof routes['personal_projects.links.destroy']
+    }
+    expenses: {
+      store: typeof routes['personal_projects.expenses.store']
+      destroy: typeof routes['personal_projects.expenses.destroy']
+    }
+  }
   meals: {
     week: typeof routes['meals.week']
     store: typeof routes['meals.store']

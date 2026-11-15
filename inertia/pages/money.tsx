@@ -16,6 +16,14 @@ import { formatAmount, formatAxisAmount, formatMonthLong, formatMonthShort } fro
 import type { MoneyOverview, NetWorthHistory } from '#shared/types/budget'
 import type { InertiaProps } from '~/types'
 
+/** Literal classes, for Tailwind: one hue per kind of wealth. */
+const NET_WORTH_COLORS: Record<string, string> = {
+  current: 'bg-accent',
+  savings: 'bg-budget',
+  investments: 'bg-budget-ink',
+  vehicles: 'bg-auto',
+}
+
 const signed = (cents: number) => `${cents >= 0 ? '+' : ''}${formatAmount(cents)}`
 
 export default function Money({
@@ -73,7 +81,7 @@ export default function Money({
             ? 'Comptes, épargne, placements au dernier cours et valeur estimée des véhicules.'
             : `${signed(netWorth.monthChangeCents)} depuis la fin du mois dernier · comptes, épargne, placements au dernier cours et véhicules.`}
         </p>
-        <AllocationBar slices={netWorth.parts} />
+        <AllocationBar slices={netWorth.parts} colorOf={(key) => NET_WORTH_COLORS[key]} />
         {netWorth.history.length >= 2 && (
           <LineChart
             title="Patrimoine sur 12 mois"

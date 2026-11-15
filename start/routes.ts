@@ -135,6 +135,36 @@ router
     router.get('recherche', [controllers.Search, 'index']).as('search')
     router
       .group(() => {
+        const ctl = controllers.PersonalProjects
+        router.get('/', [ctl, 'index']).as('personal_projects.index')
+        router.post('/', [ctl, 'store']).as('personal_projects.store')
+        router.get(':id', [ctl, 'show']).as('personal_projects.show')
+        router.put(':id', [ctl, 'update']).as('personal_projects.update')
+        router.delete(':id', [ctl, 'destroy']).as('personal_projects.destroy')
+        router.post(':id/notes', [ctl, 'storeNote']).as('personal_projects.notes.store')
+        router.put(':id/notes/:itemId', [ctl, 'updateNote']).as('personal_projects.notes.update')
+        router
+          .delete(':id/notes/:itemId', [ctl, 'destroyNote'])
+          .as('personal_projects.notes.destroy')
+        router.post(':id/taches', [ctl, 'storeTask']).as('personal_projects.tasks.store')
+        router.patch(':id/taches/:itemId', [ctl, 'toggleTask']).as('personal_projects.tasks.toggle')
+        router
+          .delete(':id/taches/:itemId', [ctl, 'destroyTask'])
+          .as('personal_projects.tasks.destroy')
+        router.post(':id/liens', [ctl, 'storeLink']).as('personal_projects.links.store')
+        router
+          .delete(':id/liens/:itemId', [ctl, 'destroyLink'])
+          .as('personal_projects.links.destroy')
+        router.post(':id/depenses', [ctl, 'storeExpense']).as('personal_projects.expenses.store')
+        router
+          .delete(':id/depenses/:itemId', [ctl, 'destroyExpense'])
+          .as('personal_projects.expenses.destroy')
+      })
+      .prefix('projets')
+      .where('id', router.matchers.number())
+      .where('itemId', router.matchers.number())
+    router
+      .group(() => {
         router.get('/', [controllers.Meals, 'index']).as('meals.week')
         router.post('/', [controllers.Meals, 'store']).as('meals.store')
         router.post('propositions', [controllers.Meals, 'storeMany']).as('meals.store_many')
