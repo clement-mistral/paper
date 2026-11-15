@@ -571,7 +571,7 @@ function FieldRow({
 }) {
   const id = useId()
   const control =
-    'h-8 w-full min-w-0 rounded-control border border-transparent bg-transparent px-2 text-sm text-ink hover:border-border focus:border-ink focus:outline-none'
+    'h-8 w-full min-w-0 rounded-control border border-transparent bg-transparent px-2 text-sm text-ink hover:border-border focus:border-accent focus:outline-none'
 
   let input
   if (field.kind === 'select') {

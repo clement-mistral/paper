@@ -9,7 +9,14 @@ export default function Logo() {
       route="today"
       className="inline-flex h-10 items-center gap-2 rounded-control px-2.5 text-sm font-semibold text-ink"
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        className="text-accent"
+      >
         <path
           d="M5 3h9.5L19 7.5V21H5z"
           stroke="currentColor"

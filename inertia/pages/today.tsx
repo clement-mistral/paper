@@ -37,15 +37,20 @@ function ReviewPrompt() {
   if (!yesterday && !routine.evening) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-card bg-callout px-4 py-3">
-      <Flame size={18} strokeWidth={ICON_STROKE} aria-hidden="true" className="shrink-0" />
+    <div className="flex flex-wrap items-center gap-4 rounded-card bg-warning-soft px-4 py-3">
+      <Flame
+        size={18}
+        strokeWidth={ICON_STROKE}
+        aria-hidden="true"
+        className="shrink-0 text-warning-bar"
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">
           {yesterday
             ? 'Le bilan d’hier est à compléter avant midi'
             : 'C’est l’heure du bilan du jour'}
         </p>
-        <p className="text-label text-muted">
+        <p className="text-label text-warning">
           {routine.streak > 0
             ? `Gardez votre série : ${routine.streak} jour${routine.streak > 1 ? 's' : ''} de suite.`
             : 'Deux minutes pour faire le point : argent, tâches, repas.'}
@@ -94,7 +99,7 @@ export default function Today({
       <ReviewPrompt />
 
       {overview.overdue.length > 0 && (
-        <Section title="En retard">
+        <Section title="En retard" tone="danger">
           <Items items={overview.overdue} />
         </Section>
       )}

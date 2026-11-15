@@ -56,7 +56,7 @@ test.group('Navigation | mobile', (group) => {
     await browser.login('mobile2@paper.local', 'secret123')
 
     const lists = bottomBar(await renderPage(await browser.page(urlFor('lists'))))
-    assert.match(lists, /aria-label="Plus[^"]*"[^>]*class="[^"]*text-ink/)
+    assert.match(lists, /aria-label="Plus[^"]*"[^>]*class="[^"]*text-accent-ink/)
 
     const money = bottomBar(await renderPage(await browser.page(urlFor('money'))))
     assert.match(money, /aria-label="Plus[^"]*"[^>]*class="[^"]*text-muted/)

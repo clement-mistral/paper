@@ -11,11 +11,41 @@ import ReviewIcon from '~/components/icons/review_icon'
 import TodayIcon from '~/components/icons/today_icon'
 import VehicleIcon from '~/components/icons/vehicle_icon'
 
+/**
+ * Colour of an entry when active (and on hover). A fiche that belongs to a
+ * domain takes that domain's colour; the dimensions take the accent.
+ */
+export type NavTone = 'accent' | 'budget' | 'maison' | 'auto' | 'menu'
+
 export type NavItem = {
   label: string
   href: string
   icon: ComponentType<IconProps>
   match: (url: string) => boolean
+  tone: NavTone
+}
+
+/**
+ * Literal classes, for Tailwind to see them.
+ */
+export const navToneClasses: Record<NavTone, { active: string; hover: string; icon: string }> = {
+  accent: {
+    active: 'bg-accent-soft text-accent-ink',
+    hover: 'hover:text-accent-ink',
+    icon: 'text-accent',
+  },
+  budget: {
+    active: 'bg-budget-soft text-budget-ink',
+    hover: 'hover:text-budget-ink',
+    icon: 'text-budget',
+  },
+  maison: {
+    active: 'bg-maison-soft text-maison-ink',
+    hover: 'hover:text-maison-ink',
+    icon: 'text-maison',
+  },
+  auto: { active: 'bg-auto-soft text-auto-ink', hover: 'hover:text-auto-ink', icon: 'text-auto' },
+  menu: { active: 'bg-menu-soft text-menu-ink', hover: 'hover:text-menu-ink', icon: 'text-menu' },
 }
 
 function pathOf(url: string): string {
@@ -34,14 +64,20 @@ function section(href: string): (url: string) => boolean {
   }
 }
 
-function item(label: string, href: string, icon: ComponentType<IconProps>): NavItem {
-  return { label, href, icon, match: section(href) }
+function item(
+  label: string,
+  href: string,
+  icon: ComponentType<IconProps>,
+  tone: NavTone = 'accent'
+): NavItem {
+  return { label, href, icon, match: section(href), tone }
 }
 
 const todayHref = urlFor('today')
 
 /**
- * Navigation by dimension, never by domain.
+ * Navigation by dimension, never by domain. Argent takes Budget's colour,
+ * the pinned fiches their domain's.
  */
 export const primaryNav: NavItem[] = [
   {
@@ -49,9 +85,10 @@ export const primaryNav: NavItem[] = [
     href: todayHref,
     icon: TodayIcon,
     match: (url) => pathOf(url) === todayHref,
+    tone: 'accent',
   },
   item('Agenda', urlFor('agenda'), AgendaIcon),
-  item('Argent', urlFor('money'), MoneyIcon),
+  item('Argent', urlFor('money'), MoneyIcon, 'budget'),
   item('Listes', urlFor('lists'), ListsIcon),
 ]
 
@@ -65,9 +102,9 @@ export const reviewNav: NavItem = item('Bilan du jour', urlFor('reviews.current'
  * The most used fiches.
  */
 const pinnedFiches: NavItem[] = [
-  item('Véhicules', urlFor('vehicles.index'), VehicleIcon),
-  item('Logement', urlFor('homes.index'), HomeIcon),
-  item('Recettes', urlFor('recipes.index'), RecipeIcon),
+  item('Véhicules', urlFor('vehicles.index'), VehicleIcon, 'auto'),
+  item('Logement', urlFor('homes.index'), HomeIcon, 'maison'),
+  item('Recettes', urlFor('recipes.index'), RecipeIcon, 'menu'),
 ]
 
 const fichesHref = urlFor('fiches.index')
@@ -84,6 +121,7 @@ export const ficheNav: NavItem[] = [
     href: fichesHref,
     icon: FichesIcon,
     match: (url) => inFiches(url) && !pinnedFiches.some((pinned) => pinned.match(url)),
+    tone: 'accent',
   },
 ]
 

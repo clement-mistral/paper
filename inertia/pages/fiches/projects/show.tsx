@@ -93,7 +93,7 @@ export default function ProjectShow({ project }: InertiaProps<{ project: Project
                     { preserveScroll: true }
                   )
                 }
-                className="size-4 shrink-0 cursor-pointer accent-ink"
+                className="size-4 shrink-0 cursor-pointer accent-accent"
               />
               <span
                 className={item.done ? 'flex-1 text-sm text-muted line-through' : 'flex-1 text-sm'}

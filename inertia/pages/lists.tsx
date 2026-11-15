@@ -48,7 +48,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
               onChange={(event) => setLabel(event.target.value)}
               placeholder="Ajouter un article…"
               autoComplete="off"
-              className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none"
+              className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none"
             />
             <Button type="submit" variant="secondary" disabled={processing || label.trim() === ''}>
               Ajouter
@@ -83,7 +83,7 @@ function ShoppingList({ items }: { items: ShoppingItemRow[] }) {
                     { preserveScroll: true }
                   )
                 }
-                className="size-4 shrink-0 cursor-pointer accent-ink"
+                className="size-4 shrink-0 cursor-pointer accent-accent"
               />
               <label
                 htmlFor={`shopping-${item.id}`}

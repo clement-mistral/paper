@@ -61,7 +61,7 @@ function Step({
         <span
           className={cn(
             'grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold',
-            done ? 'bg-ink text-bg' : 'border border-border text-muted'
+            done ? 'bg-accent text-bg' : 'border border-border text-muted'
           )}
           aria-hidden="true"
         >
@@ -119,7 +119,7 @@ function Money({ review }: { review: DailyReview }) {
                   onChange={(event) => setText(event.target.value)}
                   placeholder="Une dépense oubliée ? « boulangerie 3,20 »"
                   autoComplete="off"
-                  className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm placeholder:text-muted/70 focus:border-ink focus:outline-none"
+                  className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm placeholder:text-muted/70 focus:border-accent focus:outline-none"
                 />
                 <Button
                   type="submit"
@@ -259,7 +259,7 @@ function MealRow({ day, meal, open }: { day: string; meal: MealPlanRow; open: bo
             inputMode="decimal"
             placeholder="Montant (€)"
             autoFocus
-            className="h-8 w-28 rounded-control border border-border px-2 text-sm focus:border-ink focus:outline-none"
+            className="h-8 w-28 rounded-control border border-border px-2 text-sm focus:border-accent focus:outline-none"
           />
           <Button size="sm" type="submit">
             Valider
@@ -335,7 +335,7 @@ function Habits({
               onChange={() =>
                 router.post(urlFor('reviews.habit', { day: review.day, id: habit.id }), {}, options)
               }
-              className="size-4 accent-ink"
+              className="size-4 accent-accent"
             />
             <span className="text-sm">{habit.name}</span>
           </label>
@@ -374,7 +374,7 @@ function Habits({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Nouvelle habitude"
-                className="h-8 min-w-0 flex-1 rounded-control border border-border bg-bg px-2 text-sm focus:border-ink focus:outline-none"
+                className="h-8 min-w-0 flex-1 rounded-control border border-border bg-bg px-2 text-sm focus:border-accent focus:outline-none"
               />
               <Button size="sm" type="submit" variant="secondary" disabled={name.trim() === ''}>
                 Ajouter
@@ -397,7 +397,7 @@ function Habits({
               className={cn(
                 'h-8 rounded-control border px-3 text-label transition-colors',
                 review.mood === mood
-                  ? 'border-ink bg-ink text-bg'
+                  ? 'border-accent bg-accent text-bg'
                   : 'border-border text-ink hover:bg-hover'
               )}
             >
@@ -418,7 +418,7 @@ function Habits({
           onBlur={() => note !== (review.note ?? '') && saveJournal(review.mood)}
           disabled={!review.open}
           rows={3}
-          className="rounded-control border border-border bg-bg px-2.5 py-2 text-sm focus:border-ink focus:outline-none"
+          className="rounded-control border border-border bg-bg px-2.5 py-2 text-sm focus:border-accent focus:outline-none"
         />
       </div>
     </Step>

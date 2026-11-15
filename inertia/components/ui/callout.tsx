@@ -14,7 +14,7 @@ export default function Callout({
 }) {
   return (
     <div className={cn('flex gap-3 rounded-card bg-callout px-4 py-3', className)}>
-      {icon && <div className="mt-0.5 shrink-0 text-muted">{icon}</div>}
+      {icon && <div className="mt-0.5 shrink-0 text-accent">{icon}</div>}
       <div className="min-w-0 text-sm">
         {title && <p className="font-medium text-ink">{title}</p>}
         {children && <div className={cn('text-ink', title && 'mt-0.5 text-muted')}>{children}</div>}

@@ -35,7 +35,7 @@ export default function AgendaItemRow({ item }: { item: AgendaItem }) {
           aria-label={`Fait : ${item.title}`}
           checked={item.done}
           onChange={toggle}
-          className="size-4 shrink-0 cursor-pointer accent-ink"
+          className="size-4 shrink-0 cursor-pointer accent-accent"
         />
       ) : (
         <Icon

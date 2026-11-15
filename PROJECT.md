@@ -152,7 +152,12 @@ Chaque élément affichable dans Agenda/Aujourd'hui expose un `domain` (`budget 
 
 ## 5. Design system
 
-**Ambiance** : minimaliste noir et blanc façon Notion. **La couleur ne sert qu'à indiquer le domaine** (icône, pastille, barre de progression, courbe). Boutons primaires **toujours noirs**.
+**Ambiance** : minimaliste façon Notion, fond blanc et texte encre. Deux familles de couleurs :
+
+- l'**accent** bleu marine (`accent`) porte l'identité de l'app : boutons primaires, bouton « + », logo, focus, sélection, cases à cocher, liens de section, états vides, entrée active de la navigation ;
+- les **quatre couleurs de domaine** indiquent un domaine (icône, pastille, barre de progression, courbe), et colorent aussi les entrées de navigation qui en relèvent (Argent → Budget, Véhicules → Auto, Logement → Maison, Recettes → Menu).
+
+Le Journal et le Compte rendu gardent leur mise en page « papier » noir et blanc.
 
 ### 5.1 Tokens Tailwind 4 (`inertia/css/app.css`)
 
@@ -169,6 +174,11 @@ Chaque élément affichable dans Agenda/Aujourd'hui expose un `domain` (`budget 
   --color-border: #ebebe9;
   --color-muted: #6b6b6b;
   --color-ink: #1f1f1f;
+
+  --color-accent: #1e40af;
+  --color-accent-ink: #172554;
+  --color-accent-soft: #e6ebf7;
+  --color-accent-bright: #2563eb;
 
   --color-budget: #c99a1a;
   --color-budget-ink: #8a6410;
@@ -206,15 +216,17 @@ body {
 - Fond blanc, filets fins `border`, **peu de cartes** : sections séparées par l'espace et des lignes.
 - Titres de page 36px/700, sections 16px/600, corps 14px/400, labels 13px `muted`.
 - Pastille de domaine : `text-xs font-medium px-1.5 py-0.5 rounded-tag` + `text-{domain}-ink bg-{domain}-soft`.
-- Barres de progression **3px**, couleur du domaine (ou `warning-bar` / `danger`).
+- Barres de progression **3px**, couleur du domaine (ou `warning-bar` / `danger`, `accent` par défaut).
+- `Section` accepte un `tone` (domaine, `accent`, `warning`, `danger`) qui affiche une pastille avant le titre (« En retard » en `danger`).
+- Toasts : filet gauche de 3px en `accent`, `success` ou `danger` selon le type.
 - Icônes : SVG inline en trait (stroke 1.8 dans les pages via lucide ; dans la navigation, icônes maison `components/icons/` à 1.6, 2 pour l'élément actif), jamais d'emoji.
 - Accessibilité : contraste ≥ 4.5:1 (le `muted` #6B6B6B passe sur blanc), vrais `<button>` / `<a>` / `<input>` + `<label>`, cibles ≥ 40px dans la navigation (56×52 dans le rail).
-- Navigation : rail blanc de 84px, icônes sans libellé visible (`aria-label` + `title` + `sr-only`), état actif par la couleur `ink` et le trait seulement (ni fond ni pastille), aucune couleur de domaine. Config dans `components/ui/nav_items.ts`.
+- Navigation : rail de 84px sur fond `sidebar`, icônes sans libellé visible (`aria-label` + `title` + `sr-only`). Chaque entrée a un `tone` (`accent` ou un domaine, cf. `navToneClasses`) : l'entrée active prend `{tone}-soft` en fond et `{tone}-ink` en trait (2), les autres sont `muted` et prennent la couleur au survol. Pastille « bilan à faire » en `warning-bar`. Config dans `components/ui/nav_items.ts`.
 - Responsive : sous `md`, le rail laisse place à une barre fixe en bas (Aujourd'hui, Agenda, +, Argent, Listes) et le contenu reçoit un `padding-bottom` équivalent ; tableaux larges dans un conteneur `overflow-x-auto`.
 
 ### 5.3 Composants `components/ui/`
 
-`Button` (primary noir / secondary bordé / ghost), `Input`, `Checkbox`, `DomainTag`, `StatusTag` (fait/planifié/à prévoir/en retard), `ProgressBar`, `Callout`, `Section` (titre + lien), `DataTable`, `PropertyList` (propriétés de fiche label/valeur), `NavRail` / `MobileNavBar`, `CommandPalette`.
+`Button` (primary accent / secondary bordé / ghost), `Input`, `Checkbox`, `DomainTag`, `StatusTag` (fait/planifié/à prévoir/en retard), `ProgressBar`, `Callout`, `Section` (titre + lien), `DataTable`, `PropertyList` (propriétés de fiche label/valeur), `NavRail` / `MobileNavBar`, `CommandPalette`.
 
 ### 5.4 Locale
 

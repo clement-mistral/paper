@@ -11,7 +11,7 @@ const tones: Record<ProgressTone, string> = {
   menu: domainMeta.menu.bar,
   warning: 'bg-warning-bar',
   danger: 'bg-danger',
-  ink: 'bg-ink',
+  ink: 'bg-accent',
 }
 
 /**

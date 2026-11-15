@@ -63,8 +63,8 @@ export default function StreakCalendar({ streak }: { streak: Streak }) {
                       title={`${formatDate(day.day)}${day.completed ? ' · validée' : ''}`}
                       className={cn(
                         'size-3 rounded-[2px]',
-                        day.completed ? 'bg-ink' : 'bg-hover',
-                        day.day === last && 'ring-1 ring-ink ring-offset-1'
+                        day.completed ? 'bg-accent' : 'bg-hover',
+                        day.day === last && 'ring-1 ring-accent ring-offset-1'
                       )}
                     />
                   ) : (

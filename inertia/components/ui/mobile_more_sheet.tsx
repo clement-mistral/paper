@@ -2,23 +2,24 @@ import { useEffect, useRef } from 'react'
 import { usePage } from '@inertiajs/react'
 import { Form, Link } from '@adonisjs/inertia/react'
 import { FileText, LogOut, Newspaper, UserRound, X } from 'lucide-react'
-import { ficheNav, reviewNav, type NavItem } from '~/components/ui/nav_items'
+import { ficheNav, navToneClasses, reviewNav, type NavItem } from '~/components/ui/nav_items'
 import { cn } from '~/lib/cn'
 import { ICON_STROKE } from '~/lib/icons'
 
 const ROW =
-  'flex min-h-12 w-full items-center gap-3 rounded-control px-3 text-left text-sm text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-ink'
+  'flex min-h-12 w-full items-center gap-3 rounded-control px-3 text-left text-sm text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent'
 
 function SheetLink({ item, url, detail }: { item: NavItem; url: string; detail?: string }) {
   const Icon = item.icon
   const active = item.match(url)
+  const tone = navToneClasses[item.tone]
   return (
     <Link
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      className={cn(ROW, active && 'font-medium')}
+      className={cn(ROW, active && cn('font-medium', tone.active))}
     >
-      <Icon size={20} strokeWidth={active ? 2 : 1.6} />
+      <Icon size={20} strokeWidth={active ? 2 : 1.6} className={cn(!active && tone.icon)} />
       <span className="flex-1">{item.label}</span>
       {detail && <span className="text-label text-muted">{detail}</span>}
     </Link>

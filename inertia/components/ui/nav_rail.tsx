@@ -8,6 +8,7 @@ import {
   ficheNav,
   inMoreSheet,
   mobileNav,
+  navToneClasses,
   primaryNav,
   reviewNav,
   type NavItem,
@@ -15,11 +16,11 @@ import {
 import { cn } from '~/lib/cn'
 
 const FOCUS_RING =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 /**
- * One icon link. The active state is shown by colour and stroke only: no
- * background, no pill.
+ * One icon link. The active entry takes its tone (accent, or the colour of
+ * its domain) on a soft background; inactive ones take it on hover.
  */
 function RailLink({
   item,
@@ -36,6 +37,7 @@ function RailLink({
 }) {
   const active = item.match(url)
   const Icon = item.icon
+  const tone = navToneClasses[item.tone]
   return (
     <Link
       href={item.href}
@@ -43,8 +45,8 @@ function RailLink({
       title={title}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'relative grid place-items-center rounded-md transition-colors',
-        active ? 'text-ink' : 'text-muted hover:text-ink',
+        'relative grid place-items-center rounded-xl transition-colors',
+        active ? tone.active : cn('text-muted', tone.hover),
         FOCUS_RING,
         className
       )}
@@ -54,7 +56,7 @@ function RailLink({
       {badge && (
         <span
           aria-hidden="true"
-          className="absolute top-3 right-3.5 size-2 rounded-full bg-ink ring-2 ring-bg"
+          className="absolute top-3 right-3.5 size-2 rounded-full bg-warning-bar ring-2 ring-bg"
         />
       )}
     </Link>
@@ -103,7 +105,7 @@ function AccountMenu() {
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          'cursor-pointer grid size-9 place-items-center rounded-full bg-hover text-[13px] font-semibold text-ink',
+          'cursor-pointer grid size-9 place-items-center rounded-full bg-accent-soft text-[13px] font-semibold text-accent-ink transition-colors hover:bg-accent hover:text-bg',
           FOCUS_RING
         )}
       >
@@ -172,13 +174,13 @@ export default function NavRail({ onAdd }: { onAdd: () => void }) {
   const linkSize = 'h-[52px] w-14'
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[84px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-bg py-4 md:flex print:hidden">
+    <aside className="sticky top-0 hidden h-dvh w-[84px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-sidebar py-4 md:flex print:hidden">
       <Link
         route="today"
         aria-label="Paper, aujourd’hui"
         title="Paper"
         className={cn(
-          'mb-[14px] grid size-10 place-items-center rounded-[10px] bg-ink text-[18px] font-bold text-bg',
+          'mb-[14px] grid size-10 place-items-center rounded-[10px] bg-linear-to-br from-accent-bright to-accent-ink text-[18px] font-bold text-bg shadow-sm',
           FOCUS_RING
         )}
       >
@@ -192,7 +194,7 @@ export default function NavRail({ onAdd }: { onAdd: () => void }) {
         title="Ajouter (Ctrl K)"
         aria-keyshortcuts="Control+K Meta+K"
         className={cn(
-          'mb-[14px] grid size-12 place-items-center rounded-full border border-ink text-ink transition-colors hover:bg-hover',
+          'mb-[14px] grid size-12 place-items-center rounded-full bg-accent text-bg shadow-sm transition-colors hover:bg-accent-ink',
           FOCUS_RING
         )}
       >
@@ -242,7 +244,7 @@ export default function NavRail({ onAdd }: { onAdd: () => void }) {
           aria-current={url.startsWith('/nouveautes') ? 'page' : undefined}
           className={cn(
             'mt-1 grid h-10 w-14 place-items-center rounded-md text-[11px] tabular-nums transition-colors',
-            url.startsWith('/nouveautes') ? 'text-ink' : 'text-muted hover:text-ink',
+            url.startsWith('/nouveautes') ? 'text-accent-ink' : 'text-muted hover:text-accent-ink',
             FOCUS_RING
           )}
         >
@@ -283,7 +285,7 @@ export function MobileNavBar({ onAdd }: { onAdd: () => void }) {
               aria-label="Ajouter"
               title="Ajouter"
               className={cn(
-                'grid size-11 place-items-center rounded-full border border-ink text-ink',
+                'grid size-11 place-items-center rounded-full bg-accent text-bg shadow-sm transition-colors hover:bg-accent-ink',
                 FOCUS_RING
               )}
             >
@@ -299,8 +301,8 @@ export function MobileNavBar({ onAdd }: { onAdd: () => void }) {
               aria-haspopup="dialog"
               aria-expanded={moreOpen}
               className={cn(
-                'relative grid flex-1 place-items-center rounded-md transition-colors',
-                moreActive ? 'text-ink' : 'text-muted hover:text-ink',
+                'relative grid flex-1 place-items-center rounded-xl transition-colors',
+                moreActive ? 'text-accent-ink' : 'text-muted hover:text-accent-ink',
                 FOCUS_RING
               )}
             >
@@ -309,7 +311,7 @@ export function MobileNavBar({ onAdd }: { onAdd: () => void }) {
               {reviewDue && (
                 <span
                   aria-hidden="true"
-                  className="absolute top-3 right-[calc(50%-18px)] size-2 rounded-full bg-ink ring-2 ring-bg"
+                  className="absolute top-3 right-[calc(50%-18px)] size-2 rounded-full bg-warning-bar ring-2 ring-bg"
                 />
               )}
             </button>

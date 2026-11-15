@@ -106,7 +106,7 @@ export function ChartFrame({
       aria-label={`${title}. Flèches gauche et droite pour parcourir les valeurs.`}
       onKeyDown={onKeyDown}
       onBlur={onBlur}
-      className="relative w-full rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+      className="relative w-full rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
     >
       {children}
       <p className="sr-only" aria-live="polite">

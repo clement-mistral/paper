@@ -14,6 +14,15 @@ absente de ce fichier.
 
 Rubriques : Ajouté, Modifié, Corrigé, Supprimé.
 
+## [Non publié]
+
+### Modifié
+
+- Paper prend des couleurs : un bleu marine pour les boutons, le bouton
+  « + » et le logo, et la navigation montre la page ouverte dans sa
+  couleur (Argent en or, Véhicules en bleu, Logement en violet, Recettes
+  en corail).
+
 ## [1.3.0] - 2026-11-11
 
 ### Ajouté

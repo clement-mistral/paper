@@ -46,7 +46,7 @@ export default function TaskList({ tasks }: { tasks: TaskRow[] }) {
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Ajouter une tâche…"
               autoComplete="off"
-              className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none"
+              className="h-9 min-w-0 flex-1 rounded-control border border-border bg-bg px-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none"
             />
             <Button type="submit" variant="secondary" disabled={processing || title.trim() === ''}>
               Ajouter
@@ -78,7 +78,7 @@ export default function TaskList({ tasks }: { tasks: TaskRow[] }) {
                     { preserveScroll: true }
                   )
                 }
-                className="size-4 shrink-0 cursor-pointer accent-ink"
+                className="size-4 shrink-0 cursor-pointer accent-accent"
               />
               <Link
                 route="tasks.show"

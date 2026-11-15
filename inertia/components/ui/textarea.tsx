@@ -27,7 +27,7 @@ export default function Textarea({
         aria-invalid={error ? true : undefined}
         className={cn(
           'rounded-control border border-border bg-bg px-2.5 py-2 text-sm text-ink placeholder:text-muted/70',
-          'transition-colors focus:border-ink focus:outline-none',
+          'transition-colors focus:border-accent focus:outline-none',
           error && 'border-danger'
         )}
         {...props}
